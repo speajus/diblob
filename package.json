@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/jspears/diblob/issues"
   },
-  "homepage": "https://jspears.github.io/diblob/",
+  "homepage": "https://speajus.github.io/diblob/",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

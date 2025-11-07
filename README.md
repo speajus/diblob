@@ -1,6 +1,6 @@
 # diblob
 
-A dependency injection framework where the **proxy (blob) is the key**. Pass around the blob, and it will act like the interface you assign to it.
+A dependency injection framework where the **proxy (blob) is the key**. Pass around the blob, and it will act like the interface you assign to it. [docs](https://speajus.github.io/diblob/)
 
 ## Key Features
 
