@@ -7,7 +7,7 @@ diblob supports two lifecycle modes: **Singleton** (default) and **Transient**.
 **Singleton** creates one instance and reuses it for all resolutions.
 
 ```typescript
-import { Lifecycle } from 'diblob';
+import { Lifecycle } from '@speajus/diblob';
 
 // Explicit singleton
 container.register(logger, ConsoleLogger, { lifecycle: Lifecycle.Singleton });
@@ -40,7 +40,7 @@ Use Singleton for:
 **Transient** creates a new instance for every resolution.
 
 ```typescript
-import { Lifecycle } from 'diblob';
+import { Lifecycle } from '@speajus/diblob';
 
 container.register(logger, ConsoleLogger, { lifecycle: Lifecycle.Transient });
 ```

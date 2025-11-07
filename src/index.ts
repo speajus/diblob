@@ -3,7 +3,7 @@
  * 
  * @example
  * ```typescript
- * import { createBlob, createContainer } from 'diblob';
+ * import { createBlob, createContainer } from '@speajus/diblob';
  * 
  * interface UserService {
  *   getUser(id: number): User;

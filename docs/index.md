@@ -50,7 +50,7 @@ features:
 ## Quick Example
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // Define your interfaces
 interface Logger {
@@ -87,15 +87,15 @@ With **diblob**, the blob IS the key. You pass it around, and it acts like the i
 
 ::: code-group
 ```bash [npm]
-npm install diblob
+npm install @speajus/diblob
 ```
 
 ```bash [yarn]
-yarn add diblob
+yarn add @speajus/diblob
 ```
 
 ```bash [pnpm]
-pnpm add diblob
+pnpm add @speajus/diblob
 ```
 :::
 

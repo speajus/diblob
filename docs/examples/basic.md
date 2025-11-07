@@ -5,7 +5,7 @@ A complete example showing basic diblob usage.
 ## Complete Example
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // 1. Define interfaces
 interface Logger {

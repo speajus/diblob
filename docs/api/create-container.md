@@ -21,7 +21,7 @@ function createContainer(...parents: Container[]): Container
 ### Basic Container
 
 ```typescript
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 
 const container = createContainer();
 ```

@@ -9,7 +9,7 @@ Here are the most common patterns for injecting environment variables into your 
 **Best for**: Most applications with structured configuration
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // 1. Define your config interface
 interface AppConfig {
@@ -188,7 +188,7 @@ container.register(config, loadConfig);
 ## Complete Example
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 import { config as loadEnv } from 'dotenv';
 
 // Load .env file

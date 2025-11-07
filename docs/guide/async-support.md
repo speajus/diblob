@@ -148,7 +148,7 @@ await database.query('...'); // (reuses cached instance)
 The async factory is called every time:
 
 ```typescript
-import { Lifecycle } from 'diblob';
+import { Lifecycle } from '@speajus/diblob';
 
 container.register(database, async () => {
   console.log('Creating database...');

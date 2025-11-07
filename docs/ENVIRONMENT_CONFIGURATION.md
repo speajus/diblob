@@ -17,7 +17,7 @@ This guide explains different approaches for injecting environment variables and
 The simplest approach - pass environment variables directly as plain values.
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 interface DatabaseService {
   connect(): string;
@@ -430,7 +430,7 @@ ENABLE_METRICS=true
 ## Example: Complete Application Setup
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // 1. Define configuration interface
 interface AppConfig {

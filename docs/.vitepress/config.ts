@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'diblob',
+  title: '@speajus/diblob',
   description: 'A dependency injection framework where the proxy (blob) is the key',
   base: '/diblob/',
   

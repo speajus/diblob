@@ -5,7 +5,7 @@ Using parent and child containers.
 ## Complete Example
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // Interfaces
 interface Logger {

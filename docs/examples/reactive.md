@@ -5,7 +5,7 @@ Demonstrating reactive dependency updates.
 ## Complete Example
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // Interfaces
 interface Logger {

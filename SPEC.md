@@ -27,7 +27,7 @@ class MyImpl implements MyType {
 ```
 
 ```ts filename=container.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob } from './blobs';
 import { MyImpl } from './my-impl';
 export const container = createContainer();
@@ -62,7 +62,7 @@ instance.someMethod(); // Calls myBlob.someMethod()
 Blobs can be registered with a factory function.  The factory function is called with the container as the first argument.
 The factory function can return a plain value, or a promise.  The factory function can also return a plain value or a promise.
 ```ts filename=factory.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 import { container } from './container';
 
@@ -75,7 +75,7 @@ If context.resolve() is called, it returns a promise.  The promise is resolved w
 transitive, so if a dependency is async, the promise is not resolved until all dependencies are resolved.
 
 ```ts filename=async.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 
 const ctx = createContainer();
@@ -87,7 +87,7 @@ await myBlob.someMethod(); // Async resolution
 ```
 If a blob is used in a constructor, and the constructor is not async, and the blob is async, an error is thrown.
 ```ts filename=async-error.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 
 const ctx = createContainer();
@@ -102,7 +102,7 @@ const b = new MyDependentImpl(); // Error: myBlob is async, but constructor is n
 To fix this, resolve the class with the container.
 
 ```ts filename=async-ok.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 import { container } from './container';
 container.register(myBlob, async () => new MyImpl());
@@ -118,7 +118,7 @@ If any other properties are accessed before the promise is resolved, they are qu
 When a blob is re-registered, all dependent blobs are invalidated.  This means that they are removed from the cache, and 
 will be re-resolved the next time they are accessed.  This is done by the container tracking which blobs depend on other blobs.
 ```ts filename=invalidation.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 import { container } from './container';
 
@@ -132,7 +132,7 @@ instance.someMethod(); // Calls myBlob.someMethod() on new instance says `Hello 
 ```
 This works transitively, so if a blob is re-registered, and it has dependencies, all dependent blobs are invalidated.  
 ```ts filename=transitive-invalidation.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 import { container } from './container';
 
@@ -213,7 +213,7 @@ Multiple containers can be created.  They are completely independent.  They can 
 scopes.  For example, a request scope, or a test scope.
 
 ```ts filename=multiple-containers.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 
 const container1 = createContainer();
@@ -231,7 +231,7 @@ instance2.someMethod(); // Calls myBlob.someMethod() `Hello Joe`
 ## Container Nesting
 Containers can be nested.  This is done by passing a parent container to the createContainer() function.
 ```ts filename=container-nesting.ts
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 import { myBlob, type MyType } from './blobs';
 
 const parent = createContainer();
@@ -244,5 +244,23 @@ const instance1 = await parent.resolve(MyImpl);
 const instance2 = await child.resolve(MyImpl);
 instance1.someMethod(); // Calls myBlob.someMethod() `Hello Jane`
 instance2.someMethod(); // Calls myBlob.someMethod() `Hello Joe`
+
+```
+
+## Containers can be merged.
+Containers can be merged.  This is done by passing multiple containers to the createContainer() function.
+```ts filename=container-merging.ts
+import { createContainer } from '@speajus/diblob';
+import { myBlob, type MyType } from './blobs';
+
+const container1 = createContainer();
+const container2 = createContainer();
+
+container1.register(myBlob, MyImpl, 'Jane');
+container2.register(myBlob, MyImpl, 'Joe');
+
+const merged = createContainer(container1, container2);
+const instance = await merged.resolve(MyImpl);
+instance.someMethod(); // Calls myBlob.someMethod() `Hello Joe`
 
 ```

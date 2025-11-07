@@ -14,7 +14,7 @@ Practical examples of using diblob.
 ### Simple Service
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 interface Logger {
   log(message: string): void;

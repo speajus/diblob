@@ -171,7 +171,7 @@ logger.log('E'); // Reuses new instance
 Transient blobs are always re-created, so they don't benefit from caching:
 
 ```typescript
-import { Lifecycle } from 'diblob';
+import { Lifecycle } from '@speajus/diblob';
 
 container.register(logger, ConsoleLogger, { lifecycle: Lifecycle.Transient });
 

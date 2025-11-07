@@ -29,7 +29,7 @@ Each blob has a unique identity. Two blobs are never equal, even if they have th
 ### Basic Usage
 
 ```typescript
-import { createBlob } from 'diblob';
+import { createBlob } from '@speajus/diblob';
 
 interface Logger {
   log(message: string): void;
@@ -72,7 +72,7 @@ function isBlob(value: any): boolean
 **Example:**
 
 ```typescript
-import { isBlob } from 'diblob';
+import { isBlob } from '@speajus/diblob';
 
 const logger = createBlob<Logger>();
 const notABlob = new ConsoleLogger();
@@ -92,7 +92,7 @@ function getBlobId(blob: Blob<any>): number
 **Example:**
 
 ```typescript
-import { getBlobId } from 'diblob';
+import { getBlobId } from '@speajus/diblob';
 
 const logger = createBlob<Logger>();
 const id = getBlobId(logger);

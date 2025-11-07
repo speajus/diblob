@@ -7,7 +7,7 @@ The **Container** is responsible for managing blob registrations and resolving d
 Use `createContainer()` to create a new container:
 
 ```typescript
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 
 const container = createContainer();
 ```
@@ -55,7 +55,7 @@ The container automatically detects which arguments are blobs and resolves them.
 ### With Lifecycle Options
 
 ```typescript
-import { Lifecycle } from 'diblob';
+import { Lifecycle } from '@speajus/diblob';
 
 // Singleton (default)
 container.register(logger, ConsoleLogger);

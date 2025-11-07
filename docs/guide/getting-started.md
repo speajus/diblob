@@ -6,15 +6,15 @@ This guide will help you get started with diblob in just a few minutes.
 
 ::: code-group
 ```bash [npm]
-npm install diblob
+npm install @speajus/diblob
 ```
 
 ```bash [yarn]
-yarn add diblob
+yarn add @speajus/diblob
 ```
 
 ```bash [pnpm]
-pnpm add diblob
+pnpm add @speajus/diblob
 ```
 :::
 
@@ -51,7 +51,7 @@ interface User {
 ### Step 2: Create Blobs
 
 ```typescript
-import { createBlob } from 'diblob';
+import { createBlob } from '@speajus/diblob';
 
 const logger = createBlob<Logger>();
 const database = createBlob<Database>();
@@ -94,7 +94,7 @@ class UserServiceImpl implements UserService {
 ### Step 4: Create a Container and Register
 
 ```typescript
-import { createContainer } from 'diblob';
+import { createContainer } from '@speajus/diblob';
 
 const container = createContainer();
 
@@ -121,7 +121,7 @@ That's it! The blob automatically forwards all calls to the registered implement
 Here's the complete code:
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // Interfaces
 interface Logger {

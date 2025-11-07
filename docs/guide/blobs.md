@@ -9,7 +9,7 @@ A **blob** is the core concept in diblob. It's a proxy object that serves as bot
 Use `createBlob<T>()` to create a blob:
 
 ```typescript
-import { createBlob } from 'diblob';
+import { createBlob } from '@speajus/diblob';
 
 interface Logger {
   log(message: string): void;
@@ -52,7 +52,7 @@ This is important because the blob itself is the key in the container.
 You can check if an object is a blob using `isBlob()`:
 
 ```typescript
-import { isBlob } from 'diblob';
+import { isBlob } from '@speajus/diblob';
 
 const logger = createBlob<Logger>();
 const notABlob = new ConsoleLogger();
@@ -66,7 +66,7 @@ console.log(isBlob(notABlob));  // false
 Each blob has an internal ID. You can retrieve it using `getBlobId()`:
 
 ```typescript
-import { getBlobId } from 'diblob';
+import { getBlobId } from '@speajus/diblob's/diblob';
 
 const logger = createBlob<Logger>();
 const id = getBlobId(logger);
@@ -129,7 +129,7 @@ logger.notAMethod(); // ✗ Error: Property 'notAMethod' does not exist
 Blobs themselves are just proxies - they don't have a lifecycle. The lifecycle is controlled by the container registration:
 
 ```typescript
-import { Lifecycle } from 'diblob';
+import { Lifecycle } from '@speajus/diblob';
 
 // Singleton (default) - one instance
 container.register(logger, ConsoleLogger);

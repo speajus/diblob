@@ -41,7 +41,7 @@ import {
   type Container,
   type Factory,
   type RegistrationOptions
-} from 'diblob';
+} from '@speajus/diblob';
 
 // Create blobs
 const logger = createBlob<Logger>();

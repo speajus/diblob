@@ -15,13 +15,13 @@ A dependency injection framework where the **proxy (blob) is the key**. Pass aro
 ## Installation
 
 ```bash
-npm install diblob
+npm install @speajus/diblob
 ```
 
 ## Quick Start
 
 ```typescript
-import { createBlob, createContainer } from 'diblob';
+import { createBlob, createContainer } from '@speajus/diblob';
 
 // 1. Define your interfaces
 interface UserService {
