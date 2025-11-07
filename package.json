@@ -12,10 +12,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jspears/diblob.git"
+    "url": "git+https://github.com/speajus/diblob.git"
   },
   "bugs": {
-    "url": "https://github.com/jspears/diblob/issues"
+    "url": "https://github.com/speajus/diblob/issues"
   },
   "homepage": "https://speajus.github.io/diblob/",
   "scripts": {
