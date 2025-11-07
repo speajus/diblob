@@ -4,6 +4,7 @@
   "description": "A dependency injection framework where the proxy (blob) is the key",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -21,8 +22,11 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^22.0.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }

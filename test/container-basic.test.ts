@@ -7,7 +7,7 @@ import assert from 'node:assert';
 import { createBlob, createContainer,  } from '../src';
 
 describe('Container - Basic Registration', () => {
-  it('should register and resolve a simple class', () => {
+  it('should register and resolve a simple class', async () => {
     interface Service {
       getValue(): string;
     }
@@ -20,12 +20,12 @@ describe('Container - Basic Registration', () => {
     const container = createContainer();
     
     container.register(service, ServiceImpl);
-    const instance = container.resolve(service);
+    const instance = await container.resolve(service);
     
     assert.strictEqual(instance.getValue(), 'test');
   });
 
-  it('should register with factory function', () => {
+  it('should register with factory function', async () => {
     interface Service {
       getValue(): string;
     }
@@ -37,7 +37,7 @@ describe('Container - Basic Registration', () => {
       getValue: () => 'factory'
     }));
     
-    const instance = container.resolve(service);
+    const instance =await container.resolve(service);
     assert.strictEqual(instance.getValue(), 'factory');
   });
 

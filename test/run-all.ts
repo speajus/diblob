@@ -1,31 +1,36 @@
-/**
- * Test runner - runs all test files
- */
-
 import { run } from 'node:test';
 import { spec as specReporter } from 'node:test/reporters';
 import { glob } from 'node:fs/promises';
 
 async function runTests() {
-  const testFiles = [
-    './test/blob.test.ts',
-    './test/container-basic.test.ts',
-    './test/container-lifecycle.test.ts',
-    './test/container-reactive.test.ts',
-    './test/container-async.test.ts',
-    './test/container-nesting.test.ts',
-    './test/constructor-resolution.test.ts',
-    './test/edge-cases.test.ts',
-    './test/integration.test.ts',
-  ];
+  // Find all test files
+  const testFiles: string[] = [];
 
+  for await (const file of glob('test/**/*.test.ts', {
+    cwd: process.cwd(),
+  })) {
+    testFiles.push(file);
+  }
+
+  if (testFiles.length === 0) {
+    console.error('No test files found');
+    process.exit(1);
+  }
+
+  console.log(`Found ${testFiles.length} test file(s)\n`);
+
+  // Run tests with spec reporter
   const stream = run({
     files: testFiles,
-    concurrency: true,
+    concurrency: true, // Run tests in parallel
+    timeout: 30000,    // 30 second timeout per test
   });
 
+  // Pipe the test stream through the spec reporter to stdout
   stream.compose(specReporter).pipe(process.stdout);
 }
 
-runTests().catch(console.error);
-
+runTests().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});
