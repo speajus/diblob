@@ -125,7 +125,7 @@ Retrieved new user: Charlie
 1. **Define interfaces** - Clear contracts for your services
 2. **Create blobs** - One blob per interface
 3. **Register implementations** - Associate blobs with classes
-4. **Use blobs directly** - No need to call `container.get()`
+4. **Use blobs directly** - No need to call `container.resolve()`
 
 ## Next Steps
 

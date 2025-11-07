@@ -79,7 +79,7 @@ userService.getUser(123);
 Traditional DI frameworks require you to:
 1. Create a separate token/key
 2. Register the implementation with that key
-3. Retrieve the instance using `container.get(key)`
+3. Retrieve the instance using `container.resolve(key)`
 
 With **diblob**, the blob IS the key. You pass it around, and it acts like the interface you assigned to it. No extra steps, no ceremony.
 

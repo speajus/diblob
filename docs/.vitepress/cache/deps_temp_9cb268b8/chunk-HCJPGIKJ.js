@@ -4225,7 +4225,7 @@ function useDraggable(target, options = {}) {
     if (toValue(exact) && e.target !== toValue(target))
       return;
     const container = toValue(containerElement);
-    const containerRect = (_a2 = container == null ? void 0 : container.getBoundingClientRect) == null ? void 0 : _a2.call(container);
+    const containerRect = (_a2 = container == null ? void 0 : container.resolveBoundingClientRect) == null ? void 0 : _a2.call(container);
     const targetRect = toValue(target).getBoundingClientRect();
     const pos = {
       x: e.clientX - (container ? targetRect.left - containerRect.left + container.scrollLeft : targetRect.left),

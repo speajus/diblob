@@ -322,7 +322,7 @@ container.register(service, () => new ServiceImpl(), {
 | Feature | pbj | diblob |
 |---------|-----|--------|
 | Key | Separate token/key | The blob itself |
-| Usage | `container.get(key)` | Use blob directly |
+| Usage | `container.resolve(key)` | Use blob directly |
 | Type safety | Token must match type | Blob IS the type |
 | Reactivity | Manual | Automatic |
 

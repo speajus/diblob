@@ -14,14 +14,14 @@ const LOGGER_TOKEN = Symbol('Logger');
 container.register(LOGGER_TOKEN, ConsoleLogger);
 
 // Retrieve using the token
-const logger = container.get(LOGGER_TOKEN);
+const logger = container.resolve(LOGGER_TOKEN);
 logger.log('Hello');
 ```
 
 This approach has several issues:
 - **Ceremony**: You need to create and manage separate tokens
 - **Indirection**: The token is separate from the type
-- **Manual retrieval**: You must explicitly call `container.get()`
+- **Manual retrieval**: You must explicitly call `container.resolve()`
 - **No reactivity**: Changes require manual updates
 
 ## The diblob Approach
@@ -47,7 +47,7 @@ The blob acts as a proxy that forwards all operations to the registered implemen
 The proxy itself is the identifier. No separate tokens or keys needed.
 
 ### 2. Direct Usage
-Use the blob directly without calling `container.get()`. It acts like the interface.
+Use the blob directly without calling `container.resolve()`. It acts like the interface.
 
 ### 3. Type Safety
 The blob IS the type. TypeScript knows exactly what methods and properties are available.
@@ -82,7 +82,7 @@ diblob is ideal for:
 | Feature | Traditional DI | diblob |
 |---------|---------------|--------|
 | Key | Separate token | The blob itself |
-| Usage | `container.get(key)` | Use blob directly |
+| Usage | `container.resolve(key)` | Use blob directly |
 | Type safety | Token must match type | Blob IS the type |
 | Reactivity | Manual | Automatic |
 | Constructor injection | Complex setup | Default parameters |
