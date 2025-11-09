@@ -1,0 +1,57 @@
+# diblob
+
+> A dependency injection framework for TypeScript/JavaScript where the proxy (blob) is the key. Pass around the blob, and it acts like the interface you assign to it.
+
+Important notes:
+
+- **The blob IS the key**: Unlike traditional DI frameworks that use separate tokens/symbols, diblob uses the proxy itself as both the identifier and the interface
+- **Automatic dependency resolution**: Dependencies are automatically inspected and resolved when registering blobs
+- **Reactive dependencies**: When a blob is re-registered, all dependents automatically update with the new implementation
+- **Constructor injection**: Blobs work as default parameters in constructors, enabling automatic dependency detection
+- **File organization**: Production applications should separate interfaces/blobs, implementations, and registration into distinct files
+
+## Getting Started
+
+- [Quick Start Guide](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/getting-started.md): Installation and your first diblob application
+- [What is diblob?](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/what-is-diblob.md): Core concepts and comparison with traditional DI frameworks
+- [File Organization Guide](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/file-organization.md): Recommended pattern for structuring diblob applications with separation of concerns
+
+## Core Concepts
+
+- [Blobs](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/blobs.md): Creating and using blobs as both identifiers and interfaces
+- [Containers](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/containers.md): Managing blob registrations and resolving dependencies
+- [Dependency Resolution](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/dependency-resolution.md): How automatic dependency inspection and resolution works
+- [Reactive Dependencies](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/reactive-dependencies.md): Automatic updates when implementations change
+
+## Injection Patterns
+
+- [Constructor Injection](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/constructor-injection.md): Using blobs as default parameters for automatic dependency detection
+- [Factory Injection](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/factory-injection.md): Explicit dependency injection with factory functions
+
+## Advanced Features
+
+- [Async Support](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/async-support.md): Working with async factories and async dependency resolution
+- [Container Nesting](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/container-nesting.md): Creating child containers and merging multiple containers
+- [Lifecycle Management](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/guide/lifecycle.md): Singleton vs Transient lifecycles
+
+## API Reference
+
+- [createBlob](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/api/create-blob.md): Create a new blob proxy
+- [createContainer](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/api/create-container.md): Create a DI container
+- [Container Methods](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/api/container-methods.md): register, resolve, has, unregister, clear
+- [Types](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/api/types.md): TypeScript type definitions
+
+## Examples
+
+- [Basic Usage](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/examples/basic.md): Simple logger and service example
+- [File Organization Example](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/examples/file-organization.md): Complete example showing proper file structure with interfaces, implementations, and registration functions
+- [Factory Injection](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/examples/factory-injection.md): Injecting dependencies into factory functions
+- [Async Dependencies](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/examples/async.md): Working with async factories
+- [Reactive Updates](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/examples/reactive.md): Re-registering implementations
+- [Container Nesting](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/examples/nesting.md): Parent and child containers
+
+## Optional
+
+- [Environment Configuration Guide](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/ENVIRONMENT_CONFIGURATION.md): Different approaches for injecting environment variables and configuration
+- [Environment Config Quick Start](https://raw.githubusercontent.com/speajus/diblob/main/packages/diblob/docs/ENVIRONMENT_CONFIG_QUICK_START.md): Common patterns for environment variable injection
+
