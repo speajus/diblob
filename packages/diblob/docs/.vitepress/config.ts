@@ -39,6 +39,7 @@ export default defineConfig({
             { text: 'Container Nesting', link: '/guide/container-nesting' },
             { text: 'Lifecycle Management', link: '/guide/lifecycle' },
             { text: 'Constructor Injection', link: '/guide/constructor-injection' },
+            { text: 'Factory Injection', link: '/guide/factory-injection' },
           ]
         }
       ],
@@ -60,6 +61,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/examples/' },
             { text: 'Basic Usage', link: '/examples/basic' },
+            { text: 'Factory Injection', link: '/examples/factory-injection' },
             { text: 'Async Dependencies', link: '/examples/async' },
             { text: 'Reactive Updates', link: '/examples/reactive' },
             { text: 'Container Nesting', link: '/examples/nesting' },

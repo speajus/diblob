@@ -35,8 +35,8 @@ features:
     details: Create child containers or merge multiple containers for flexible architecture.
   
   - icon: 💉
-    title: Constructor Injection
-    details: Blobs work as default parameters and property initializers for seamless injection.
+    title: Flexible Injection
+    details: Constructor injection with default parameters, or factory injection with explicit dependencies.
   
   - icon: 📘
     title: Type-Safe
