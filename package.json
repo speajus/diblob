@@ -1,51 +1,36 @@
 {
-  "name": "@speajus/diblob",
-  "version": "0.2.1",
-  "description": "A dependency injection framework where the proxy (blob) is the key",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "type": "module",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+  "name": "diblob-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Monorepo for diblob dependency injection framework and visualizer",
+  "workspaces": [
+    "packages/*"
   ],
+  "scripts": {
+    "build": "npm run build:diblob && npm run build:visualizer",
+    "build:diblob": "npm run build -w @speajus/diblob",
+    "build:visualizer": "npm run build -w @speajus/diblob-visualizer",
+    "test": "npm run test -w @speajus/diblob",
+    "test:watch": "npm run test:watch -w @speajus/diblob",
+    "dev:visualizer": "npm run dev -w @speajus/diblob-visualizer",
+    "docs:dev": "npm run docs:dev -w @speajus/diblob",
+    "docs:build": "npm run docs:build -w @speajus/diblob",
+    "docs:preview": "npm run docs:preview -w @speajus/diblob",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/speajus/diblob.git"
   },
-  "bugs": {
-    "url": "https://github.com/speajus/diblob/issues"
-  },
-  "homepage": "https://speajus.github.io/diblob/",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "example": "tsx examples/basic.ts",
-    "tsc:test": "tsc -p tsconfig.test.json",
-    "test": "npm run build && tsx --test test/*.test.ts",
-    "test:watch": "tsx --test --watch test/*.test.ts",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
-  },
-  "keywords": [
-    "dependency-injection",
-    "di",
-    "ioc",
-    "proxy",
-    "reactive"
-  ],
   "author": "Justin Spears <speajus@gmail.com>",
-  "license": "MIT",
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "patch-package": "^8.0.1",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3",
-    "vitepress": "^1.6.4"
-  }
+  "license": "MIT"
 }

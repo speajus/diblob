@@ -1,5 +1,5 @@
 {
-  "name": "@speajus/@speajus/diblob-visualizer",
+  "name": "@speajus/diblob-visualizer",
   "private": false,
   "version": "1.0.0",
   "type": "module",
@@ -35,7 +35,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
-    "@speajus/diblob": "^0.2.1",
+    "@speajus/diblob": "*",
     "@xyflow/svelte": "^1.4.1"
   }
 }

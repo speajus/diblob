@@ -1,332 +1,168 @@
-# diblob
+# diblob Monorepo
 
-A dependency injection framework where the **proxy (blob) is the key**. Pass around the blob, and it will act like the interface you assign to it. [docs](https://speajus.github.io/diblob/)
+A monorepo containing the diblob dependency injection framework and its visualization tools.
 
-## Key Features
+## Packages
 
-- **Blob as Key**: The proxy itself is both the identifier and the interface
-- **Automatic Dependency Resolution**: Dependencies are automatically inspected and resolved
-- **Reactive Dependencies**: When a blob is re-registered, all dependents automatically update
-- **Async Support**: Full support for async factories and async resolution
-- **Container Nesting & Merging**: Create child containers or merge multiple containers
-- **Constructor & Property Injection**: Blobs work as default parameters and property initializers
-- **Type-Safe**: Full TypeScript support with type inference
+### [@speajus/diblob](./packages/diblob)
 
-## Installation
+The core dependency injection framework where the proxy (blob) is the key.
 
-```bash
-npm install @speajus/diblob
-```
+- **Version**: 0.2.1
+- **Description**: A dependency injection framework with automatic dependency resolution, reactive dependencies, and full TypeScript support
+- **Documentation**: [https://speajus.github.io/diblob/](https://speajus.github.io/diblob/)
 
-## Quick Start
+### [@speajus/diblob-visualizer](./packages/diblob-visualizer)
 
-```typescript
-import { createBlob, createContainer } from '@speajus/diblob';
+Interactive dependency injection graph visualization for diblob.
 
-// 1. Define your interfaces
-interface UserService {
-  getUser(id: number): User;
-}
+- **Version**: 1.0.0
+- **Description**: Svelte-based visualization tool for exploring diblob container dependency graphs
+- **Features**: Real-time graph updates, lifecycle indicators, statistics dashboard
 
-// 2. Create blobs
-const userService = createBlob<UserService>();
-const logger = createBlob<Logger>();
-const database = createBlob<Database>();
+## Getting Started
 
-// 3. Create a container and register blobs with their dependencies
-const container = createContainer();
-container.register(logger, ConsoleLogger);
-container.register(database, DatabaseImpl);
-container.register(userService, UserServiceImpl, logger, database);
+### Prerequisites
 
-// 4. Use the blob directly - it acts as UserService!
-const user = userService.getUser(123);
-```
+- Node.js >= 22.0.0
+- npm >= 7.0.0 (for workspaces support)
 
-## Core Concepts
+### Installation
 
-### Blobs
+\`\`\`bash
+# Install all dependencies
+npm install
+\`\`\`
 
-A **blob** is a proxy object that serves as both:
-- A unique identifier for the dependency
-- The interface/type that consumers interact with
+### Building
 
-```typescript
-const logger = createBlob<Logger>();
-const database = createBlob<Database>();
-```
+\`\`\`bash
+# Build all packages
+npm run build
 
-### Container
+# Build individual packages
+npm run build:diblob
+npm run build:visualizer
+\`\`\`
 
-The container manages blob registrations and automatically resolves dependencies:
+### Testing
 
-```typescript
-const container = createContainer();
+\`\`\`bash
+# Run tests for diblob
+npm test
 
-// Register with a constructor (no dependencies)
-container.register(logger, ConsoleLogger);
+# Run tests in watch mode
+npm run test:watch
+\`\`\`
 
-// Register with a constructor and blob dependencies
-// Dependencies are automatically inspected and resolved!
-container.register(userService, UserServiceImpl, logger, database);
+### Development
 
-// You can also use factory functions
-container.register(config, () => new ConfigImpl());
+\`\`\`bash
+# Start visualizer in development mode
+npm run dev:visualizer
 
-// Mix blob dependencies with plain values
-container.register(service, ServiceImpl, logger, "production", 8080);
-```
+# Start documentation site
+npm run docs:dev
+\`\`\`
 
-### Reactive Dependencies
+## Monorepo Structure
 
-When a blob's registration changes, all dependent blobs automatically invalidate and recalculate:
+\`\`\`
+diblob/
+├── packages/
+│   ├── diblob/              # Core DI framework
+│   │   ├── src/             # Source code
+│   │   ├── test/            # Tests
+│   │   ├── examples/        # Example code
+│   │   └── dist/            # Build output
+│   │
+│   └── diblob-visualizer/   # Visualization tool
+│       ├── src/             # Svelte components
+│       ├── public/          # Static assets
+│       └── dist/            # Build output
+│
+├── docs/                    # Documentation site
+├── .changeset/              # Changesets configuration
+└── package.json             # Workspace root
+\`\`\`
 
-```typescript
-// Initial registration
-container.register(logger, ConsoleLogger);
-container.register(userService, UserServiceImpl, logger);
+## Publishing
 
-// Use the service
-userService.doSomething(); // Uses ConsoleLogger
+This monorepo uses [Changesets](https://github.com/changesets/changesets) for version management and publishing.
 
-// Re-register logger with new implementation
-container.register(logger, FileLogger);
+**Fixed Versioning**: All packages in this monorepo are configured to publish at the same version. When you create a changeset, both packages will be bumped to the same version number, ensuring version consistency across the monorepo.
 
-// userService automatically uses the new logger!
-userService.doSomething(); // Now uses FileLogger
-```
+### Creating a Changeset
 
-### Constructor & Property Injection
+When you make changes that should be published:
 
-Blobs can be used as default parameters in constructors or as property initializers:
-
-```typescript
-// Constructor parameter with default blob
-class MyService {
-  constructor(private logger = loggerBlob) {}
-
-  doSomething() {
-    this.logger.log('Doing something');
-  }
-}
-
-// Property initialization with blob
-class AnotherService {
-  private logger = loggerBlob;
-
-  doSomething() {
-    this.logger.log('Doing something');
-  }
-}
-
-// Both work automatically!
-const service = new MyService();
-service.doSomething(); // Uses the registered logger
-```
-
-### Async Resolution
-
-Full support for async factories and async dependency resolution:
-
-```typescript
-// Async factory
-container.register(myBlob, async () => {
-  const data = await fetchData();
-  return new MyImpl(data);
-});
-
-// Resolve async
-const instance = await container.resolve(myBlob);
-
-// Or use directly (returns Promise)
-await myBlob.someMethod();
-
-// Async dependencies are handled automatically
-class MyService {
-  constructor(private asyncDep = asyncBlob) {}
-}
-
-const service = await container.resolve(MyService);
-```
-
-### Container Nesting & Merging
-
-Create hierarchical container structures or merge multiple containers:
-
-```typescript
-// Nesting - child inherits from parent
-const parent = createContainer();
-parent.register(sharedBlob, SharedImpl);
-
-const child = createContainer(parent);
-child.register(childBlob, ChildImpl);
-
-// child can resolve both sharedBlob and childBlob
-// parent can only resolve sharedBlob
-
-// Merging - combine multiple containers
-const c1 = createContainer();
-const c2 = createContainer();
-
-c1.register(blob1, Impl1);
-c2.register(blob2, Impl2);
-
-const merged = createContainer(c1, c2);
-// merged can resolve both blob1 and blob2
-// Last parent wins for conflicts
-```
-
-## API Reference
-
-### `createBlob<T>()`
-
-Creates a new blob that acts as type `T`.
-
-```typescript
-const service = createBlob<MyService>();
-```
-
-### `createContainer(...parents)`
-
-Creates a new DI container. Optionally accepts parent containers for nesting or merging.
-
-```typescript
-// Simple container
-const container = createContainer();
-
-// Nested container (child inherits from parent)
-const parent = createContainer();
-const child = createContainer(parent);
-
-// Merged containers (last parent wins for conflicts)
-const container1 = createContainer();
-const container2 = createContainer();
-const merged = createContainer(container1, container2);
-```
-
-### `container.register<T>(blob, factory, ...deps)`
-
-Registers a blob with a factory/constructor and its dependencies.
-
-**Parameters:**
-- `blob`: The blob to register
-- `factory`: Constructor or factory function
-- `...deps`: Dependencies to inject (blobs are auto-resolved, plain values passed as-is)
-  - Last argument can be `{ lifecycle: Lifecycle }` for options
-
-```typescript
-// With constructor and dependencies
-container.register(myService, MyServiceImpl, logger, database);
-
-// With factory function
-container.register(config, () => new ConfigImpl());
-
-// With lifecycle option
-container.register(
-  myService,
-  MyServiceImpl,
-  logger,
-  { lifecycle: Lifecycle.Transient }
-);
-```
-
-### `container.resolve<T>(blobOrConstructor)`
-
-Manually resolve a blob or class constructor to its instance.
-
-**For blobs** (usually not needed - just use the blob directly):
-```typescript
-const instance = container.resolve(myService);
-```
-
-**For unregistered classes** (automatically detects and resolves blob default parameters):
-```typescript
-class MyClass {
-  constructor(private service = myBlob) {}
-}
-
-// MyClass is NOT registered as a blob, but container.resolve still works!
-const instance = await container.resolve(MyClass);
-
-// How it works:
-// 1. Container tracks blob accesses during constructor execution
-// 2. Each blob pushes itself into a singleton tracking array
-// 3. Container resolves those blobs and handles async dependencies
-// 4. Returns the instantiated class with all dependencies resolved
-```
-
-**Async resolution**:
-```typescript
-// Async factory
-container.register(myBlob, async () => new MyImpl());
-
-// Resolve returns a Promise
-const instance = await container.resolve(myBlob);
-
-// Or use the blob directly (returns Promise)
-await myBlob.someMethod();
-```
-
-### `container.has<T>(blob)`
-
-Check if a blob is registered.
-
-```typescript
-if (container.has(myService)) {
-  // ...
-}
-```
-
-### `container.unregister<T>(blob)`
-
-Unregister a blob.
-
-```typescript
-container.unregister(myService);
-```
-
-### `container.clear()`
-
-Clear all registrations.
-
-```typescript
-container.clear();
-```
-
-## Lifecycle
-
-### Singleton (default)
-
-Creates one instance and reuses it:
-
-```typescript
-container.register(service, () => new ServiceImpl());
-// or explicitly:
-container.register(service, () => new ServiceImpl(), {
-  lifecycle: Lifecycle.Singleton
-});
-```
-
-### Transient
-
-Creates a new instance every time:
-
-```typescript
-container.register(service, () => new ServiceImpl(), {
-  lifecycle: Lifecycle.Transient
-});
-```
-
-## Comparison with pbj
-
-| Feature | pbj | diblob |
-|---------|-----|--------|
-| Key | Separate token/key | The blob itself |
-| Usage | `container.resolve(key)` | Use blob directly |
-| Type safety | Token must match type | Blob IS the type |
-| Reactivity | Manual | Automatic |
+\`\`\`bash
+npm run changeset
+\`\`\`
+
+Follow the prompts to:
+1. Select which packages have changed
+2. Choose the version bump type (major, minor, patch)
+3. Write a summary of the changes
+
+### Versioning Packages
+
+To update package versions based on changesets:
+
+\`\`\`bash
+npm run version-packages
+\`\`\`
+
+This will:
+- Update package.json versions
+- Update dependencies between packages
+- Generate CHANGELOG.md files
+
+### Publishing to npm
+
+\`\`\`bash
+npm run release
+\`\`\`
+
+This will:
+1. Build all packages
+2. Publish changed packages to npm
+3. Create git tags for the releases
+
+## Scripts Reference
+
+| Script | Description |
+|--------|-------------|
+| \`npm run build\` | Build all packages |
+| \`npm run build:diblob\` | Build diblob package only |
+| \`npm run build:visualizer\` | Build visualizer package only |
+| \`npm test\` | Run diblob tests |
+| \`npm run test:watch\` | Run tests in watch mode |
+| \`npm run dev:visualizer\` | Start visualizer dev server |
+| \`npm run docs:dev\` | Start documentation dev server |
+| \`npm run docs:build\` | Build documentation site |
+| \`npm run docs:preview\` | Preview built documentation |
+| \`npm run clean\` | Remove all build outputs and node_modules |
+| \`npm run changeset\` | Create a new changeset |
+| \`npm run version-packages\` | Update versions from changesets |
+| \`npm run release\` | Build and publish packages |
+
+## Contributing
+
+1. Make your changes
+2. Add tests if applicable
+3. Run \`npm test\` to ensure tests pass
+4. Run \`npm run build\` to ensure builds succeed
+5. Create a changeset: \`npm run changeset\`
+6. Commit your changes including the changeset file
 
 ## License
 
-MIT
+MIT - See LICENSE file in each package for details
 
+## Links
+
+- [diblob Documentation](https://speajus.github.io/diblob/)
+- [GitHub Repository](https://github.com/speajus/diblob)
+- [npm - @speajus/diblob](https://www.npmjs.com/package/@speajus/diblob)
+- [npm - @speajus/diblob-visualizer](https://www.npmjs.com/package/@speajus/diblob-visualizer)

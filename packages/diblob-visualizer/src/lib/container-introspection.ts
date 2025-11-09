@@ -1,8 +1,8 @@
 /**
  * Utilities for introspecting diblob containers to extract dependency graph data
  */
-import type { Container, Blob, Lifecycle } from '@speajus/diblob';
-import { getBlobId, isBlob } from '@speajus/diblob';
+import type { Container, Blob } from '@speajus/diblob';
+import { getBlobId, isBlob, Lifecycle } from '@speajus/diblob';
 
 export interface BlobNode {
   id: string;
@@ -86,7 +86,7 @@ export function extractDependencyGraph(container: any): DependencyGraph {
               id: depNodeId,
               blobId: depBlobId,
               label: isRegistered ? 'Registered' : 'Unregistered',
-              lifecycle: 'singleton',
+              lifecycle: Lifecycle.Singleton,
               isRegistered,
             });
             seenBlobIds.add(depBlobId);
