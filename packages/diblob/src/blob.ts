@@ -2,21 +2,13 @@
  * Blob creation and proxy implementation
  */
 
-import type { Blob, BlobMetadata } from './types';
+import type { Blob, BlobMetadata, BlobMetadata } from './types';
 import { blobPropSymbol } from './types';
 /**
  * WeakMap to store blob IDs
  * Maps from the blob proxy to its internal ID
  */
 const blobIds = new WeakMap<object, symbol>();
-
-/**
- * Register a blob ID for a proxy object
- * Used by createListBlob and other special blob creators
- */
-export function registerBlobId(proxy: object, id: symbol): void {
-  blobIds.set(proxy, id);
-}
 
 /**
  * WeakMap to store blob metadata

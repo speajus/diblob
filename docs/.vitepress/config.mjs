@@ -55,6 +55,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/diblob/api/' },
             { text: 'createBlob', link: '/diblob/api/create-blob' },
+            { text: 'createListBlob', link: '/diblob/api/create-list-blob' },
             { text: 'createContainer', link: '/diblob/api/create-container' },
             { text: 'Container Methods', link: '/diblob/api/container-methods' },
             { text: 'Types', link: '/diblob/api/types' },
