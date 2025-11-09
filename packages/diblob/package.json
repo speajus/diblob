@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A dependency injection framework where the proxy (blob) is the key",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
