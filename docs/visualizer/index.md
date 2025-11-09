@@ -1,10 +1,10 @@
-# 🎨 Diblob Visualizer
+# Diblob Visualizer
 
-Interactive dependency injection graph visualization for [diblob](https://github.com/speajus/diblob).
+Interactive dependency injection graph visualization for [diblob](../diblob/).
 
 Visualize your dependency injection container as an interactive graph with nodes representing blobs and edges showing dependencies between them.
 
-## ✨ Features
+## Features
 
 - 📊 **Interactive Graph Visualization** - Pan, zoom, and drag nodes
 - 🔄 **Real-time Updates** - Watch the graph update as you modify your container
@@ -13,11 +13,12 @@ Visualize your dependency injection container as an interactive graph with nodes
 - 🎨 **Clean UI** - Modern, responsive design with clear visual hierarchy
 - 🔌 **Embeddable** - Easy to integrate into any Svelte application
 - 🏷️ **Metadata Support** - Display custom names, descriptions, and metadata for blobs
+- 🌐 **Remote Visualization** - Connect to containers running in different processes
 
-## 📸 Screenshots
+## Screenshots
 
 ### Dependency Graph Visualization
-![Dependency Graph](https://speajus.github.io/diblob/screenshot-graph.png)
+![Dependency Graph](/screenshot-graph.png)
 
 The visualizer displays your dependency injection container as an interactive graph, showing:
 - Blob nodes with their metadata (name, description)
@@ -26,20 +27,20 @@ The visualizer displays your dependency injection container as an interactive gr
 - Real-time statistics
 
 ### Metadata Display
-![Metadata Display](https://speajus.github.io/diblob/screenshot-metadata.png)
+![Metadata Display](/screenshot-metadata.png)
 
 Blobs with metadata show rich information:
 - Custom names instead of generic blob IDs
 - Descriptions for better understanding
 - Any custom metadata properties you define
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install @speajus/diblob-visualizer @speajus/diblob
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Standalone Demo
 
@@ -65,43 +66,16 @@ Open http://localhost:5173 to see the visualizer in action.
 <DiblobVisualizer {container} />
 ```
 
-## 📖 Usage Examples
+## Documentation
 
-See `src/App.svelte` for a complete working example with multiple services.
+- [Getting Started](./getting-started.md) - Installation and basic usage
+- [Embedding Guide](./embedding.md) - How to embed in your application
+- [Remote Visualization](./remote.md) - Connect to remote containers
+- [Server Setup](./server.md) - Set up a visualization server
+- [Examples](./examples.md) - Sample container setups
+- [API Reference](./api.md) - Component props and options
 
-### Using Metadata for Better Visualization
-
-Add metadata to your blobs to make the visualizer more informative:
-
-```typescript
-import { createBlob, createContainer } from '@speajus/diblob';
-
-// Create blobs with metadata
-const logger = createBlob<Logger>('logger', {
-  name: 'Console Logger',
-  description: 'Logs messages to the console'
-});
-
-const userService = createBlob<UserService>('userService', {
-  name: 'User Service',
-  description: 'Manages user data and operations',
-  version: '1.0.0'
-});
-
-// Create container with metadata
-const container = createContainer({
-  name: 'Application Container',
-  description: 'Main DI container'
-});
-
-// Register services
-container.register(logger, ConsoleLogger);
-container.register(userService, UserServiceImpl, logger);
-```
-
-The visualizer will display the metadata names and descriptions, making it much easier to understand your dependency graph at a glance.
-
-### Component Props
+## Component Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -109,18 +83,18 @@ The visualizer will display the metadata names and descriptions, making it much 
 | `autoRefresh` | `boolean` | `false` | Auto-refresh at intervals |
 | `refreshInterval` | `number` | `1000` | Refresh interval (ms) |
 
-### Graph Legend
+## Graph Legend
 
 - **🔒 Blue nodes** - Singleton services
 - **⚡ Orange nodes** - Transient services  
 - **Red nodes** - Unregistered dependencies
 - **Arrows** - Dependencies between services
 
-## 🏗️ Architecture
+## Architecture
 
 Built with Svelte 5, Svelte Flow, TypeScript, and Vite.
 
-## 🔧 Development
+## Development
 
 ```bash
 npm install
@@ -129,6 +103,7 @@ npm run build    # Build library
 npm run check    # Type check
 ```
 
-## 📝 License
+## License
 
 MIT
+
