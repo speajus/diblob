@@ -2,7 +2,7 @@
  * DI Container implementation
  */
 
-import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams } from './types';
+import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams, BlobMetadata } from './types';
 import { blobPropSymbol, Lifecycle } from './types';
 import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking } from './blob';
 import {
@@ -23,14 +23,24 @@ interface Registration<T = any> {
 }
 
 /**
+ * WeakMap to store container metadata
+ */
+const containerMetadataStore = new WeakMap<Container, BlobMetadata>();
+
+/**
  * Default DI container implementation
  */
 export class Container implements IContainer {
   private registrations = new Map<symbol, Registration>();
   private parents: Container[] = [];
 
-  constructor(parents: Container[] = []) {
+  constructor(parents: Container[] = [], metadata?: BlobMetadata) {
     this.parents = parents;
+
+    // Store metadata if provided
+    if (metadata) {
+      containerMetadataStore.set(this, metadata);
+    }
   }
 
   register<T extends object, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
@@ -333,8 +343,41 @@ export class Container implements IContainer {
  * const container1 = createContainer();
  * const container2 = createContainer();
  * const merged = createContainer(container1, container2);
+ *
+ * // With metadata
+ * const container = createContainer({
+ *   name: 'Main Container',
+ *   description: 'Application-wide DI container'
+ * });
  */
-export function createContainer(...parents: IContainer[]): IContainer {
-  return new Container(parents as Container[]);
+export function createContainer(...parents: IContainer[]): IContainer;
+export function createContainer(metadata: BlobMetadata, ...parents: IContainer[]): IContainer;
+export function createContainer(...args: (IContainer | BlobMetadata)[]): IContainer {
+  // Check if first argument is metadata (plain object without container methods)
+  const firstArg = args[0];
+  let metadata: BlobMetadata | undefined;
+  let parents: IContainer[];
+
+  if (firstArg && typeof firstArg === 'object' && !('register' in firstArg)) {
+    // First argument is metadata
+    metadata = firstArg as BlobMetadata;
+    parents = args.slice(1) as IContainer[];
+  } else {
+    // All arguments are parent containers
+    metadata = undefined;
+    parents = args as IContainer[];
+  }
+
+  return new Container(parents as Container[], metadata);
+}
+
+/**
+ * Get the metadata associated with a container
+ *
+ * @param container - The container to get metadata for
+ * @returns The metadata object, or undefined if no metadata was set
+ */
+export function getContainerMetadata(container: IContainer): BlobMetadata | undefined {
+  return containerMetadataStore.get(container as Container);
 }
 

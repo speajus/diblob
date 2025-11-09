@@ -2,13 +2,19 @@
  * Blob creation and proxy implementation
  */
 
-import type { Blob } from './types';
+import type { Blob, BlobMetadata } from './types';
 import { blobPropSymbol } from './types';
 /**
- * WeakMap to store blob metadata
+ * WeakMap to store blob IDs
  * Maps from the blob proxy to its internal ID
  */
-const blobMetadata = new WeakMap<object, symbol>();
+const blobIds = new WeakMap<object, symbol>();
+
+/**
+ * WeakMap to store blob metadata
+ * Maps from the blob proxy to its metadata object
+ */
+const blobMetadataStore = new WeakMap<object, BlobMetadata>();
 
 /**
  * Global registry of blob handlers
@@ -24,23 +30,28 @@ export const blobInstanceGetters = new Map<symbol, () => any>();
 
 /**
  * Create a new blob that acts as both a key and a proxy for type T
- * 
+ *
+ * @param name - Optional name for the blob (used in Symbol creation)
+ * @param metadata - Optional metadata for debugging and visualization
  * @returns A proxy object that can be registered with a container
- * 
+ *
  * @example
  * ```typescript
  * interface UserService {
  *   getUser(id: number): User;
  * }
- * 
- * const userService = createBlob<UserService>();
+ *
+ * const userService = createBlob<UserService>('userService', {
+ *   name: 'User Service',
+ *   description: 'Handles user-related operations'
+ * });
  * container.register(userService, () => new UserServiceImpl());
- * 
+ *
  * // userService now acts as UserService
  * const user = userService.getUser(123);
  * ```
  */
-export function createBlob<T extends object>(name = 'blob'): Blob<T> {
+export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetadata): Blob<T> {
   const blobId = Symbol(name);
 
   // Create a proxy that will be populated by the container
@@ -91,8 +102,13 @@ export function createBlob<T extends object>(name = 'blob'): Blob<T> {
     },
   });
 
-  // Store the blob ID in metadata
-  blobMetadata.set(proxy, blobId);
+  // Store the blob ID
+  blobIds.set(proxy, blobId);
+
+  // Store metadata if provided
+  if (metadata) {
+    blobMetadataStore.set(proxy, metadata);
+  }
 
   return proxy as Blob<T>;
 }
@@ -101,7 +117,7 @@ export function createBlob<T extends object>(name = 'blob'): Blob<T> {
  * Get the internal ID of a blob
  */
 export function getBlobId<T>(blob: Blob<T>): symbol {
-  const id = blobMetadata.get(blob as object);
+  const id = blobIds.get(blob as object);
   if (!id) {
     throw new Error('Invalid blob: not created with createBlob()');
   }
@@ -112,7 +128,17 @@ export function getBlobId<T>(blob: Blob<T>): symbol {
  * Check if an object is a blob
  */
 export function isBlob(obj: any): obj is Blob<any> {
-  return obj != null && blobMetadata.has(obj);
+  return obj != null && blobIds.has(obj);
+}
+
+/**
+ * Get the metadata associated with a blob
+ *
+ * @param blob - The blob to get metadata for
+ * @returns The metadata object, or undefined if no metadata was set
+ */
+export function getBlobMetadata<T>(blob: Blob<T>): BlobMetadata | undefined {
+  return blobMetadataStore.get(blob as object);
 }
 
 /**
