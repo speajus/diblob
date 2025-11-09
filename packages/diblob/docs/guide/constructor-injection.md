@@ -275,6 +275,7 @@ class MyService {
 
 ## Next Steps
 
+- [Factory Injection](/guide/factory-injection) - Alternative injection pattern using factory functions
 - [Dependency Resolution](/guide/dependency-resolution) - How dependencies are resolved
 - [Async Support](/guide/async-support) - Async dependencies
 

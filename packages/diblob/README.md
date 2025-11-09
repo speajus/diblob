@@ -73,6 +73,11 @@ container.register(userService, UserServiceImpl, logger, database);
 // You can also use factory functions
 container.register(config, () => new ConfigImpl());
 
+// Factory functions can receive injected dependencies
+container.register(service, (log: Logger, db: Database) => {
+  return new ServiceImpl(log, db);
+}, logger, database);
+
 // Mix blob dependencies with plain values
 container.register(service, ServiceImpl, logger, "production", 8080);
 ```

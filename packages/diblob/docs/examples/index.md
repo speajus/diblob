@@ -5,6 +5,7 @@ Practical examples of using diblob.
 ## Basic Examples
 
 - [Basic Usage](/examples/basic) - Simple logger and service example
+- [Factory Injection](/examples/factory-injection) - Injecting dependencies into factory functions
 - [Async Dependencies](/examples/async) - Working with async factories
 - [Reactive Updates](/examples/reactive) - Re-registering implementations
 - [Container Nesting](/examples/nesting) - Parent and child containers
@@ -79,7 +80,7 @@ class MyService {
     private logger = loggerBlob,
     private database = databaseBlob
   ) {}
-  
+
   async doSomething() {
     this.logger.log('Starting...');
     const data = await this.database.query('...');
@@ -91,10 +92,31 @@ const service = await container.resolve(MyService);
 await service.doSomething();
 ```
 
+### Factory Injection
+
+```typescript
+interface Service {
+  doWork(): void;
+}
+
+const service = createBlob<Service>();
+
+// Factory receives injected dependencies as parameters
+container.register(service, (log: Logger, db: Database) => ({
+  doWork: () => {
+    log.log('Working...');
+    db.query('SELECT * FROM tasks');
+  }
+}), logger, database);
+
+service.doWork();
+```
+
 ## Next Steps
 
 Explore the detailed examples:
 - [Basic Usage](/examples/basic)
+- [Factory Injection](/examples/factory-injection)
 - [Async Dependencies](/examples/async)
 - [Reactive Updates](/examples/reactive)
 - [Container Nesting](/examples/nesting)

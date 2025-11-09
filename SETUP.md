@@ -51,7 +51,8 @@ docs/
 │   ├── async-support.md
 │   ├── container-nesting.md
 │   ├── lifecycle.md
-│   └── constructor-injection.md
+│   ├── constructor-injection.md
+│   └── factory-injection.md
 ├── api/                   # API reference
 │   ├── index.md
 │   ├── create-blob.md
@@ -61,6 +62,7 @@ docs/
 ├── examples/              # Code examples
 │   ├── index.md
 │   ├── basic.md
+│   ├── factory-injection.md
 │   ├── async.md
 │   ├── reactive.md
 │   └── nesting.md

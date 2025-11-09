@@ -19,24 +19,91 @@ register<T>(
 ### Parameters
 
 - `blob` - The blob to register
-- `factory` - Constructor or factory function
-- `...deps` - Dependencies (blobs or plain values)
-  - Last argument can be `{ lifecycle: Lifecycle }` for options
+- `factory` - Constructor or factory function that creates instances of type T
+  - Can be a class constructor: `new (...args: any[]) => T`
+  - Can be a factory function: `(...args: any[]) => T`
+  - Can be an async factory: `(...args: any[]) => Promise<T>`
+- `...deps` - Dependencies to pass to the factory
+  - Can be blobs (automatically resolved)
+  - Can be plain values (passed as-is)
+  - Last argument can be `{ lifecycle: Lifecycle }` for lifecycle options
+
+### Dependency Injection
+
+Dependencies listed in `...deps` are resolved and passed to the factory function as parameters:
+
+```typescript
+// Factory receives resolved dependencies as parameters
+container.register(service, (log: Logger, db: Database) => {
+  return new ServiceImpl(log, db);
+}, logger, database);
+```
+
+The container automatically:
+1. Resolves each blob dependency to its instance
+2. Passes plain values as-is
+3. Calls the factory with all resolved dependencies
+4. Handles async dependencies (returns Promise if any dependency is async)
 
 ### Examples
 
+#### Basic Registration
+
 ```typescript
-// With constructor
+// With constructor (no dependencies)
 container.register(logger, ConsoleLogger);
 
-// With dependencies
+// With constructor and dependencies
 container.register(userService, UserServiceImpl, logger, database);
 
-// With factory
+// With factory function (no dependencies)
 container.register(config, () => new ConfigImpl());
+```
 
-// With lifecycle
+#### Factory Injection
+
+```typescript
+// Factory with single blob dependency
+container.register(service, (log: Logger) => ({
+  doWork: () => log.log('working')
+}), logger);
+
+// Factory with multiple blob dependencies
+container.register(service, (log: Logger, db: Database) => {
+  return new ServiceImpl(log, db);
+}, logger, database);
+
+// Factory with mixed blob and plain dependencies
+container.register(apiClient, (log: Logger, baseUrl: string, timeout: number) => {
+  return new ApiClient(baseUrl, timeout, log);
+}, logger, 'https://api.example.com', 5000);
+```
+
+#### Async Factories
+
+```typescript
+// Async factory with dependencies
+container.register(database, async (cfg: Config, log: Logger) => {
+  const db = new DatabaseImpl(cfg.getConnectionString());
+  await db.connect();
+  log.log('Database connected');
+  return db;
+}, config, logger);
+```
+
+#### Lifecycle Options
+
+```typescript
+// Singleton (default)
+container.register(logger, ConsoleLogger);
+
+// Transient - creates new instance each time
 container.register(logger, ConsoleLogger, { lifecycle: Lifecycle.Transient });
+
+// With dependencies and lifecycle
+container.register(service, (log: Logger) => new ServiceImpl(log), logger, {
+  lifecycle: Lifecycle.Transient
+});
 ```
 
 ## resolve
@@ -135,5 +202,6 @@ container.clear();
 ## See Also
 
 - [Containers Guide](/guide/containers) - Comprehensive guide
+- [Factory Injection Guide](/guide/factory-injection) - Factory function dependency injection
 - [API Reference](/api/) - Full API reference
 
