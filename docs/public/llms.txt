@@ -1,0 +1,190 @@
+# Diblob - Dependency Injection Framework
+
+> A dependency injection framework where the proxy (blob) is the key
+
+## Overview
+
+Diblob is a modern dependency injection framework for TypeScript/JavaScript that uses proxies as both the key and the interface for dependency injection. It provides automatic dependency resolution, reactive updates, and type safety.
+
+## Installation
+
+```bash
+npm install @speajus/diblob
+```
+
+Requirements: Node.js >= 22.0.0
+
+## Core Concepts
+
+### Blobs
+
+A blob is a proxy object that acts as both a unique identifier and the interface for dependency injection.
+
+```typescript
+import { createBlob } from '@speajus/diblob';
+
+const logger = createBlob<Logger>();
+const database = createBlob<Database>();
+```
+
+### Containers
+
+Containers manage blob registrations and dependency resolution.
+
+```typescript
+import { createContainer } from '@speajus/diblob';
+
+const container = createContainer();
+container.register(logger, ConsoleLogger);
+container.register(database, DatabaseImpl, logger);
+```
+
+### List Blobs
+
+List blobs are special blobs for managing arrays with automatic invalidation.
+
+```typescript
+import { createListBlob } from '@speajus/diblob';
+
+const todoList = createListBlob<string>();
+container.register(todoList, () => []);
+
+// Use as an array
+todoList.push('Buy groceries');
+todoList.push('Walk the dog');
+console.log(todoList.length); // 2
+```
+
+**Key Features:**
+- Acts exactly like a standard JavaScript array
+- All mutation methods (push, pop, shift, unshift, splice, reverse, sort, fill, copyWithin) trigger automatic invalidation
+- Creates new array instances on mutation (immutability through re-initialization)
+- All read-only methods (map, filter, reduce, find, etc.) work without triggering invalidation
+- Can be initialized with empty or pre-populated arrays
+- Fully type-safe with TypeScript
+
+**Mutation Example:**
+```typescript
+const numbers = createListBlob<number>();
+container.register(numbers, () => [1, 2, 3]);
+
+numbers.push(4);        // Triggers invalidation
+numbers.pop();          // Triggers invalidation
+numbers.reverse();      // Triggers invalidation
+
+const doubled = numbers.map(x => x * 2); // No invalidation
+```
+
+**With Dependencies:**
+```typescript
+const todos = createListBlob<string>();
+const counter = createBlob<TodoCounter>();
+
+class TodoCounterImpl {
+  constructor(private items: string[]) {}
+  count() { return this.items.length; }
+}
+
+container.register(todos, () => []);
+container.register(counter, TodoCounterImpl, todos);
+
+todos.push('Task 1');
+console.log(counter.count()); // 1 - automatically updated!
+```
+
+## API Reference
+
+### createBlob<T>(name?, metadata?)
+
+Creates a new blob.
+
+```typescript
+const logger = createBlob<Logger>('logger');
+```
+
+### createListBlob<T>(name?, metadata?)
+
+Creates a list blob for managing arrays.
+
+```typescript
+const users = createListBlob<User>('users');
+container.register(users, () => []);
+users.push({ id: 1, name: 'Alice' });
+```
+
+### createContainer(...parents)
+
+Creates a new container, optionally with parent containers.
+
+```typescript
+const container = createContainer();
+const childContainer = createContainer(container);
+```
+
+### container.register(blob, factory, ...deps)
+
+Registers a blob with a factory function and dependencies.
+
+```typescript
+container.register(logger, ConsoleLogger);
+container.register(database, DatabaseImpl, logger);
+container.register(todos, () => ['initial', 'items']);
+```
+
+### container.resolve(blobOrConstructor)
+
+Manually resolves a blob or constructor.
+
+```typescript
+const loggerInstance = await container.resolve(logger);
+```
+
+### container.has(blob)
+
+Checks if a blob is registered.
+
+```typescript
+if (container.has(logger)) {
+  console.log('Logger is registered');
+}
+```
+
+### container.unregister(blob)
+
+Unregisters a blob.
+
+```typescript
+container.unregister(logger);
+```
+
+### container.clear()
+
+Clears all registrations.
+
+```typescript
+container.clear();
+```
+
+## Features
+
+- **Type Safety**: Full TypeScript support with type inference
+- **Reactive Dependencies**: Automatic invalidation and re-resolution when dependencies change
+- **Async Support**: Async factories and dependencies
+- **Container Nesting**: Hierarchical containers with inheritance
+- **Lifecycle Management**: Singleton (default) and Transient lifecycles
+- **Constructor Injection**: Automatic dependency injection into class constructors
+- **Factory Injection**: Support for factory functions
+- **List Blobs**: Special array blobs with automatic invalidation on mutations
+
+## Documentation
+
+Full documentation: https://jspears.github.io/diblob/
+
+- Guide: https://jspears.github.io/diblob/diblob/guide/getting-started
+- API Reference: https://jspears.github.io/diblob/diblob/api/
+- Examples: https://jspears.github.io/diblob/diblob/examples/
+
+## License
+
+MIT
+

@@ -5,6 +5,7 @@ Complete API reference for diblob.
 ## Core Functions
 
 - [`createBlob<T>()`](/diblob/api/create-blob) - Create a new blob
+- [`createListBlob<T>()`](/diblob/api/create-list-blob) - Create a list blob for arrays
 - [`createContainer(...parents)`](/diblob/api/create-container) - Create a DI container
 
 ## Container Methods
@@ -31,8 +32,9 @@ Complete API reference for diblob.
 ## Quick Reference
 
 ```typescript
-import { 
-  createBlob, 
+import {
+  createBlob,
+  createListBlob,
   createContainer,
   isBlob,
   getBlobId,
@@ -46,6 +48,7 @@ import {
 // Create blobs
 const logger = createBlob<Logger>();
 const database = createBlob<Database>();
+const todos = createListBlob<string>();
 
 // Create container
 const container = createContainer();
@@ -53,10 +56,12 @@ const container = createContainer();
 // Register blobs
 container.register(logger, ConsoleLogger);
 container.register(database, DatabaseImpl, logger);
+container.register(todos, () => []);
 
 // Use blobs
 logger.log('Hello');
 database.query('SELECT * FROM users');
+todos.push('Buy groceries');
 
 // Resolve manually
 const loggerInstance = await container.resolve(logger);
@@ -118,6 +123,7 @@ interface Container {
 ## Next Steps
 
 - [createBlob](/diblob/api/create-blob) - Learn about creating blobs
+- [createListBlob](/diblob/api/create-list-blob) - Learn about creating list blobs
 - [createContainer](/diblob/api/create-container) - Learn about creating containers
 - [Container Methods](/diblob/api/container-methods) - Learn about container operations
 - [Types](/diblob/api/types) - Learn about TypeScript types

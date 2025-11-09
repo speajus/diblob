@@ -4,7 +4,7 @@
 
 import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams, BlobMetadata } from './types';
 import { blobPropSymbol, Lifecycle } from './types';
-import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking } from './blob';
+import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking, setBlobContainer } from './blob';
 import {
   beginTracking,
   endTracking,
@@ -45,6 +45,9 @@ export class Container implements IContainer {
 
   register<T extends object, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
     const blobId = getBlobId(blob);
+
+    // Track which container registered this blob (first registration wins)
+    setBlobContainer(blobId, this);
 
     // Extract lifecycle option if the last dep is a RegistrationOptions object
     let lifecycle = Lifecycle.Singleton;

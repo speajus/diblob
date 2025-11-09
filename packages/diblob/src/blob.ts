@@ -11,6 +11,14 @@ import { blobPropSymbol } from './types';
 const blobIds = new WeakMap<object, symbol>();
 
 /**
+ * Register a blob ID for a proxy object
+ * Used by createListBlob and other special blob creators
+ */
+export function registerBlobId(proxy: object, id: symbol): void {
+  blobIds.set(proxy, id);
+}
+
+/**
  * WeakMap to store blob metadata
  * Maps from the blob proxy to its metadata object
  */
@@ -27,6 +35,13 @@ export const blobHandlers = new Map<symbol, (prop: string | symbol) => any>();
  * Maps blob ID to a function that returns the resolved instance
  */
 export const blobInstanceGetters = new Map<symbol, () => any>();
+
+/**
+ * Global registry of blob containers
+ * Maps blob ID to the container that first registered it
+ * Used by ListBlob and other special blobs to detect their container
+ */
+export const blobContainers = new Map<symbol, any>();
 
 /**
  * Create a new blob that acts as both a key and a proxy for type T
@@ -139,6 +154,29 @@ export function isBlob(obj: any): obj is Blob<any> {
  */
 export function getBlobMetadata<T>(blob: Blob<T>): BlobMetadata | undefined {
   return blobMetadataStore.get(blob as object);
+}
+
+/**
+ * Set the container that registered a blob
+ * Only sets if not already set (first registration wins)
+ *
+ * @param blobId - The blob ID
+ * @param container - The container that registered the blob
+ */
+export function setBlobContainer(blobId: symbol, container: any): void {
+  if (!blobContainers.has(blobId)) {
+    blobContainers.set(blobId, container);
+  }
+}
+
+/**
+ * Get the container that registered a blob
+ *
+ * @param blobId - The blob ID
+ * @returns The container, or undefined if not registered
+ */
+export function getBlobContainer(blobId: symbol): any | undefined {
+  return blobContainers.get(blobId);
 }
 
 /**

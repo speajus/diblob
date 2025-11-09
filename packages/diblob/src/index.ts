@@ -21,6 +21,7 @@
 
 export { createBlob, getBlobId, isBlob, getBlobMetadata } from './blob';
 export { createContainer, Container, getContainerMetadata } from './container';
+export { createListBlob } from './list-blob';
 export type { Blob, Factory, Container as IContainer, RegistrationOptions, BlobMetadata } from './types';
 export { Lifecycle } from './types';
 

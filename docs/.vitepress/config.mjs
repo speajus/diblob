@@ -32,6 +32,7 @@ export default defineConfig({
           text: 'Core Concepts',
           items: [
             { text: 'Blobs', link: '/diblob/guide/blobs' },
+            { text: 'List Blobs', link: '/diblob/guide/list-blob' },
             { text: 'Containers', link: '/diblob/guide/containers' },
             { text: 'Dependency Resolution', link: '/diblob/guide/dependency-resolution' },
             { text: 'Reactive Dependencies', link: '/diblob/guide/reactive-dependencies' },
