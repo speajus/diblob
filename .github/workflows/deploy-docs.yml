@@ -37,12 +37,12 @@ jobs:
         run: npm ci
       
       - name: Build documentation
-        run: npm run docs:build
-      
+        run: npm run docs:build -w @speajus/diblob
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/.vitepress/dist
+          path: packages/diblob/docs/.vitepress/dist
 
   deploy:
     environment:
