@@ -4,6 +4,16 @@
 export const blobPropSymbol = Symbol('blobProp');
 
 /**
+ * Metadata that can be attached to blobs and containers
+ * for debugging and visualization purposes
+ */
+export interface BlobMetadata {
+  name?: string;
+  description?: string;
+  [key: string]: any;
+}
+
+/**
  * A Blob is a proxy object that acts as both the key and the interface
  * for dependency injection. It can be passed around and will resolve to
  * the registered implementation.
