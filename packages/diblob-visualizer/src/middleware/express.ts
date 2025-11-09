@@ -1,18 +1,18 @@
 /**
- * Diblob Visualizer Server
- *
- * Exposes container introspection data via SSE and REST API
+ * Express middleware for diblob-visualizer
+ * 
+ * Provides middleware that can be embedded into existing Express/Node.js servers
  */
 
-import { createServer } from 'node:http';
+import type { Request, Response, NextFunction } from 'express';
 import type { Container } from '@speajus/diblob';
 import { extractDependencyGraph, getGraphStats } from '../lib/container-introspection.js';
 
-export interface ServerOptions {
-  port?: number;
-  host?: string;
-  cors?: boolean;
+export interface MiddlewareOptions {
+  container: Container;
+  path?: string;
   updateInterval?: number;
+  cors?: boolean;
 }
 
 export interface GraphUpdate {
@@ -23,14 +23,23 @@ export interface GraphUpdate {
 }
 
 /**
- * Create a server that exposes container data via SSE
+ * Create Express middleware for the diblob visualizer
+ * 
+ * @example
+ * ```typescript
+ * import express from 'express';
+ * import { createVisualizerMiddleware } from '@speajus/diblob-visualizer/middleware';
+ * 
+ * const app = express();
+ * app.use('/visualizer', createVisualizerMiddleware({ container }));
+ * ```
  */
-export function createVisualizerServer(container: Container, options: ServerOptions = {}) {
+export function createVisualizerMiddleware(options: MiddlewareOptions) {
   const {
-    port = 3001,
-    host = 'localhost',
-    cors = true,
-    updateInterval = 1000
+    container,
+    path = '/visualizer',
+    updateInterval = 1000,
+    cors = true
   } = options;
 
   // Get current graph data
@@ -45,7 +54,12 @@ export function createVisualizerServer(container: Container, options: ServerOpti
     };
   }
 
-  const server = createServer((req, res) => {
+  return function diblobVisualizerMiddleware(req: Request, res: Response, next: NextFunction) {
+    // Only handle requests under the specified path
+    if (!req.path.startsWith(path)) {
+      return next();
+    }
+
     // CORS headers
     if (cors) {
       res.setHeader('Access-Control-Allow-Origin', '*');
@@ -54,13 +68,14 @@ export function createVisualizerServer(container: Container, options: ServerOpti
     }
 
     if (req.method === 'OPTIONS') {
-      res.writeHead(200);
-      res.end();
+      res.status(200).end();
       return;
     }
 
+    const subPath = req.path.substring(path.length);
+
     // SSE endpoint
-    if (req.url === '/events' && req.method === 'GET') {
+    if (subPath === '/events' && req.method === 'GET') {
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -86,44 +101,25 @@ export function createVisualizerServer(container: Container, options: ServerOpti
     }
 
     // REST endpoint for one-time fetch
-    if (req.url === '/graph' && req.method === 'GET') {
+    if (subPath === '/graph' && req.method === 'GET') {
       const data = getGraphData();
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(data));
+      res.json(data);
       return;
     }
 
     // Health check
-    if (req.url === '/health' && req.method === 'GET') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok' }));
+    if (subPath === '/health' && req.method === 'GET') {
+      res.json({ status: 'ok' });
       return;
     }
 
-    // 404
-    res.writeHead(404);
-    res.end('Not Found');
-  });
-
-  return {
-    server,
-    start: () => {
-      return new Promise<void>((resolve) => {
-        server.listen(port, host, () => {
-          console.log(`Diblob Visualizer Server running at:`);
-          console.log(`  SSE:       http://${host}:${port}/events`);
-          console.log(`  Graph API: http://${host}:${port}/graph`);
-          console.log(`  Health:    http://${host}:${port}/health`);
-          resolve();
-        });
-      });
-    },
-    stop: () => {
-      return new Promise<void>((resolve) => {
-        server.close(() => resolve());
-      });
-    }
+    // If no route matched, pass to next middleware
+    next();
   };
 }
 
+/**
+ * Type-safe Express middleware type
+ */
+export type DiblobVisualizerMiddleware = ReturnType<typeof createVisualizerMiddleware>;
 

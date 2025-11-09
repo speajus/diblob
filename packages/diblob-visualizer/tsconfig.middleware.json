@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "esnext",
+    "target": "es2022",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "skipLibCheck": true,
+    "noEmit": false
+  },
+  "include": ["src/middleware/**/*", "src/lib/container-introspection.ts"],
+  "exclude": ["node_modules", "dist"]
+}
+

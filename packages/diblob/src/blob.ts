@@ -111,14 +111,14 @@ export function getBlobId<T>(blob: Blob<T>): symbol {
 /**
  * Check if an object is a blob
  */
-export function isBlob(obj: any): obj is Blob<any> {
+export function isBlob(obj: unknown): obj is Blob<any> {
   return obj != null && blobMetadata.has(obj);
 }
 
 /**
  * Singleton array for tracking blob accesses during constructor execution
  */
-let constructorDependencies: Blob<any>[] | null = null;
+let constructorDependencies: Blob<unknown>[] | null = null;
 
 /**
  * Begin tracking blob accesses for constructor parameter detection

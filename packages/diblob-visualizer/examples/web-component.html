@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diblob Visualizer Web Component Example</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 12px;
+      margin: 16px 0;
+    }
+    diblob-visualizer {
+      display: block;
+      min-height: 600px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Diblob Visualizer Web Component</h1>
+  
+  <div class="container">
+    <h2>Framework-Agnostic Web Component</h2>
+    <p>
+      This example demonstrates using the diblob-visualizer as a standard web component
+      that can be embedded in any web application (React, Vue, Angular, vanilla JS, etc.)
+    </p>
+    
+    <div class="info">
+      <strong>ℹ️ Note:</strong> Make sure you have a diblob visualizer server running.
+      You can start one with: <code>npm run server</code>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Live Visualization</h2>
+    
+    <!-- The web component - just use it like any HTML element! -->
+    <diblob-visualizer 
+      url="http://localhost:3001/events"
+      mode="remote"
+      updateInterval="1000">
+    </diblob-visualizer>
+  </div>
+
+  <div class="container">
+    <h2>Usage</h2>
+    <p>To use this web component in your application:</p>
+    
+    <h3>1. Install the package</h3>
+    <pre><code>npm install @speajus/diblob-visualizer</code></pre>
+    
+    <h3>2. Import the web component</h3>
+    <pre><code>import '@speajus/diblob-visualizer/web-component';</code></pre>
+    
+    <h3>3. Use it in your HTML</h3>
+    <pre><code>&lt;diblob-visualizer 
+  url="http://localhost:3001/events"
+  mode="remote"
+  updateInterval="1000"&gt;
+&lt;/diblob-visualizer&gt;</code></pre>
+    
+    <h3>Attributes</h3>
+    <ul>
+      <li><code>url</code> - The SSE endpoint URL</li>
+      <li><code>mode</code> - "local" or "remote" (default: "remote")</li>
+      <li><code>updateInterval</code> - Update interval in milliseconds (default: 1000)</li>
+    </ul>
+  </div>
+
+  <!-- Load the web component -->
+  <script type="module" src="../dist/web-component/web-component.js"></script>
+</body>
+</html>
+
