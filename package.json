@@ -13,16 +13,17 @@
     "test": "npm run test -w @speajus/diblob",
     "test:watch": "npm run test:watch -w @speajus/diblob",
     "dev:visualizer": "npm run dev -w @speajus/diblob-visualizer",
-    "docs:dev": "npm run docs:dev -w @speajus/diblob",
-    "docs:build": "npm run docs:build -w @speajus/diblob",
-    "docs:preview": "npm run docs:preview -w @speajus/diblob",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "npm run build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1"
+    "@changesets/cli": "^2.27.1",
+    "vitepress": "^1.6.4"
   },
   "engines": {
     "node": ">=22.0.0"
