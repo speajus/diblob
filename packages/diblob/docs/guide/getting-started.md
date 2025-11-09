@@ -162,10 +162,48 @@ const user = userService.getUser(123);
 console.log(user.name); // "John Doe"
 ```
 
+## Organizing Your Code
+
+The example above shows everything in a single file for simplicity. In a real application, you should organize your code into separate files for better maintainability:
+
+- **Interface/Blob files** - Define interfaces and create blobs
+- **Implementation files** - Concrete class implementations
+- **Registration files** - Container setup and blob registration
+
+For example:
+
+```typescript
+// services/logger.ts - Interface and blob only
+export interface Logger {
+  log(message: string): void;
+}
+export const logger = createBlob<Logger>();
+
+// implementations/console-logger.ts - Implementation only
+export class ConsoleLogger implements Logger {
+  log(message: string): void {
+    console.log(`[LOG] ${message}`);
+  }
+}
+
+// container/register-core.ts - Registration only
+export function registerCoreServices(container: Container): void {
+  container.register(logger, ConsoleLogger);
+}
+```
+
+This separation provides:
+- **Clear separation of concerns** - Each file has a single responsibility
+- **Better testability** - Easy to swap implementations for testing
+- **Improved maintainability** - Changes to implementations don't affect interfaces
+
+See the [File Organization Guide](/guide/file-organization) for detailed best practices and a complete example.
+
 ## Next Steps
 
 Now that you understand the basics, explore these topics:
 
+- [File Organization](/guide/file-organization) - **Recommended**: Learn how to structure your diblob application
 - [Blobs](/guide/blobs) - Learn more about creating and using blobs
 - [Containers](/guide/containers) - Understand container features
 - [Dependency Resolution](/guide/dependency-resolution) - How dependencies are resolved

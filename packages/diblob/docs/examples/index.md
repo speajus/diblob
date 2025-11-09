@@ -5,6 +5,7 @@ Practical examples of using diblob.
 ## Basic Examples
 
 - [Basic Usage](/examples/basic) - Simple logger and service example
+- [File Organization](/examples/file-organization) - **Recommended**: Complete example showing proper file structure
 - [Factory Injection](/examples/factory-injection) - Injecting dependencies into factory functions
 - [Async Dependencies](/examples/async) - Working with async factories
 - [Reactive Updates](/examples/reactive) - Re-registering implementations

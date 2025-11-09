@@ -43,6 +43,16 @@ container.register(userService, UserServiceImpl, logger, database);
 const user = userService.getUser(123);
 ```
 
+## Best Practices
+
+For production applications, organize your code into separate files:
+
+- **Interface/Blob Definition Files** - Define interfaces and create blobs
+- **Implementation Files** - Concrete class implementations
+- **Registration Files** - Container setup using registration functions
+
+This separation provides clear separation of concerns, better testability, and improved maintainability. See the [File Organization Guide](https://speajus.github.io/diblob/guide/file-organization) for detailed best practices.
+
 ## Core Concepts
 
 ### Blobs

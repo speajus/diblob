@@ -104,3 +104,15 @@ pnpm add @speajus/diblob
 - Node.js >= 22.0.0
 - TypeScript >= 5.3.3 (for TypeScript projects)
 
+## Best Practices
+
+For production applications, organize your code with proper separation of concerns:
+
+- **Interface/Blob files** - Define contracts and create blobs
+- **Implementation files** - Concrete class implementations
+- **Registration files** - Container setup using registration functions
+
+This pattern provides clear separation of concerns, better testability, and improved maintainability.
+
+👉 See the [File Organization Guide](/guide/file-organization) for detailed best practices and examples.
+

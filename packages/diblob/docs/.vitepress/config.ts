@@ -21,6 +21,7 @@ export default defineConfig({
           items: [
             { text: 'What is diblob?', link: '/guide/what-is-diblob' },
             { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'File Organization', link: '/guide/file-organization' },
           ]
         },
         {
@@ -61,6 +62,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/examples/' },
             { text: 'Basic Usage', link: '/examples/basic' },
+            { text: 'File Organization', link: '/examples/file-organization' },
             { text: 'Factory Injection', link: '/examples/factory-injection' },
             { text: 'Async Dependencies', link: '/examples/async' },
             { text: 'Reactive Updates', link: '/examples/reactive' },
