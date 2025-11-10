@@ -1,5 +1,16 @@
 # @speajus/diblob-visualizer
 
+## 0.4.0
+
+### Minor Changes
+
+- 2bf07d3: Added metadata ability
+
+### Patch Changes
+
+- Updated dependencies [2bf07d3]
+  - @speajus/diblob@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes
