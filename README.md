@@ -12,6 +12,14 @@ The core dependency injection framework where the proxy (blob) is the key.
 - **Description**: A dependency injection framework with automatic dependency resolution, reactive dependencies, and full TypeScript support
 - **Documentation**: [https://speajus.github.io/diblob/](https://speajus.github.io/diblob/)
 
+### [@speajus/diblob-mcp](./packages/diblob-mcp)
+
+Model Context Protocol (MCP) server implementation for diblob containers.
+
+- **Version**: 0.1.0
+- **Description**: MCP server that exposes diblob container functionality through the Model Context Protocol
+- **Features**: Container introspection, dependency graph visualization, MCP tools for AI assistants
+
 ### [@speajus/diblob-visualizer](./packages/diblob-visualizer)
 
 Interactive dependency injection graph visualization for diblob.
@@ -42,6 +50,7 @@ npm run build
 
 # Build individual packages
 npm run build:diblob
+npm run build:mcp
 npm run build:visualizer
 \`\`\`
 
@@ -61,6 +70,9 @@ npm run test:watch
 # Start visualizer in development mode
 npm run dev:visualizer
 
+# Start MCP server in development mode
+npm run dev:mcp
+
 # Start documentation site
 npm run docs:dev
 \`\`\`
@@ -74,6 +86,11 @@ diblob/
 │   │   ├── src/             # Source code
 │   │   ├── test/            # Tests
 │   │   ├── examples/        # Example code
+│   │   └── dist/            # Build output
+│   │
+│   ├── diblob-mcp/          # MCP server
+│   │   ├── src/             # Source code
+│   │   ├── example.ts       # Example usage
 │   │   └── dist/            # Build output
 │   │
 │   └── diblob-visualizer/   # Visualization tool
@@ -135,10 +152,12 @@ This will:
 |--------|-------------|
 | \`npm run build\` | Build all packages |
 | \`npm run build:diblob\` | Build diblob package only |
+| \`npm run build:mcp\` | Build diblob-mcp package only |
 | \`npm run build:visualizer\` | Build visualizer package only |
 | \`npm test\` | Run diblob tests |
 | \`npm run test:watch\` | Run tests in watch mode |
 | \`npm run dev:visualizer\` | Start visualizer dev server |
+| \`npm run dev:mcp\` | Start MCP server in dev mode |
 | \`npm run docs:dev\` | Start documentation dev server |
 | \`npm run docs:build\` | Build documentation site |
 | \`npm run docs:preview\` | Preview built documentation |
@@ -165,4 +184,5 @@ MIT - See LICENSE file in each package for details
 - [diblob Documentation](https://speajus.github.io/diblob/)
 - [GitHub Repository](https://github.com/speajus/diblob)
 - [npm - @speajus/diblob](https://www.npmjs.com/package/@speajus/diblob)
+- [npm - @speajus/diblob-mcp](https://www.npmjs.com/package/@speajus/diblob-mcp)
 - [npm - @speajus/diblob-visualizer](https://www.npmjs.com/package/@speajus/diblob-visualizer)

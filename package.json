@@ -7,12 +7,14 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build:diblob && npm run build:visualizer",
+    "build": "npm run build:diblob && npm run build:mcp && npm run build:visualizer",
     "build:diblob": "npm run build -w @speajus/diblob",
+    "build:mcp": "npm run build -w @speajus/diblob-mcp",
     "build:visualizer": "npm run build -w @speajus/diblob-visualizer",
     "test": "npm run test -w @speajus/diblob",
     "test:watch": "npm run test:watch -w @speajus/diblob",
     "dev:visualizer": "npm run dev -w @speajus/diblob-visualizer",
+    "dev:mcp": "npm run dev -w @speajus/diblob-mcp",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",

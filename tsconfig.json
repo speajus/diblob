@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/diblob" },
+    { "path": "./packages/diblob-mcp" },
     { "path": "./packages/diblob-visualizer" }
   ]
 }
