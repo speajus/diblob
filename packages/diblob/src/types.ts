@@ -4,6 +4,16 @@
 export const blobPropSymbol = Symbol('blobProp');
 
 /**
+ * Metadata that can be attached to blobs and containers
+ * for debugging and visualization purposes
+ */
+export interface BlobMetadata {
+  name?: string;
+  description?: string;
+  [key: string]: any;
+}
+
+/**
  * A Blob is a proxy object that acts as both the key and the interface
  * for dependency injection. It can be passed around and will resolve to
  * the registered implementation.
@@ -12,6 +22,10 @@ export type Blob<T> = T & {
   readonly [blobPropSymbol]: symbol;
 };
 
+
+export type Ctor<T> = new (...args: any[]) => T;
+export type FactoryFn<T> = (...args: any[]) => T | Promise<T>;
+
 /**
  * Factory function or constructor that creates an instance of type T.
  * Can be either:
@@ -19,8 +33,7 @@ export type Blob<T> = T & {
  * - A factory function: (...args: any[]) => T
  * - An async factory function: (...args: any[]) => Promise<T>
  */
-export type Factory<T> = (new (...args: any[]) => T) | ((...args: any[]) => T | Promise<T>);
-
+export type Factory<T> = Ctor<T> | FactoryFn<T>;
 /**
  * Lifecycle options for blob registration
  */
@@ -38,9 +51,12 @@ export interface RegistrationOptions {
   lifecycle?: Lifecycle;
 }
 
-export type FactoryParams<T extends Factory<any>> = T extends new (...args: infer P) => any ? P : T extends (...args: infer P) => any ? P : never;
+export type FactoryParams<T extends Factory<any>> = T extends new (...args: infer P) => unknown ? P : T extends (...args: infer P) => unknown ? P : never;
 
-export type RegisterParams<T extends Factory<any>> = [...FactoryParams<T>, RegistrationOptions?];
+export type RegisterParams<T extends Factory<any>> = [...FactoryParams<T>, RegistrationOptions] | FactoryParams<T>;
+
+export type FactoryReturnType<T extends Factory<any>> = T extends Factory<infer R> ? R : never;
+
 /**
  * Container interface for managing blob registrations
  */
@@ -63,33 +79,32 @@ export interface Container {
    * // With mixed dependencies (blobs and values)
    * container.register(config, ConfigImpl, database, "production");
    */
-  register<T extends object, TFactory extends Factory<T>>(blob: Blob<T>, factory:TFactory, ...deps: RegisterParams<TFactory>): void;
+  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory:TFactory, ...deps: RegisterParams<TFactory>): void;
 
   /**
    * Resolve a blob to its implementation.
    * Returns a Promise if the blob or any of its dependencies are async.
    */
-  resolve<T extends object>(blob: Blob<T>): T | Promise<T>;
+  resolve<T>(blob: Blob<T>): T | Promise<T>;
 
   /**
    * Resolve a class constructor by inspecting its parameters and resolving blob dependencies.
    * Returns a Promise if any dependencies are async.
    */
-  resolve<T extends object>(ctor: new (...args: any[]) => T): T | Promise<T>;
+  resolve<T>(ctor: Ctor<T>): T | Promise<T>;
 
   /**
    * Check if a blob is registered
    */
-  has<T extends object>(blob: Blob<T>): boolean;
+  has<T>(blob: Blob<T>): boolean;
 
   /**
    * Unregister a blob
    */
-  unregister<T extends object>(blob: Blob<T>): void;
+  unregister<T>(blob: Blob<T>): void;
 
   /**
    * Clear all registrations
    */
   clear(): void;
 }
-

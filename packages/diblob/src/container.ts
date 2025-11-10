@@ -2,9 +2,8 @@
  * DI Container implementation
  */
 
-import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams } from './types';
+import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking, setBlobContainer } from './blob';
 import { blobPropSymbol, Lifecycle } from './types';
-import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking } from './blob';
 import {
   beginTracking,
   endTracking,
@@ -13,14 +12,20 @@ import {
   clearDependencies,
   clearAllDependencies,
 } from './reactive';
+import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams, BlobMetadata, Ctor, FactoryFn } from './types';
 
-interface Registration<T = any> {
+interface Registration<T = unknown> {
   factory: Factory<T>;
-  deps: any[];
+  deps: unknown[];
   lifecycle: Lifecycle;
   instance?: T;
   resolving?: boolean; // Track if currently being resolved (for cyclic dependency detection)
 }
+
+/**
+ * WeakMap to store container metadata
+ */
+const containerMetadataStore = new WeakMap<Container, BlobMetadata>();
 
 /**
  * Default DI container implementation
@@ -29,22 +34,32 @@ export class Container implements IContainer {
   private registrations = new Map<symbol, Registration>();
   private parents: Container[] = [];
 
-  constructor(parents: Container[] = []) {
+  constructor(parents: Container[] = [], metadata?: BlobMetadata) {
     this.parents = parents;
+
+    // Store metadata if provided
+    if (metadata) {
+      containerMetadataStore.set(this, metadata);
+    }
   }
 
-  register<T extends object, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
+  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
     const blobId = getBlobId(blob);
+
+    // Track which container registered this blob (first registration wins)
+    setBlobContainer(blobId, this);
 
     // Extract lifecycle option if the last dep is a RegistrationOptions object
     let lifecycle = Lifecycle.Singleton;
-    let actualDeps = deps as unknown as FactoryParams<TFactory>;
+    let actualDeps = [] as unknown as FactoryParams<TFactory>
 
     if (deps.length > 0) {
       const lastDep = deps[deps.length - 1];
-      if (lastDep && typeof lastDep === 'object' && 'lifecycle' in lastDep && !isBlob(lastDep)) {
+      if (isLifecycleOption(lastDep)) {
         lifecycle = (lastDep as { lifecycle?: Lifecycle }).lifecycle ?? Lifecycle.Singleton;
         actualDeps = deps.slice(0, -1) as FactoryParams<TFactory>;
+      }else{
+        actualDeps = deps as FactoryParams<TFactory>;
       }
     }
 
@@ -69,7 +84,9 @@ export class Container implements IContainer {
       // Handle async resolution
       if (instance instanceof Promise) {
         return instance.then((resolved) => {
-          const value = (resolved as any)[prop];
+    
+          // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
+              const value = (resolved as any)[prop];
           if (typeof value === 'function') {
             return value.bind(resolved);
           }
@@ -78,6 +95,7 @@ export class Container implements IContainer {
       }
 
       // Forward the property access to the instance
+      // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
       const value = (instance as any)[prop];
 
       // Bind methods to the instance
@@ -100,16 +118,16 @@ export class Container implements IContainer {
     });
   }
 
-  resolve<T extends object>(blobOrConstructor: Blob<T> | (new (...args: any[]) => T)): T | Promise<T> {
+  resolve<T>(blobOrConstructor: Blob<T> | Ctor<T>): T | Promise<T> {
     // Check if it's a blob or a constructor
     if (isBlob(blobOrConstructor)) {
       return this.resolveBlob(blobOrConstructor as Blob<T>);
     } else {
-      return this.resolveConstructor(blobOrConstructor as new (...args: any[]) => T);
+      return this.resolveConstructor(blobOrConstructor as Ctor<T>);
     }
   }
 
-  private resolveBlob<T extends object>(blob: Blob<T>): T | Promise<T> {
+  private resolveBlob<T>(blob: Blob<T>): T | Promise<T> {
     const blobId = getBlobId(blob);
     const registration = this.registrations.get(blobId);
 
@@ -208,7 +226,7 @@ export class Container implements IContainer {
     }
   }
 
-  private resolveConstructor<T extends object>(ctor: new (...args: any[]) => T): T | Promise<T> {
+  private resolveConstructor<T>(ctor: Ctor<T>): T | Promise<T> {
     // Begin tracking blob accesses during constructor execution
     beginConstructorTracking();
 
@@ -246,18 +264,20 @@ export class Container implements IContainer {
     return instance;
   }
 
-  private instantiate<T>(factory: Factory<T>, deps: any[]): T | Promise<T> {
+  private instantiate<K, T extends Factory<K>>(factory:T, deps: FactoryParams<T>): K | Promise<K>{
     // Check if it's a constructor (has prototype)
-    if (factory.prototype && factory.prototype.constructor) {
+    if (isCtor(factory)) {
       // It's a constructor - use 'new'
-      return new (factory as new (...args: any[]) => T)(...deps);
-    } else {
+      return new factory(...deps);
+    } else if (isFactoryFn(factory)) {
       // It's a factory function - call it directly
-      return (factory as (...args: any[]) => T | Promise<T>)(...deps);
+      return factory(...deps);
+    }else{
+      throw new Error('Invalid factory');
     }
   }
 
-  has<T extends object>(blob: Blob<T>): boolean {
+  has<T>(blob: Blob<T>): boolean {
     const blobId = getBlobId(blob);
 
     // Check this container first
@@ -275,7 +295,7 @@ export class Container implements IContainer {
     return false;
   }
 
-  unregister<T extends object>(blob: Blob<T>): void {
+  unregister<T>(blob: Blob<T>): void {
     const blobId = getBlobId(blob);
     this.invalidate(blobId);
     this.registrations.delete(blobId);
@@ -333,8 +353,59 @@ export class Container implements IContainer {
  * const container1 = createContainer();
  * const container2 = createContainer();
  * const merged = createContainer(container1, container2);
+ *
+ * // With metadata
+ * const container = createContainer({
+ *   name: 'Main Container',
+ *   description: 'Application-wide DI container'
+ * });
  */
-export function createContainer(...parents: IContainer[]): IContainer {
-  return new Container(parents as Container[]);
+export function createContainer(...parents: IContainer[]): IContainer;
+export function createContainer(metadata: BlobMetadata, ...parents: IContainer[]): IContainer;
+export function createContainer(...args: (IContainer | BlobMetadata)[]): IContainer {
+  // Check if first argument is metadata (plain object without container methods)
+  const firstArg = args[0];
+  let metadata: BlobMetadata | undefined;
+  let parents: IContainer[];
+
+  if (isMetadata(firstArg)) {
+    // First argument is metadata
+    metadata = firstArg as BlobMetadata;
+    parents = args.slice(1) as IContainer[];
+  } else {
+    // All arguments are parent containers
+    metadata = undefined;
+    parents = args as IContainer[];
+  }
+
+  return new Container(parents as Container[], metadata);
+}
+function isMetadata(value: unknown): value is BlobMetadata {
+  return value != null && typeof value === 'object' && !('register' in value);
 }
 
+/**
+ * Get the metadata associated with a container
+ *
+ * @param container - The container to get metadata for
+ * @returns The metadata object, or undefined if no metadata was set
+ */
+export function getContainerMetadata(container: IContainer): BlobMetadata | undefined {
+  return containerMetadataStore.get(container as Container);
+}
+
+// biome-ignore lint/complexity/noBannedTypes: cause we need to check if it's a function
+export function isFn(obj: unknown): obj is Function {
+  return obj != null && typeof obj === 'function';
+}
+export function isCtor(obj: unknown): obj is Ctor<unknown> {
+  return isFn(obj) && obj.prototype?.constructor != null
+}
+
+export function isFactoryFn(obj: unknown): obj is FactoryFn<unknown> {
+  return isFn(obj) && !isCtor(obj);
+}
+
+function isLifecycleOption(obj: unknown): obj is { lifecycle?: Lifecycle } {
+  return obj != null && typeof obj === 'object' && 'lifecycle' in obj;
+}

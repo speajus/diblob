@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A dependency injection framework where the proxy (blob) is the key",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,10 +24,7 @@
     "example": "tsx examples/basic.ts",
     "tsc:test": "tsc -p tsconfig.test.json",
     "test": "npm run build && tsx --test test/*.test.ts",
-    "test:watch": "tsx --test --watch test/*.test.ts",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "test:watch": "tsx --test --watch test/*.test.ts"
   },
   "keywords": [
     "dependency-injection",

@@ -1,8 +1,8 @@
 /**
  * Utilities for introspecting diblob containers to extract dependency graph data
  */
-import type { Container, Blob } from '@speajus/diblob';
-import { getBlobId, isBlob, Lifecycle } from '@speajus/diblob';
+import type { Container, Blob, BlobMetadata } from '@speajus/diblob';
+import { getBlobId, isBlob, Lifecycle, getBlobMetadata } from '@speajus/diblob';
 
 export interface BlobNode {
   id: string;
@@ -11,6 +11,7 @@ export interface BlobNode {
   lifecycle: Lifecycle;
   isRegistered: boolean;
   factoryName?: string;
+  metadata?: BlobMetadata;
 }
 
 export interface BlobEdge {
@@ -33,6 +34,7 @@ export function extractDependencyGraph(container: any): DependencyGraph {
   const nodes: BlobNode[] = [];
   const edges: BlobEdge[] = [];
   const seenBlobIds = new Set<symbol>();
+  const blobIdToProxy = new Map<symbol, any>();
 
   // Access the private registrations map via reflection
   // This is a workaround since Container doesn't expose its registrations
@@ -45,11 +47,24 @@ export function extractDependencyGraph(container: any): DependencyGraph {
   // Process each registration
   registrations.forEach((registration, blobId) => {
     const nodeId = blobId.toString();
-    
+
     // Extract factory name if possible
     let factoryName = 'Unknown';
     if (registration.factory) {
       factoryName = registration.factory.name || 'Anonymous';
+    }
+
+    // Try to find the blob proxy from dependencies to get metadata
+    let metadata: BlobMetadata | undefined;
+
+    // Check if any dependency is a blob with this ID
+    if (registration.deps && Array.isArray(registration.deps)) {
+      for (const dep of registration.deps) {
+        if (isBlob(dep)) {
+          const depId = getBlobId(dep);
+          blobIdToProxy.set(depId, dep);
+        }
+      }
     }
 
     // Create node for this blob
@@ -60,6 +75,7 @@ export function extractDependencyGraph(container: any): DependencyGraph {
       lifecycle: registration.lifecycle || 'singleton',
       isRegistered: true,
       factoryName,
+      metadata,
     });
 
     seenBlobIds.add(blobId);
@@ -82,12 +98,15 @@ export function extractDependencyGraph(container: any): DependencyGraph {
           // If we haven't seen this dependency blob yet, add it as a node
           if (!seenBlobIds.has(depBlobId)) {
             const isRegistered = registrations.has(depBlobId);
+            const depMetadata = getBlobMetadata(dep);
+
             nodes.push({
               id: depNodeId,
               blobId: depBlobId,
               label: isRegistered ? 'Registered' : 'Unregistered',
               lifecycle: Lifecycle.Singleton,
               isRegistered,
+              metadata: depMetadata,
             });
             seenBlobIds.add(depBlobId);
           }
@@ -105,7 +124,11 @@ export function extractDependencyGraph(container: any): DependencyGraph {
 export function createBlobLabel(node: BlobNode): string {
   const lifecycle = node.lifecycle === 'transient' ? '⚡' : '🔒';
   const status = node.isRegistered ? '' : ' (unregistered)';
-  return `${lifecycle} ${node.label}${status}`;
+
+  // Use metadata name if available, otherwise use factory name
+  const displayName = node.metadata?.name || node.label;
+
+  return `${lifecycle} ${displayName}${status}`;
 }
 
 /**
