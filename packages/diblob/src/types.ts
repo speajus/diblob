@@ -53,7 +53,7 @@ export interface RegistrationOptions {
 
 export type FactoryParams<T extends Factory<any>> = T extends new (...args: infer P) => unknown ? P : T extends (...args: infer P) => unknown ? P : never;
 
-export type RegisterParams<T extends Factory<any>> = FactoryParams<T>;
+export type RegisterParams<T extends Factory<any>> = [...FactoryParams<T>, RegistrationOptions] | FactoryParams<T>;
 
 export type FactoryReturnType<T extends Factory<any>> = T extends Factory<infer R> ? R : never;
 
