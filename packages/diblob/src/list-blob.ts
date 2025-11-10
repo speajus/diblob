@@ -2,7 +2,7 @@
  * Array blob implementation for managing arrays with automatic invalidation
  */
 
-import { blobHandlers, blobInstanceGetters, getBlobContainer, registerBlobId } from './blob';
+import { blobHandlers, blobInstanceGetters, BlobNotReadyError, getBlobContainer, registerBlobId } from './blob';
 import type { Blob, BlobMetadata, Container } from './types';
 import { blobPropSymbol } from './types';
 
@@ -55,7 +55,7 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
     }
     const current = instanceGetter();
     if (current instanceof Promise) {
-      throw new Error('Array blob does not support async arrays');
+      throw new BlobNotReadyError(current);
     }
     return current as Array<T>;
   };
