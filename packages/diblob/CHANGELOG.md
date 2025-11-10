@@ -1,5 +1,11 @@
 # @speajus/diblob
 
+## 0.4.0
+
+### Minor Changes
+
+- 2bf07d3: Added metadata ability
+
 ## 0.3.0
 
 ### Minor Changes
