@@ -32,6 +32,7 @@ export default defineConfig({
           text: 'Core Concepts',
           items: [
             { text: 'Blobs', link: '/diblob/guide/blobs' },
+            { text: 'List Blobs', link: '/diblob/guide/list-blob' },
             { text: 'Containers', link: '/diblob/guide/containers' },
             { text: 'Dependency Resolution', link: '/diblob/guide/dependency-resolution' },
             { text: 'Reactive Dependencies', link: '/diblob/guide/reactive-dependencies' },
@@ -54,6 +55,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/diblob/api/' },
             { text: 'createBlob', link: '/diblob/api/create-blob' },
+            { text: 'createListBlob', link: '/diblob/api/create-list-blob' },
             { text: 'createContainer', link: '/diblob/api/create-container' },
             { text: 'Container Methods', link: '/diblob/api/container-methods' },
             { text: 'Types', link: '/diblob/api/types' },

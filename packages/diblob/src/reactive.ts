@@ -3,7 +3,6 @@
  * Tracks which blobs depend on which other blobs and invalidates when dependencies change
  */
 
-import type { Blob } from './types';
 
 /**
  * Stack of blobs currently being resolved

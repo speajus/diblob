@@ -2,31 +2,48 @@
  * Blob creation and proxy implementation
  */
 
+import type { Container } from './container';
 import type { Blob, BlobMetadata } from './types';
 import { blobPropSymbol } from './types';
+
 /**
  * WeakMap to store blob IDs
  * Maps from the blob proxy to its internal ID
  */
-const blobIds = new WeakMap<object, symbol>();
+const blobIds = new WeakMap<Blob<unknown>, symbol>();
 
 /**
  * WeakMap to store blob metadata
  * Maps from the blob proxy to its metadata object
  */
-const blobMetadataStore = new WeakMap<object, BlobMetadata>();
+const blobMetadataStore = new WeakMap<Blob<unknown>, BlobMetadata>();
 
 /**
  * Global registry of blob handlers
  * Maps blob ID to a handler function that resolves the blob
  */
-export const blobHandlers = new Map<symbol, (prop: string | symbol) => any>();
+export const blobHandlers = new Map<symbol, (prop: string | symbol) => unknown>();
 
 /**
  * Global registry of instance getters
  * Maps blob ID to a function that returns the resolved instance
  */
-export const blobInstanceGetters = new Map<symbol, () => any>();
+export const blobInstanceGetters = new Map<symbol, () => unknown>();
+
+/**
+ * Global registry of blob containers
+ * Maps blob ID to the container that first registered it
+ * Used by ListBlob and other special blobs to detect their container
+ */
+export const blobContainers = new Map<symbol, Container>();
+
+/**
+ * Register a blob ID for a proxy object
+ * Used by createListBlob and other special blob creators
+ */
+export function registerBlobId(proxy: Blob<unknown>, id: symbol): void {
+  blobIds.set(proxy, id);
+}
 
 /**
  * Create a new blob that acts as both a key and a proxy for type T
@@ -97,7 +114,8 @@ export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetad
       }
 
       // Set the property on the actual instance
-      (instance as any)[prop] = value;
+      // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
+            (instance as any)[prop] = value;
       return true;
     },
   });
@@ -117,7 +135,7 @@ export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetad
  * Get the internal ID of a blob
  */
 export function getBlobId<T>(blob: Blob<T>): symbol {
-  const id = blobIds.get(blob as object);
+  const id = blobIds.get(blob);
   if (!id) {
     throw new Error('Invalid blob: not created with createBlob()');
   }
@@ -127,8 +145,8 @@ export function getBlobId<T>(blob: Blob<T>): symbol {
 /**
  * Check if an object is a blob
  */
-export function isBlob(obj: any): obj is Blob<any> {
-  return obj != null && blobIds.has(obj);
+export function isBlob(obj: unknown): obj is Blob<unknown> {
+  return obj != null && blobIds.has(obj as Blob<unknown>);
 }
 
 /**
@@ -138,13 +156,36 @@ export function isBlob(obj: any): obj is Blob<any> {
  * @returns The metadata object, or undefined if no metadata was set
  */
 export function getBlobMetadata<T>(blob: Blob<T>): BlobMetadata | undefined {
-  return blobMetadataStore.get(blob as object);
+  return blobMetadataStore.get(blob);
+}
+
+/**
+ * Set the container that registered a blob
+ * Only sets if not already set (first registration wins)
+ *
+ * @param blobId - The blob ID
+ * @param container - The container that registered the blob
+ */
+export function setBlobContainer(blobId: symbol, container: Container): void {
+  if (!blobContainers.has(blobId)) {
+    blobContainers.set(blobId, container);
+  }
+}
+
+/**
+ * Get the container that registered a blob
+ *
+ * @param blobId - The blob ID
+ * @returns The container, or undefined if not registered
+ */
+export function getBlobContainer(blobId: symbol): Container | undefined {
+  return blobContainers.get(blobId);
 }
 
 /**
  * Singleton array for tracking blob accesses during constructor execution
  */
-let constructorDependencies: Blob<any>[] | null = null;
+let constructorDependencies: Blob<unknown>[] | null = null;
 
 /**
  * Begin tracking blob accesses for constructor parameter detection
@@ -156,7 +197,7 @@ export function beginConstructorTracking(): void {
 /**
  * End tracking and return the blobs that were accessed
  */
-export function endConstructorTracking(): Blob<any>[] {
+export function endConstructorTracking(): Blob<unknown>[] {
   const deps = constructorDependencies || [];
   constructorDependencies = null;
   return deps;
