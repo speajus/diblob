@@ -57,7 +57,7 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
     if (current instanceof Promise) {
       throw new Error('Array blob does not support async arrays');
     }
-    return current;
+    return current as Array<T>;
   };
 
   /**
