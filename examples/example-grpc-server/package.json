@@ -1,0 +1,31 @@
+{
+  "name": "example-grpc-server",
+  "version": "1.0.0",
+  "description": "Example gRPC server using diblob-grpc and diblob-drizzle",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "npm run build && node dist/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.12.4",
+    "@grpc/proto-loader": "^0.7.15",
+    "@speajus/diblob": "workspace:*",
+    "@speajus/diblob-drizzle": "workspace:*",
+    "@speajus/diblob-grpc": "workspace:*",
+    "drizzle-orm": "^0.36.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.0.0",
+    "better-sqlite3": "^11.10.0",
+    "drizzle-kit": "^0.28.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

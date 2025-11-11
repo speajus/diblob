@@ -1,7 +1,7 @@
 {
-  "name": "@speajus/diblob",
-  "version": "0.5.0",
-  "description": "A dependency injection framework where the proxy (blob) is the key",
+  "name": "@speajus/diblob-drizzle",
+  "version": "0.1.0",
+  "description": "Drizzle ORM integration for diblob dependency injection containers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -21,28 +21,32 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "example": "tsx examples/basic.ts",
-    "tsc:test": "tsc -p tsconfig.test.json",
     "test": "pnpm run build && tsx --test test/*.test.ts",
     "test:watch": "tsx --test --watch test/*.test.ts"
   },
   "keywords": [
+    "drizzle",
+    "orm",
+    "database",
     "dependency-injection",
     "di",
-    "ioc",
-    "proxy",
-    "reactive"
+    "diblob"
   ],
   "author": "Justin Spears <speajus@gmail.com>",
   "license": "MIT",
-  "engines": {
-    "node": ">=22.0.0"
+  "peerDependencies": {
+    "@speajus/diblob": "workspace:*",
+    "drizzle-orm": "^0.36.0"
   },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "patch-package": "^8.0.1",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3",
-    "vitepress": "^1.6.4"
+    "drizzle-orm": "^0.36.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
+

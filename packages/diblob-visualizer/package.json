@@ -35,7 +35,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
-    "@speajus/diblob": "*",
+    "@speajus/diblob": "workspace:*",
     "@xyflow/svelte": "^1.4.1"
   }
 }
