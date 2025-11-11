@@ -8,14 +8,13 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "pnpm run build:diblob && pnpm run build:mcp && pnpm run build:grpc && pnpm run build:drizzle && pnpm run build:visualizer",
-    "build:all": "pnpm run build:diblob && pnpm run build:mcp && pnpm run build:grpc && pnpm run build:drizzle && pnpm run build:visualizer",
+    "build": "pnpm -r build",
     "build:diblob": "pnpm --filter @speajus/diblob build",
     "build:mcp": "pnpm --filter @speajus/diblob-mcp build",
     "build:grpc": "pnpm --filter @speajus/diblob-grpc build",
     "build:drizzle": "pnpm --filter @speajus/diblob-drizzle build",
     "build:visualizer": "pnpm --filter @speajus/diblob-visualizer build",
-    "test": "pnpm --filter @speajus/diblob test",
+    "test": "pnpm -r test",
     "test:watch": "pnpm --filter @speajus/diblob test:watch",
     "dev:visualizer": "pnpm --filter @speajus/diblob-visualizer dev",
     "dev:mcp": "pnpm --filter @speajus/diblob-mcp dev",
@@ -24,7 +23,8 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules && pnpm clean:projects",
+    "clean:projects": "pnpm -r run clean",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm run build && changeset publish"

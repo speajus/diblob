@@ -5,9 +5,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run proto:generate && pnpm run db:generate && tsc",
     "dev": "tsx src/index.ts",
     "start": "pnpm run build && node dist/index.js",
+    "test": "pnpm run build && tsx --test src/**/*.test.ts",
     "client": "tsx src/client.ts",
     "client:typed": "tsx src/client-typed.ts",
     "proto:generate": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/generated --ts_proto_opt=outputServices=grpc-js,env=node,esModuleInterop=true --proto_path=./proto ./proto/*.proto",
@@ -32,6 +33,8 @@
     "@types/node": "^22.0.0",
     "better-sqlite3": "^11.10.0",
     "drizzle-kit": "^0.28.1",
+    "protoc": "^33.0.0",
+    "ts-proto": "^2.8.3",
     "tsx": "^4.20.6",
     "typescript": "^5.7.2"
   }

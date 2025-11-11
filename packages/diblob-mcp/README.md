@@ -26,7 +26,7 @@ Requirements: Node.js >= 22.0.0
 
 ```typescript
 import { createContainer } from '@speajus/diblob';
-import { registerMcpBlobs } from '@speajus/diblob-mcp';
+import { registerMcpBlobs, mcpServer } from '@speajus/diblob-mcp';
 
 // Create a diblob container
 const container = createContainer();
@@ -34,7 +34,9 @@ const container = createContainer();
 // Register MCP server blobs
 registerMcpBlobs(container);
 
-// The MCP server is now available through the container
+// Start the MCP server by resolving the mcpServer blob.
+// The registration uses lifecycle hooks to call server.start() for you.
+await container.resolve(mcpServer);
 ```
 
 ## Architecture
@@ -53,7 +55,27 @@ Registers all MCP-related blobs with the provided container.
 
 ```typescript
 import { createContainer } from '@speajus/diblob';
-import { registerMcpBlobs } from '@speajus/diblob-mcp';
+import { registerMcpBlobs, mcpServer } from '@speajus/diblob-mcp';
+
+// Start the MCP server (lifecycle hooks will call start() for you)
+await container.resolve(mcpServer);
+
+## Lifecycle
+
+The `registerMcpBlobs` helper registers the `mcpServer` blob as a
+`Lifecycle.Singleton` with lifecycle hooks:
+
+- `initialize: 'start'` – called the first time the blob is resolved
+- `dispose: 'stop'` – called when the blob is invalidated (for example, when
+  it or one of its dependencies is re-registered or unregistered)
+
+This means:
+
+- The MCP server starts automatically the first time you resolve `mcpServer`,
+  e.g. with `await container.resolve(mcpServer)`.
+- The MCP server is stopped automatically when its registration (or its
+  dependencies) are invalidated, following diblob's cascading disposal
+  semantics.
 
 const container = createContainer();
 registerMcpBlobs(container);

@@ -5,7 +5,8 @@
  * function that accepts a container parameter and registers all gRPC-related blobs.
  */
 
-import type { IContainer } from '@speajus/diblob';
+import type { Container } from '@speajus/diblob';
+import { Lifecycle } from '@speajus/diblob';
 import {
   grpcServerConfig,
   grpcServer,
@@ -57,9 +58,9 @@ const DEFAULT_CONFIG: GrpcServerConfig = {
  * ```
  */
 export function registerGrpcBlobs(
-  container: IContainer,
-  config: Partial<GrpcServerConfig> = {}
-): void {
+	  container: Container,
+	  config: Partial<GrpcServerConfig> = {}
+	): void {
   // Merge provided config with defaults
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
@@ -69,12 +70,17 @@ export function registerGrpcBlobs(
   // Register service registry
   container.register(grpcServiceRegistry, GrpcServiceRegistryImpl);
 
-  // Register gRPC server with its dependencies
-  container.register(
-    grpcServer,
-    GrpcServerImpl,
-    grpcServerConfig,
-    grpcServiceRegistry
-  );
+	  // Register gRPC server with its dependencies and lifecycle hooks
+	  container.register(
+	    grpcServer,
+	    GrpcServerImpl,
+	    grpcServerConfig,
+	    grpcServiceRegistry,
+	    {
+	      lifecycle: Lifecycle.Singleton,
+	      initialize: 'start',
+	      dispose: 'stop',
+	    }
+	  );
 }
 

@@ -20,6 +20,7 @@
   "homepage": "https://speajus.github.io/diblob/",
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-grpc build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build",
     "dev": "tsc --watch",
     "example": "tsx examples/basic.ts",

@@ -6,12 +6,13 @@
  */
 
 import type { Container } from '@speajus/diblob';
+import { Lifecycle } from '@speajus/diblob';
 import {
-  mcpServerConfig,
-  mcpServer,
-  mcpTransport,
-  containerIntrospector,
-} from './blobs.js';
+	  mcpServerConfig,
+	  mcpServer,
+	  mcpTransport,
+	  containerIntrospector,
+	} from './blobs.js';
 import {
   McpServerImpl,
   StdioMcpTransport,
@@ -79,12 +80,17 @@ export function registerMcpBlobs(
   );
 
   // Register MCP server with all its dependencies
-  container.register(
-    mcpServer,
-    McpServerImpl,
-    mcpServerConfig,
-    mcpTransport,
-    containerIntrospector
-  );
+	  container.register(
+	    mcpServer,
+	    McpServerImpl,
+	    mcpServerConfig,
+	    mcpTransport,
+	    containerIntrospector,
+	    {
+	      lifecycle: Lifecycle.Singleton,
+	      initialize: 'start',
+	      dispose: 'stop',
+	    }
+	  );
 }
 

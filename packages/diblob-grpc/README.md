@@ -16,7 +16,7 @@ Requirements: Node.js >= 22.0.0
 
 ```typescript
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer } from '@speajus/diblob-grpc';
+import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-grpc';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 
@@ -33,8 +33,8 @@ registerGrpcBlobs(container, {
 const packageDefinition = protoLoader.loadSync('path/to/your.proto');
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
-// Add your service implementation
-grpcServer.addService(
+// Register your service implementation with the registry (does not start the server yet)
+grpcServiceRegistry.registerService(
   protoDescriptor.YourService.service,
   {
     yourMethod: (call, callback) => {
@@ -44,8 +44,9 @@ grpcServer.addService(
   }
 );
 
-// Start the server
-await grpcServer.start();
+// Resolve the grpcServer blob to start the server.
+// The registration uses lifecycle hooks to call server.start() for you.
+await container.resolve(grpcServer);
 console.log('gRPC server running on port 50051');
 ```
 
@@ -86,6 +87,23 @@ registerGrpcBlobs(container, {
 - `grpcServer`: The main gRPC server instance
 - `grpcServerConfig`: Server configuration
 - `grpcServiceRegistry`: Registry for managing service implementations
+
+## Lifecycle
+
+The `registerGrpcBlobs` helper registers the `grpcServer` blob as a `Lifecycle.Singleton`
+with lifecycle hooks:
+
+- `initialize: 'start'` – called the first time the blob is resolved
+- `dispose: 'stop'` – called when the blob is invalidated (for example, when
+  it or one of its dependencies is re-registered or unregistered)
+
+This means:
+
+- The server starts automatically the first time you resolve `grpcServer`,
+  e.g. with `await container.resolve(grpcServer)`.
+- The server is stopped automatically when its registration (or its
+  dependencies) are invalidated, following diblob's cascading disposal
+  semantics.
 
 ## Examples
 

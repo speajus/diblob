@@ -9,7 +9,7 @@
  */
 
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer } from '@speajus/diblob-grpc';
+import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-grpc';
 import { registerDrizzleBlobs, databaseClient } from '@speajus/diblob-drizzle';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
@@ -25,6 +25,9 @@ import * as schema from './db/schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const DEFAULT_DB_PATH = join(__dirname, '../data/app.db');
+const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
 
 async function main() {
   console.log('🚀 Starting gRPC server with diblob...\n');
@@ -43,14 +46,16 @@ async function main() {
   console.log('📦 Registering Drizzle blobs...');
   registerDrizzleBlobs(container, {
     driver: 'better-sqlite3',
-    connection: './data/app.db',
+    connection: DB_PATH,
     logging: true
   });
 
   // Initialize database
   console.log('💾 Initializing database...');
-  mkdirSync(join(__dirname, '../data'), { recursive: true });
-  const sqlite = new Database(join(__dirname, '../data/app.db'));
+  if (DB_PATH !== ':memory:') {
+    mkdirSync(dirname(DB_PATH), { recursive: true });
+  }
+  const sqlite = new Database(DB_PATH);
   const db = drizzle(sqlite, { schema });
   
   // Initialize the database client
@@ -83,22 +88,22 @@ async function main() {
 
   const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any;
 
-  // Create gRPC service implementation
-  console.log('🔧 Setting up gRPC service handlers...');
-  const userGrpcService = new UserGrpcService(userService);
+	// Create gRPC service implementation
+	console.log('🔧 Setting up gRPC service handlers...');
+	const userGrpcService = new UserGrpcService(userService);
 
-  // Add service to gRPC server
-  grpcServer.addService(protoDescriptor.user.UserService.service, {
-    getUser: userGrpcService.getUser,
-    createUser: userGrpcService.createUser,
-    listUsers: userGrpcService.listUsers,
-    updateUser: userGrpcService.updateUser,
-    deleteUser: userGrpcService.deleteUser
-  });
+	// Register service with the gRPC service registry
+	grpcServiceRegistry.registerService(protoDescriptor.user.UserService.service, {
+		getUser: userGrpcService.getUser,
+		createUser: userGrpcService.createUser,
+		listUsers: userGrpcService.listUsers,
+		updateUser: userGrpcService.updateUser,
+		deleteUser: userGrpcService.deleteUser
+	});
 
-  // Start the server
-  console.log('🌐 Starting gRPC server...');
-  await grpcServer.start();
+	// Start the server by resolving the server blob (lifecycle will call start)
+	console.log('🌐 Starting gRPC server...');
+	await container.resolve(grpcServer);
 
   console.log(`\n✅ gRPC server is running on ${grpcServer.getAddress()}`);
   console.log('\nAvailable services:');

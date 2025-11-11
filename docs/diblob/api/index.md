@@ -92,10 +92,12 @@ type Blob<T> = T;
 type Factory<T> = (() => T) | (() => Promise<T>) | (new (...args: any[]) => T);
 
 // Registration options
+type LifecycleFn<T> = ((instance: T) => void | Promise<void>)
+
 interface RegistrationOptions<T> {
-  lifecycle?: Lifecycle;
-  dispose?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
-  initialize?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
+  lifecycle: Lifecycle;
+  dispose?: LifecycleFn<T> | keyof T;
+  initialize?: LifecycleFn<T> | keyof T;
 }
 
 // Lifecycle enum
@@ -219,10 +221,12 @@ type Blob<T> = T;
 type Factory<T> = (() => T) | (() => Promise<T>) | (new (...args: any[]) => T);
 
 // Registration options
+type LifecycleFn<T> = ((instance: T) => void | Promise<void>)
+
 interface RegistrationOptions<T> {
-  lifecycle?: Lifecycle;
-  dispose?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
-  initialize?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
+  lifecycle: Lifecycle;
+  dispose?: LifecycleFn<T> | keyof T;
+  initialize?: LifecycleFn<T> | keyof T;
 }
 
 // Lifecycle enum
