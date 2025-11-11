@@ -7,6 +7,17 @@ import type { Blob, BlobMetadata } from './types';
 import { blobPropSymbol } from './types';
 
 /**
+ * Error thrown when a blob is accessed during constructor execution
+ * but the blob is not yet resolved (async dependency)
+ */
+export class BlobNotReadyError extends Error {
+  constructor(public readonly promise: Promise<unknown>) {
+    super('Blob not yet resolved - async dependency detected');
+    Object.setPrototypeOf(this, BlobNotReadyError.prototype);
+  }
+}
+
+/**
  * WeakMap to store blob IDs
  * Maps from the blob proxy to its internal ID
  */
@@ -93,7 +104,15 @@ export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetad
       }
 
       // Delegate to the handler
-      return handler(prop);
+      const result = handler(prop);
+
+      // If we're tracking constructor dependencies and the result is a Promise,
+      // throw a special error that includes the promise
+      if (isTrackingConstructor() && result instanceof Promise) {
+        throw new BlobNotReadyError(result);
+      }
+
+      return result;
     },
 
     set(_target, prop, value) {

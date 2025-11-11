@@ -2,7 +2,7 @@
  * DI Container implementation
  */
 
-import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking, setBlobContainer } from './blob';
+import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking, setBlobContainer, BlobNotReadyError, isTrackingConstructor } from './blob';
 import { blobPropSymbol, Lifecycle } from './types';
 import {
   beginTracking,
@@ -79,12 +79,48 @@ export class Container implements IContainer {
       trackDependency(blobId);
 
       // Resolve the actual instance
-      const instance = this.resolve(blob);
+      let instance: T | Promise<T>;
+      try {
+        instance = this.resolve(blob);
+      } catch (error) {
+        // If we caught a BlobNotReadyError, wait for the promise and retry
+        if (error instanceof BlobNotReadyError) {
+          // If we're tracking constructors, re-throw so resolveConstructor can handle it
+          if (isTrackingConstructor()) {
+            throw error;
+          }
+          // Otherwise, wait for the promise and then retry resolving this blob
+          return error.promise.then(() => {
+            // The async dependency should now be cached
+            // Retry resolving this blob
+            const resolved = this.resolve(blob);
+            // If it's still a promise, wait for it
+            if (resolved instanceof Promise) {
+              return resolved.then((r) => {
+                // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
+                const value = (r as any)[prop];
+                if (typeof value === 'function') {
+                  return value.bind(r);
+                }
+                return value;
+              });
+            }
+            // Access the property on the resolved instance
+            // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
+            const value = (resolved as any)[prop];
+            if (typeof value === 'function') {
+              return value.bind(resolved);
+            }
+            return value;
+          });
+        }
+        throw error;
+      }
 
       // Handle async resolution
       if (instance instanceof Promise) {
         return instance.then((resolved) => {
-    
+
           // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
               const value = (resolved as any)[prop];
           if (typeof value === 'function') {
@@ -121,9 +157,18 @@ export class Container implements IContainer {
   resolve<T>(blobOrConstructor: Blob<T> | Ctor<T>): T | Promise<T> {
     // Check if it's a blob or a constructor
     if (isBlob(blobOrConstructor)) {
-      return this.resolveBlob(blobOrConstructor as Blob<T>);
+      try {
+        return this.resolveBlob(blobOrConstructor as Blob<T>);
+      } catch (error) {
+        // If resolveBlob throws BlobNotReadyError, return the promise
+        // The promise already resolves to the fully resolved instance
+        if (error instanceof BlobNotReadyError) {
+          return error.promise as Promise<T>;
+        }
+        throw error;
+      }
     } else {
-      return this.resolveConstructor(blobOrConstructor as Ctor<T>);
+      return this.resolveConstructor(blobOrConstructor );
     }
   }
 
@@ -142,15 +187,21 @@ export class Container implements IContainer {
       throw new Error('Blob not registered. Call container.register() first.');
     }
 
+    // Detect cyclic dependency - if already resolving, return the blob itself
+    // The blob proxy will forward to the instance once it's created
+    // BUT: if the instance is already cached, return it even if still resolving
+    // This allows retries after async resolution to work correctly
+    if (registration.resolving) {
+      // Check if instance is cached (might be cached by async resolution)
+      if (registration.lifecycle === Lifecycle.Singleton && registration.instance) {
+        return registration.instance as T;
+      }
+      return blob as unknown as T;
+    }
+
     // For singleton lifecycle, return cached instance if available
     if (registration.lifecycle === Lifecycle.Singleton && registration.instance) {
       return registration.instance as T;
-    }
-
-    // Detect cyclic dependency - if already resolving, return the blob itself
-    // The blob proxy will forward to the instance once it's created
-    if (registration.resolving) {
-      return blob as unknown as T;
     }
 
     // Mark as resolving to detect cycles
@@ -166,7 +217,15 @@ export class Container implements IContainer {
           // It's a blob - track it as a dependency and resolve it
           const depId = getBlobId(dep);
           trackDependency(depId);
-          return this.resolveBlob(dep);
+          try {
+            return this.resolveBlob(dep);
+          } catch (error) {
+            // If the dependency throws BlobNotReadyError, treat it as a Promise
+            if (error instanceof BlobNotReadyError) {
+              return error.promise;
+            }
+            throw error;
+          }
         } else {
           // It's a plain value - use it directly
           return dep;
@@ -177,8 +236,8 @@ export class Container implements IContainer {
       const hasAsyncDeps = resolvedDeps.some((dep) => dep instanceof Promise);
 
       if (hasAsyncDeps) {
-        // Async resolution
-        return Promise.all(resolvedDeps).then((deps) => {
+        // Create the promise that will resolve all dependencies
+        const asyncResolution = Promise.all(resolvedDeps).then((deps) => {
           const instance = this.instantiate(registration.factory, deps);
 
           // Handle async factory
@@ -198,6 +257,15 @@ export class Container implements IContainer {
           registration.resolving = false;
           return instance;
         }) as Promise<T>;
+
+        // Clean up tracking before throwing
+        endTracking();
+        // DON'T set registration.resolving = false here - let the promise handler do it
+        // Otherwise, retries will create new promises instead of using the cached instance
+
+        // Throw BlobNotReadyError so the blob handler can catch it
+        // The blob handler will decide whether to re-throw or wait based on context
+        throw new BlobNotReadyError(asyncResolution);
       }
 
       // Sync resolution
@@ -230,23 +298,63 @@ export class Container implements IContainer {
     // Begin tracking blob accesses during constructor execution
     beginConstructorTracking();
 
-    let instance: T;
+    let instance: T | undefined;
+    let asyncPromise: Promise<unknown> | null = null;
+
     try {
       // Instantiate the constructor - any blob default parameters will be tracked
       instance = new ctor();
     } catch (error) {
-      // Make sure to end tracking even if there's an error
-      endConstructorTracking();
-      throw error;
+      // Check if this is a BlobNotReadyError (async dependency)
+      if (error instanceof BlobNotReadyError) {
+        asyncPromise = error.promise;
+      } else {
+        // Make sure to end tracking even if there's an error
+        endConstructorTracking();
+        throw error;
+      }
     }
 
     // Get the blobs that were accessed during construction
     const blobDeps = endConstructorTracking();
 
-    // If any blobs were accessed, we need to check if they're async
-    if (blobDeps.length > 0) {
-      // Resolve all blob dependencies to check for async
+    // If we caught an async dependency error, resolve all blob dependencies
+    if (asyncPromise) {
+      // Resolve all blob dependencies that were tracked
       const resolvedDeps = blobDeps.map(blob => this.resolveBlob(blob));
+      // Wait for all of them (including the one that threw the error)
+      return Promise.all(resolvedDeps).then(() => {
+        // Re-instantiate - all async blobs should now be resolved and cached
+        return new ctor();
+      }) as Promise<T>;
+    }
+
+    // Collect all blob dependencies (both accessed and stored in instance properties)
+    const allBlobDeps = [...blobDeps];
+
+    // Check instance properties for blob proxies that weren't accessed during construction
+    if (instance) {
+      for (const key in instance) {
+        const value = instance[key];
+        if (isBlob(value) && !allBlobDeps.includes(value)) {
+          allBlobDeps.push(value);
+        }
+      }
+    }
+
+    // If any blobs were accessed or stored, we need to check if they're async
+    if (allBlobDeps.length > 0) {
+      // Resolve all blob dependencies to check for async
+      const resolvedDeps = allBlobDeps.map(blob => {
+        try {
+          return this.resolveBlob(blob);
+        } catch (error) {
+          if (error instanceof BlobNotReadyError) {
+            return error.promise;
+          }
+          throw error;
+        }
+      });
       const hasAsyncDeps = resolvedDeps.some(dep => dep instanceof Promise);
 
       if (hasAsyncDeps) {
@@ -261,13 +369,18 @@ export class Container implements IContainer {
     }
 
     // No async dependencies, return the instance
-    return instance;
+    // At this point instance must be defined (no async error was thrown)
+    return instance as T;
   }
 
   private instantiate<K, T extends Factory<K>>(factory:T, deps: FactoryParams<T>): K | Promise<K>{
     // Check if it's a constructor (has prototype)
     if (isCtor(factory)) {
-      // It's a constructor - use 'new'
+      // If there are no dependencies, use resolveConstructor to handle blob default parameters
+      if (deps.length === 0) {
+        return this.resolveConstructor(factory) as K | Promise<K>;
+      }
+      // Otherwise, use 'new' with the provided dependencies
       return new factory(...deps);
     } else if (isFactoryFn(factory)) {
       // It's a factory function - call it directly
