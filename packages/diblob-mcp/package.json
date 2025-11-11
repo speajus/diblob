@@ -1,0 +1,51 @@
+{
+  "name": "@speajus/diblob-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol (MCP) server implementation for diblob dependency injection containers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/speajus/diblob.git"
+  },
+  "bugs": {
+    "url": "https://github.com/speajus/diblob/issues"
+  },
+  "homepage": "https://speajus.github.io/diblob/",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "example": "npm run build && tsx example.ts",
+    "test": "npm run build && tsx --test test/*.test.ts",
+    "test:watch": "tsx --test --watch test/*.test.ts"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "dependency-injection",
+    "di",
+    "diblob",
+    "server"
+  ],
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@speajus/diblob": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
+

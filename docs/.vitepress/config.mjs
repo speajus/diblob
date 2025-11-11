@@ -14,6 +14,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Diblob', link: '/diblob/guide/getting-started' },
+      { text: 'MCP Server', link: '/mcp/' },
       { text: 'Visualizer', link: '/visualizer/' },
       { text: 'API Reference', link: '/diblob/api/' },
       { text: 'Examples', link: '/diblob/examples/' },
@@ -72,6 +73,16 @@ export default defineConfig({
             { text: 'Async Dependencies', link: '/diblob/examples/async' },
             { text: 'Reactive Updates', link: '/diblob/examples/reactive' },
             { text: 'Container Nesting', link: '/diblob/examples/nesting' },
+          ]
+        }
+      ],
+      '/mcp/': [
+        {
+          text: 'MCP Server',
+          items: [
+            { text: 'Overview', link: '/mcp/' },
+            { text: 'Getting Started', link: '/mcp/getting-started' },
+            { text: 'Examples', link: '/mcp/examples' },
           ]
         }
       ],

@@ -184,6 +184,97 @@ Full documentation: https://jspears.github.io/diblob/
 - API Reference: https://jspears.github.io/diblob/diblob/api/
 - Examples: https://jspears.github.io/diblob/diblob/examples/
 
+## Packages
+
+The diblob ecosystem consists of multiple packages:
+
+### @speajus/diblob
+
+The core dependency injection framework. See above for full documentation.
+
+### @speajus/diblob-mcp
+
+Model Context Protocol (MCP) server implementation for diblob containers.
+
+**Installation:**
+```bash
+npm install @speajus/diblob-mcp @speajus/diblob @modelcontextprotocol/sdk
+```
+
+**Purpose:**
+Exposes diblob container functionality through the Model Context Protocol, enabling AI assistants and other MCP clients to introspect and interact with dependency injection containers.
+
+**Features:**
+- MCP server with stdio transport
+- Container introspection tools
+- Dependency graph visualization
+- List and inspect registered blobs
+- Query blob details and dependencies
+
+**Quick Start:**
+```typescript
+import { createContainer } from '@speajus/diblob';
+import { registerMcpBlobs, mcpServer } from '@speajus/diblob-mcp';
+
+// Create a diblob container
+const container = createContainer();
+
+// Register your application blobs
+// ... your blob registrations ...
+
+// Register MCP server blobs
+registerMcpBlobs(container);
+
+// Start the MCP server
+await mcpServer.start();
+```
+
+**Architecture:**
+Following diblob conventions, the package separates:
+- **Interface/Blob Definitions** (`blobs.ts`): Type definitions and blob declarations
+- **Implementations** (`server.ts`): Concrete MCP server and introspector implementations
+- **Registration** (`register.ts`): `registerMcpBlobs(container)` function for grouping related registrations
+
+**Available MCP Tools:**
+- `list_blobs`: List all registered blobs in the container
+- `get_blob_details`: Get detailed information about a specific blob (dependencies, lifecycle, metadata)
+- `get_dependency_graph`: Get the complete dependency graph as nodes and edges
+
+**Custom Configuration:**
+```typescript
+registerMcpBlobs(container, {
+  name: 'my-custom-mcp-server',
+  version: '1.0.0',
+  description: 'Custom MCP server for my application'
+});
+```
+
+**API Reference:**
+- `registerMcpBlobs(container, config?)`: Register all MCP blobs with a container
+- `mcpServer`: Blob for the MCP server instance
+- `mcpServerConfig`: Blob for server configuration
+- `mcpTransport`: Blob for the transport layer
+- `containerIntrospector`: Blob for container introspection service
+
+### @speajus/diblob-visualizer
+
+Interactive dependency injection graph visualization for diblob.
+
+**Installation:**
+```bash
+npm install @speajus/diblob-visualizer @speajus/diblob
+```
+
+**Purpose:**
+Provides a Svelte-based visualization tool for exploring diblob container dependency graphs with real-time updates and interactive features.
+
+**Features:**
+- Real-time graph visualization
+- Interactive node manipulation (drag, pan, zoom)
+- Lifecycle indicators (Singleton/Transient)
+- Statistics dashboard
+- Metadata display
+
 ## License
 
 MIT

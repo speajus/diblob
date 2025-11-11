@@ -33,7 +33,11 @@ features:
   - icon: 🎨
     title: Interactive Visualizer
     details: Visualize your dependency graph with an interactive, real-time graph visualization tool.
-  
+
+  - icon: 🤖
+    title: MCP Server
+    details: Expose container functionality through Model Context Protocol for AI assistant integration.
+
   - icon: 🏷️
     title: Metadata Support
     details: Attach custom metadata to blobs and containers for better debugging and documentation.
@@ -88,6 +92,13 @@ The core dependency injection framework.
 - [Documentation](/diblob/guide/getting-started)
 - [API Reference](/diblob/api/)
 - [Examples](/diblob/examples/)
+
+### @speajus/diblob-mcp
+
+Model Context Protocol server for diblob containers.
+
+- [Package README](https://github.com/speajus/diblob/tree/main/packages/diblob-mcp)
+- [npm Package](https://www.npmjs.com/package/@speajus/diblob-mcp)
 
 ### @speajus/diblob-visualizer
 
