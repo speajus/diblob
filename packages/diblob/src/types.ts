@@ -44,17 +44,23 @@ export enum Lifecycle {
   Singleton = 'singleton',
 }
 
+type LifecyclFn<T> = ((instance: T) => void | Promise<void>)
 /**
  * Registration options
  */
-export interface RegistrationOptions {
-  lifecycle?: Lifecycle;
+export interface RegistrationOptions<T> {
+  lifecycle: Lifecycle;
+  dispose?: LifecyclFn<T> | keyof T;
+  initialize?:  LifecyclFn<T> | keyof T;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: it needs any
+export type FactoryType<T extends Factory<any>> = T extends Factory<infer R> ? R : never;
+// biome-ignore lint/suspicious/noExplicitAny: it needs any
 export type FactoryParams<T extends Factory<any>> = T extends new (...args: infer P) => unknown ? P : T extends (...args: infer P) => unknown ? P : never;
-
-export type RegisterParams<T extends Factory<any>> = [...FactoryParams<T>, RegistrationOptions] | FactoryParams<T>;
-
+// biome-ignore lint/suspicious/noExplicitAny: it needs any
+export type RegisterParams<T extends Factory<any>> = [...FactoryParams<T>, RegistrationOptions<FactoryType<T>>] | FactoryParams<T>;
+// biome-ignore lint/suspicious/noExplicitAny: it needs any
 export type FactoryReturnType<T extends Factory<any>> = T extends Factory<infer R> ? R : never;
 
 /**

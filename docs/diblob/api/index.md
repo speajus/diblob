@@ -92,8 +92,10 @@ type Blob<T> = T;
 type Factory<T> = (() => T) | (() => Promise<T>) | (new (...args: any[]) => T);
 
 // Registration options
-interface RegistrationOptions {
+interface RegistrationOptions<T> {
   lifecycle?: Lifecycle;
+  dispose?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
+  initialize?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
 }
 
 // Lifecycle enum
@@ -217,8 +219,10 @@ type Blob<T> = T;
 type Factory<T> = (() => T) | (() => Promise<T>) | (new (...args: any[]) => T);
 
 // Registration options
-interface RegistrationOptions {
+interface RegistrationOptions<T> {
   lifecycle?: Lifecycle;
+  dispose?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
+  initialize?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
 }
 
 // Lifecycle enum
