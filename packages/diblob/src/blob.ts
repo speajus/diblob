@@ -13,7 +13,7 @@ import { blobPropSymbol } from './types';
 export class BlobNotReadyError extends Error {
   constructor(public readonly promise: Promise<unknown>) {
     super('Blob not yet resolved - async dependency detected');
-    this.name = 'BlobNotReadyError';
+    Object.setPrototypeOf(this, BlobNotReadyError.prototype);
   }
 }
 
