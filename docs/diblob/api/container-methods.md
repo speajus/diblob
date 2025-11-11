@@ -106,6 +106,40 @@ container.register(service, (log: Logger) => new ServiceImpl(log), logger, {
 });
 ```
 
+#### Lifecycle Hooks
+
+```typescript
+import { Lifecycle } from '@speajus/diblob';
+
+// Initialize hook - called after instance creation
+container.register(database, DatabaseImpl, {
+  lifecycle: Lifecycle.Singleton,
+  initialize: 'initialize' // Method name
+});
+
+// Dispose hook - called when instance is invalidated
+container.register(database, DatabaseImpl, {
+  lifecycle: Lifecycle.Singleton,
+  dispose: 'dispose' // Method name
+});
+
+// Using functions with instance parameter instead of method names
+container.register(database, DatabaseImpl, {
+  lifecycle: Lifecycle.Singleton,
+  initialize: async (instance: DatabaseImpl) => await instance.connect(),
+  dispose: async (instance: DatabaseImpl) => await instance.close()
+});
+
+// Combine all options
+container.register(database, DatabaseImpl, {
+  lifecycle: Lifecycle.Singleton,
+  initialize: 'initialize',
+  dispose: 'dispose'
+});
+```
+
+**Note**: Including the `lifecycle` property is recommended when using lifecycle hooks, as it helps TypeScript correctly discriminate the options type.
+
 ## resolve
 
 Resolve a blob or class to its instance.

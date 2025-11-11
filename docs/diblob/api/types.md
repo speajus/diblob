@@ -47,10 +47,16 @@ interface Container {
 Options for blob registration.
 
 ```typescript
-interface RegistrationOptions {
+interface RegistrationOptions<T> {
   lifecycle?: Lifecycle;
+  dispose?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
+  initialize?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
 }
 ```
+
+- `lifecycle` - Controls instance creation (Singleton or Transient)
+- `dispose` - Method name, function, or function with instance parameter to call when instance is invalidated
+- `initialize` - Method name, function, or function with instance parameter to call after instance is created
 
 ## Lifecycle
 

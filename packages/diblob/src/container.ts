@@ -12,7 +12,7 @@ import {
   clearDependencies,
   clearAllDependencies,
 } from './reactive';
-import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams, BlobMetadata, Ctor, FactoryFn } from './types';
+import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams, BlobMetadata, Ctor, FactoryFn, RegistrationOptions } from './types';
 
 interface Registration<T = unknown> {
   factory: Factory<T>;
@@ -20,6 +20,8 @@ interface Registration<T = unknown> {
   lifecycle: Lifecycle;
   instance?: T;
   resolving?: boolean; // Track if currently being resolved (for cyclic dependency detection)
+  dispose?: ((v:T) => void | Promise<void>) | (string & keyof T);
+  initialize?: ((v:T) => void | Promise<void>) | (string & keyof T);
 }
 
 /**
@@ -51,12 +53,17 @@ export class Container implements IContainer {
 
     // Extract lifecycle option if the last dep is a RegistrationOptions object
     let lifecycle = Lifecycle.Singleton;
+    let dispose: (() => void | Promise<void>) | keyof T | undefined;
+    let initialize: (() => void | Promise<void>) | keyof T | undefined;
     let actualDeps = [] as unknown as FactoryParams<TFactory>
 
     if (deps.length > 0) {
       const lastDep = deps[deps.length - 1];
       if (isLifecycleOption(lastDep)) {
-        lifecycle = (lastDep as { lifecycle?: Lifecycle }).lifecycle ?? Lifecycle.Singleton;
+        const options = lastDep as RegistrationOptions<T>;
+        lifecycle = options.lifecycle ?? Lifecycle.Singleton;
+        dispose = options.dispose as any;
+        initialize = options.initialize as any;
         actualDeps = deps.slice(0, -1) as FactoryParams<TFactory>;
       }else{
         actualDeps = deps as FactoryParams<TFactory>;
@@ -151,6 +158,8 @@ export class Container implements IContainer {
       factory,
       deps: actualDeps,
       lifecycle,
+      dispose: dispose as any,
+      initialize: initialize as any,
     });
   }
 
@@ -243,11 +252,35 @@ export class Container implements IContainer {
           // Handle async factory
           if (instance instanceof Promise) {
             return instance.then((resolved) => {
+              // Call initialize if defined
+              const initResult = this.callLifecycleMethod(resolved, registration.initialize);
+              if (initResult instanceof Promise) {
+                return initResult.then(() => {
+                  if (registration.lifecycle === Lifecycle.Singleton) {
+                    registration.instance = resolved;
+                  }
+                  registration.resolving = false;
+                  return resolved;
+                });
+              }
+
               if (registration.lifecycle === Lifecycle.Singleton) {
                 registration.instance = resolved;
               }
               registration.resolving = false;
               return resolved;
+            });
+          }
+
+          // Call initialize if defined
+          const initResult = this.callLifecycleMethod(instance, registration.initialize);
+          if (initResult instanceof Promise) {
+            return initResult.then(() => {
+              if (registration.lifecycle === Lifecycle.Singleton) {
+                registration.instance = instance;
+              }
+              registration.resolving = false;
+              return instance;
             });
           }
 
@@ -274,11 +307,36 @@ export class Container implements IContainer {
       // Handle async factory in sync context
       if (instance instanceof Promise) {
         return instance.then((resolved) => {
+          // Call initialize if defined
+          const initResult = this.callLifecycleMethod(resolved, registration.initialize);
+          if (initResult instanceof Promise) {
+            return initResult.then(() => {
+              if (registration.lifecycle === Lifecycle.Singleton) {
+                registration.instance = resolved;
+              }
+              registration.resolving = false;
+              return resolved;
+            });
+          }
+
           if (registration.lifecycle === Lifecycle.Singleton) {
             registration.instance = resolved;
           }
           registration.resolving = false;
           return resolved;
+        }) as Promise<T>;
+      }
+
+      // Call initialize if defined
+      const initResult = this.callLifecycleMethod(instance, registration.initialize);
+      if (initResult instanceof Promise) {
+        return initResult.then(() => {
+          // Cache singleton instances
+          if (registration.lifecycle === Lifecycle.Singleton) {
+            registration.instance = instance;
+          }
+          registration.resolving = false;
+          return instance as T;
         }) as Promise<T>;
       }
 
@@ -422,6 +480,34 @@ export class Container implements IContainer {
   }
 
   /**
+   * Call a lifecycle method (initialize or dispose) on an instance
+   */
+  private callLifecycleMethod<T>(
+    instance: T,
+    method: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | (string & keyof T) | undefined
+  ): void | Promise<void> {
+    if (!method) {
+      return;
+    }
+
+    if (typeof method === 'function') {
+      // Try calling with instance parameter first, fall back to no parameters
+      try {
+        return method(instance);
+      } catch {
+        return (method as () => void | Promise<void>)();
+      }
+    }
+
+    // Method is a property name on the instance
+    // biome-ignore lint/suspicious/noExplicitAny: needs any for dynamic property access
+    const instanceMethod = (instance as any)[method];
+    if (typeof instanceMethod === 'function') {
+      return instanceMethod.call(instance);
+    }
+  }
+
+  /**
    * Invalidate a blob and all its dependents
    */
   private invalidate(blobId: symbol, invalidated = new Set<symbol>()): void {
@@ -433,6 +519,22 @@ export class Container implements IContainer {
 
     const registration = this.registrations.get(blobId);
     if (registration) {
+      // Call dispose on the instance before clearing it
+      if (registration.instance && registration.dispose) {
+        try {
+          const result = this.callLifecycleMethod(registration.instance, registration.dispose);
+          // If dispose is async, we don't await it (fire-and-forget)
+          // This keeps invalidate synchronous
+          if (result instanceof Promise) {
+            result.catch((error) => {
+              console.error('Error in dispose method:', error);
+            });
+          }
+        } catch (error) {
+          console.error('Error in dispose method:', error);
+        }
+      }
+
       // Clear the cached instance
       delete registration.instance;
 
@@ -519,6 +621,6 @@ export function isFactoryFn(obj: unknown): obj is FactoryFn<unknown> {
   return isFn(obj) && !isCtor(obj);
 }
 
-function isLifecycleOption(obj: unknown): obj is { lifecycle?: Lifecycle } {
+function isLifecycleOption(obj: unknown): obj is RegistrationOptions<unknown> {
   return obj != null && typeof obj === 'object' && 'lifecycle' in obj;
 }

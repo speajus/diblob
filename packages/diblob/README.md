@@ -7,6 +7,7 @@ A dependency injection framework where the **proxy (blob) is the key**. Pass aro
 - **Blob as Key**: The proxy itself is both the identifier and the interface
 - **Automatic Dependency Resolution**: Dependencies are automatically inspected and resolved
 - **Reactive Dependencies**: When a blob is re-registered, all dependents automatically update
+- **Lifecycle Hooks**: Initialize and dispose hooks for resource management
 - **Async Support**: Full support for async factories and async resolution
 - **Container Nesting & Merging**: Create child containers or merge multiple containers
 - **Constructor & Property Injection**: Blobs work as default parameters and property initializers
