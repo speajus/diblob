@@ -1,5 +1,12 @@
 # @speajus/diblob
 
+## 0.5.0
+
+### Minor Changes
+
+- b24f580: Added list capabilities, probably broke some types
+- 6ebcb60: Made async the default and make sure it works through constructor
+
 ## 0.4.0
 
 ### Minor Changes
