@@ -45,6 +45,7 @@ export default defineConfig({
             { text: 'Async Support', link: '/diblob/guide/async-support' },
             { text: 'Container Nesting', link: '/diblob/guide/container-nesting' },
             { text: 'Lifecycle Management', link: '/diblob/guide/lifecycle' },
+            { text: 'Lifecycle Hooks', link: '/diblob/guide/lifecycle-hooks' },
             { text: 'Constructor Injection', link: '/diblob/guide/constructor-injection' },
             { text: 'Factory Injection', link: '/diblob/guide/factory-injection' },
           ]
