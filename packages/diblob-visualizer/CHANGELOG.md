@@ -1,5 +1,18 @@
 # @speajus/diblob-visualizer
 
+## 0.5.0
+
+### Minor Changes
+
+- b24f580: Added list capabilities, probably broke some types
+- 6ebcb60: Made async the default and make sure it works through constructor
+
+### Patch Changes
+
+- Updated dependencies [b24f580]
+- Updated dependencies [6ebcb60]
+  - @speajus/diblob@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes

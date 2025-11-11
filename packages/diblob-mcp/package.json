@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob-mcp",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "Model Context Protocol (MCP) server implementation for diblob dependency injection containers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,4 +48,3 @@
     "typescript": "^5.3.3"
   }
 }
-
