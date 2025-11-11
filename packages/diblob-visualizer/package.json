@@ -20,6 +20,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-grpc build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "server": "tsx example-server.ts"

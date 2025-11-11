@@ -4,10 +4,12 @@
   "private": true,
   "description": "Monorepo for diblob dependency injection framework and visualizer",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "pnpm run build:diblob && pnpm run build:mcp && pnpm run build:grpc && pnpm run build:drizzle && pnpm run build:visualizer",
+    "build:all": "pnpm run build:diblob && pnpm run build:mcp && pnpm run build:grpc && pnpm run build:drizzle && pnpm run build:visualizer",
     "build:diblob": "pnpm --filter @speajus/diblob build",
     "build:mcp": "pnpm --filter @speajus/diblob-mcp build",
     "build:grpc": "pnpm --filter @speajus/diblob-grpc build",

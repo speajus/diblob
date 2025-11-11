@@ -10,6 +10,8 @@ This example demonstrates how to build a gRPC server using `@speajus/diblob-grpc
 - ✅ Complete CRUD operations (Create, Read, Update, Delete)
 - ✅ Service layer with automatic dependency resolution
 - ✅ Type-safe database queries with Drizzle ORM
+- ✅ **Type-safe gRPC with Protocol Buffers code generation** (see [PROTOC-TYPES.md](./PROTOC-TYPES.md))
+- ✅ Database seeding with realistic fake data using `drizzle-seed`
 - ✅ Graceful shutdown handling
 
 ## Project Structure
@@ -17,18 +19,25 @@ This example demonstrates how to build a gRPC server using `@speajus/diblob-grpc
 ```
 example-grpc-server/
 ├── proto/
-│   └── user.proto              # gRPC service definition
+│   └── user.proto                      # gRPC service definition
 ├── src/
 │   ├── db/
-│   │   └── schema.ts           # Drizzle database schema
+│   │   ├── schema.ts                   # Drizzle database schema
+│   │   └── seed.ts                     # Database seeding script
+│   ├── generated/                      # Generated TypeScript types from proto
+│   │   └── user.ts                     # Auto-generated (run proto:generate)
 │   ├── grpc/
-│   │   └── user-grpc-service.ts # gRPC service handlers
+│   │   ├── user-grpc-service.ts        # gRPC service handlers (runtime)
+│   │   └── user-grpc-service-typed.ts  # Type-safe gRPC handlers
 │   ├── services/
-│   │   └── user-service.ts     # Business logic layer
-│   ├── index.ts                # Server entry point
-│   └── client.ts               # Test client
-├── drizzle.config.ts           # Drizzle configuration
+│   │   └── user-service.ts             # Business logic layer
+│   ├── index.ts                        # Server entry point
+│   ├── client.ts                       # Test client (runtime)
+│   └── client-typed.ts                 # Type-safe test client
+├── drizzle.config.ts                   # Drizzle configuration
 ├── package.json
+├── SEEDING.md                          # Database seeding documentation
+├── PROTOC-TYPES.md                     # Type-safe gRPC guide
 └── tsconfig.json
 ```
 
@@ -64,22 +73,41 @@ npm run dev
 
 The server will start on `0.0.0.0:50051`.
 
+## Database Seeding
+
+Populate the database with realistic sample data:
+
+```bash
+# Add seed data to the database
+npm run db:seed
+
+# Reset database and add fresh seed data
+npm run db:seed:reset
+```
+
+See [SEEDING.md](./SEEDING.md) for detailed documentation on database seeding.
+
 ## Testing the Server
 
 In a separate terminal:
 
 ```bash
-# Run the test client
-tsx src/client.ts
+# Run the test client (runtime proto loading)
+pnpm run client
+
+# OR run the type-safe client (recommended)
+pnpm run client:typed
 ```
 
-This will run through a series of tests:
+Both clients will run through a series of tests:
 1. Create a user
 2. Fetch the user by ID
 3. Create another user
 4. List all users
 5. Update a user
 6. Delete a user
+
+**💡 Tip**: The type-safe client (`client:typed`) provides full IntelliSense and compile-time type checking. See [PROTOC-TYPES.md](./PROTOC-TYPES.md) for more details.
 
 ## How It Works
 

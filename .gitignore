@@ -6,3 +6,6 @@ dist/
 docs/.vitepress/cache
 docs/.vitepress/dist
 
+# Generated proto files
+**/src/generated/
+
