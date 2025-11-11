@@ -44,13 +44,14 @@ export enum Lifecycle {
   Singleton = 'singleton',
 }
 
+type LifecyclFn<T> = ((instance: T) => void | Promise<void>)
 /**
  * Registration options
  */
 export interface RegistrationOptions<T> {
   lifecycle: Lifecycle;
-  dispose?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
-  initialize?: (() => void | Promise<void>) | ((instance: T) => void | Promise<void>) | keyof T;
+  dispose?: LifecyclFn<T> | keyof T;
+  initialize?:  LifecyclFn<T> | keyof T;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: it needs any
