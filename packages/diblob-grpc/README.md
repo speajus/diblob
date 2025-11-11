@@ -2,12 +2,12 @@
 
 gRPC server implementation for [diblob](https://github.com/speajus/diblob) dependency injection containers.
 
-This package provides a gRPC server that integrates seamlessly with diblob's dependency injection system, allowing you to build gRPC services with automatic dependency resolution.
+This package provides a gRPC server that integrates seamlessly with diblob's dependency injection system, using [Connect-ES](https://github.com/connectrpc/connect-es) under the hood. It lets you build modern gRPC/Connect/gRPC-Web services with automatic dependency resolution.
 
 ## Installation
 
 ```bash
-npm install @speajus/diblob-grpc @speajus/diblob @grpc/grpc-js @grpc/proto-loader
+pnpm add @speajus/diblob-grpc @speajus/diblob @connectrpc/connect @connectrpc/connect-node @bufbuild/protobuf
 ```
 
 Requirements: Node.js >= 22.0.0
@@ -16,33 +16,31 @@ Requirements: Node.js >= 22.0.0
 
 ```typescript
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-grpc';
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
+import {
+  registerGrpcBlobs,
+  grpcServer,
+  grpcServiceRegistry,
+} from '@speajus/diblob-grpc';
+import { YourService } from './gen/your_connect.js'; // from protoc-gen-connect-es
 
 // Create a diblob container
 const container = createContainer();
 
-// Register gRPC server blobs
+// Register gRPC/Connect server blobs
 registerGrpcBlobs(container, {
   host: '0.0.0.0',
-  port: 50051
+  port: 50051,
+  // optional: requestPathPrefix: '/api',
 });
 
-// Load your proto file
-const packageDefinition = protoLoader.loadSync('path/to/your.proto');
-const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
-
-// Register your service implementation with the registry (does not start the server yet)
-grpcServiceRegistry.registerService(
-  protoDescriptor.YourService.service,
-  {
-    yourMethod: (call, callback) => {
-      // Your implementation
-      callback(null, { message: 'Hello!' });
-    }
-  }
-);
+// Register your generated service descriptor + implementation with the
+// service registry. The types come directly from Connect-ES codegen.
+grpcServiceRegistry.registerService(YourService, {
+  async yourMethod(request) {
+    // ...
+    return { /* response */ };
+  },
+});
 
 // Resolve the grpcServer blob to start the server.
 // The registration uses lifecycle hooks to call server.start() for you.
@@ -79,8 +77,7 @@ registerGrpcBlobs(container, {
 
 - `host` (string): Host to bind the server to (default: '0.0.0.0')
 - `port` (number): Port to bind the server to (default: 50051)
-- `credentials` (grpc.ServerCredentials): Server credentials (default: insecure)
-- `options` (grpc.ChannelOptions): Additional server options
+- `requestPathPrefix` (string): Optional URL prefix for all RPCs (default: '')
 
 ### Blobs
 

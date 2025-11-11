@@ -1,15 +1,17 @@
 /**
  * Blob and interface definitions for gRPC server
- * 
+ *
  * This file contains type definitions and blob declarations following
  * diblob architecture patterns.
  */
 
 import { createBlob } from '@speajus/diblob';
-import type * as grpc from '@grpc/grpc-js';
+import type { DescService } from '@bufbuild/protobuf';
+import type { ServiceImpl } from '@connectrpc/connect';
+import type { Server as NodeHttpServer } from 'node:http';
 
 /**
- * Configuration for the gRPC server
+ * Configuration for the gRPC (Connect) server
  */
 export interface GrpcServerConfig {
   /**
@@ -25,36 +27,38 @@ export interface GrpcServerConfig {
   port?: number;
 
   /**
-   * Server credentials
-   * @default grpc.ServerCredentials.createInsecure()
+   * Optional request path prefix for all RPCs (for example, "/api")
+   *
+   * This is passed through to Connect's Node adapter and is useful when you
+   * want to serve your RPCs under a common URL prefix.
    */
-  credentials?: grpc.ServerCredentials;
-
-  /**
-   * Additional server options
-   */
-  options?: grpc.ChannelOptions;
+  requestPathPrefix?: string;
 }
 
 /**
  * gRPC Server interface
- * Wraps the @grpc/grpc-js Server
+ *
+ * This is implemented via Connect-ES and Node's HTTP server. The underlying
+ * transport speaks Connect, gRPC, and gRPC-web protocols.
  */
 export interface GrpcServer {
   /**
-   * Get the underlying gRPC server instance
+   * Get the underlying Node HTTP server instance, if the server has been
+   * started. This is primarily for advanced scenarios like custom shutdown
+   * or inspection.
    */
-  getServer(): grpc.Server;
+  getServer(): NodeHttpServer | null;
 
   /**
-   * Add a service to the gRPC server
-   * 
-   * @param serviceDefinition - The service definition from proto-loader
-   * @param implementation - The service implementation object
+   * Register a service implementation with the server.
+   *
+   * This is a convenience that forwards to the GrpcServiceRegistry. In most
+   * cases you should prefer injecting and using {@link GrpcServiceRegistry}
+   * directly.
    */
-  addService(
-    serviceDefinition: grpc.ServiceDefinition,
-    implementation: grpc.UntypedServiceImplementation
+  addService<S extends DescService>(
+    service: S,
+    implementation: Partial<ServiceImpl<S>>
   ): void;
 
   /**
@@ -86,37 +90,36 @@ export interface GrpcServer {
 export interface GrpcServiceRegistry {
   /**
    * Register a gRPC service implementation
-   * 
-   * @param serviceDefinition - The service definition from proto-loader
+   *
+   * @param service - The service descriptor from codegen (DescService)
    * @param implementation - The service implementation object
    */
-  registerService(
-    serviceDefinition: grpc.ServiceDefinition,
-    implementation: grpc.UntypedServiceImplementation
+  registerService<S extends DescService>(
+    service: S,
+    implementation: Partial<ServiceImpl<S>>
   ): void;
 
   /**
    * Get all registered services
    */
   getServices(): Array<{
-    definition: grpc.ServiceDefinition;
-    implementation: grpc.UntypedServiceImplementation;
+    service: DescService;
+    implementation: Partial<ServiceImpl<DescService>>;
   }>;
 }
 
 // Blob declarations
 export const grpcServerConfig = createBlob<GrpcServerConfig>('grpcServerConfig', {
   name: 'gRPC Server Configuration',
-  description: 'Configuration for the gRPC server'
+  description: 'Configuration for the gRPC server',
 });
 
 export const grpcServer = createBlob<GrpcServer>('grpcServer', {
   name: 'gRPC Server',
-  description: 'gRPC server instance'
+  description: 'gRPC server instance',
 });
 
 export const grpcServiceRegistry = createBlob<GrpcServiceRegistry>('grpcServiceRegistry', {
   name: 'gRPC Service Registry',
-  description: 'Registry for managing gRPC service implementations'
+  description: 'Registry for managing gRPC service implementations',
 });
-

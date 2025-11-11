@@ -11,8 +11,6 @@
 import { createContainer } from '@speajus/diblob';
 import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-grpc';
 import { registerDrizzleBlobs, databaseClient } from '@speajus/diblob-drizzle';
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
@@ -20,7 +18,17 @@ import { dirname, join } from 'path';
 import { mkdirSync } from 'fs';
 
 import { userService, UserServiceImpl } from './services/user-service.js';
-import { UserGrpcService } from './grpc/user-grpc-service.js';
+import { UserGrpcServiceTyped } from './grpc/user-grpc-service-typed.js';
+// Connect-ES / Protobuf-ES generated service descriptor and message types
+// (from @bufbuild/protoc-gen-es, user_pb.ts)
+import {
+  UserService,
+  type GetUserRequest,
+  type CreateUserRequest,
+  type ListUsersRequest,
+  type UpdateUserRequest,
+  type DeleteUserRequest,
+} from './generated/user_pb.js';
 import * as schema from './db/schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -75,35 +83,23 @@ async function main() {
   console.log('📦 Registering user service...');
   container.register(userService, UserServiceImpl, databaseClient);
 
-  // Load proto file
-  console.log('📄 Loading proto definitions...');
-  const PROTO_PATH = join(__dirname, '../proto/user.proto');
-  const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true
-  });
+  // Create Connect-based service implementation
+  console.log('🔧 Setting up Connect service handlers...');
+  const userGrpcService = new UserGrpcServiceTyped(userService);
 
-  const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any;
+	  // Register typed service with the gRPC service registry.
+	  // The service descriptor comes from Connect-ES code generation.
+	  grpcServiceRegistry.registerService(UserService, {
+	    getUser: (request: GetUserRequest) => userGrpcService.getUser(request),
+	    createUser: (request: CreateUserRequest) => userGrpcService.createUser(request),
+	    listUsers: (request: ListUsersRequest) => userGrpcService.listUsers(request),
+	    updateUser: (request: UpdateUserRequest) => userGrpcService.updateUser(request),
+	    deleteUser: (request: DeleteUserRequest) => userGrpcService.deleteUser(request),
+	  } as any);
 
-	// Create gRPC service implementation
-	console.log('🔧 Setting up gRPC service handlers...');
-	const userGrpcService = new UserGrpcService(userService);
-
-	// Register service with the gRPC service registry
-	grpcServiceRegistry.registerService(protoDescriptor.user.UserService.service, {
-		getUser: userGrpcService.getUser,
-		createUser: userGrpcService.createUser,
-		listUsers: userGrpcService.listUsers,
-		updateUser: userGrpcService.updateUser,
-		deleteUser: userGrpcService.deleteUser
-	});
-
-	// Start the server by resolving the server blob (lifecycle will call start)
-	console.log('🌐 Starting gRPC server...');
-	await container.resolve(grpcServer);
+  // Start the server by resolving the server blob (lifecycle will call start)
+  console.log('🌐 Starting gRPC server (Connect)...');
+  await container.resolve(grpcServer);
 
   console.log(`\n✅ gRPC server is running on ${grpcServer.getAddress()}`);
   console.log('\nAvailable services:');

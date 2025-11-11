@@ -10,8 +10,7 @@
     "start": "pnpm run build && node dist/index.js",
     "test": "pnpm run build && tsx --test src/**/*.test.ts",
     "client": "tsx src/client.ts",
-    "client:typed": "tsx src/client-typed.ts",
-    "proto:generate": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/generated --ts_proto_opt=outputServices=grpc-js,env=node,esModuleInterop=true --proto_path=./proto ./proto/*.proto",
+    "proto:generate": "buf generate",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
@@ -19,8 +18,9 @@
     "db:seed:reset": "tsx src/db/seed.ts --reset"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.12.4",
-    "@grpc/proto-loader": "^0.7.15",
+    "@connectrpc/connect": "^2.1.0",
+    "@connectrpc/connect-node": "*",
+    "@bufbuild/protobuf": "^2.10.0",
     "@speajus/diblob": "workspace:*",
     "@speajus/diblob-drizzle": "workspace:*",
     "@speajus/diblob-grpc": "workspace:*",
@@ -28,13 +28,13 @@
     "drizzle-seed": "^0.1.3"
   },
   "devDependencies": {
-    "@bufbuild/protobuf": "^2.10.0",
+    "@bufbuild/buf": "*",
+    "@bufbuild/protoc-gen-es": "^2.10.0",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.0.0",
     "better-sqlite3": "^11.10.0",
     "drizzle-kit": "^0.28.1",
     "protoc": "^33.0.0",
-    "ts-proto": "^2.8.3",
     "tsx": "^4.20.6",
     "typescript": "^5.7.2"
   }

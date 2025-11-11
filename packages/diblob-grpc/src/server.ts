@@ -1,15 +1,19 @@
 /**
- * gRPC Server implementation
+ * gRPC Server implementation (Connect-ES based)
  *
- * Concrete implementations of gRPC server interfaces following
- * diblob architecture patterns.
+ * Concrete implementations of gRPC server interfaces following diblob
+ * architecture patterns, using Connect-ES and Node's HTTP server under
+ * the hood.
  */
 
-import * as grpc from '@grpc/grpc-js';
+import * as http from 'node:http';
+import { connectNodeAdapter } from '@connectrpc/connect-node';
+import type { DescService } from '@bufbuild/protobuf';
+import type { ServiceImpl } from '@connectrpc/connect';
 import type {
   GrpcServer,
   GrpcServerConfig,
-  GrpcServiceRegistry
+  GrpcServiceRegistry,
 } from './blobs.js';
 
 /**
@@ -18,62 +22,57 @@ import type {
 const DEFAULT_CONFIG: Required<GrpcServerConfig> = {
   host: '0.0.0.0',
   port: 50051,
-  credentials: grpc.ServerCredentials.createInsecure(),
-  options: {}
+  requestPathPrefix: '',
+};
+
+type ServiceRegistration<S extends DescService = DescService> = {
+  service: S;
+  implementation: Partial<ServiceImpl<S>>;
 };
 
 /**
  * gRPC Service Registry implementation
  */
 export class GrpcServiceRegistryImpl implements GrpcServiceRegistry {
-  private services: Array<{
-    definition: grpc.ServiceDefinition;
-    implementation: grpc.UntypedServiceImplementation;
-  }> = [];
+  private services: ServiceRegistration<any>[] = [];
 
-  registerService(
-    serviceDefinition: grpc.ServiceDefinition,
-    implementation: grpc.UntypedServiceImplementation
+  registerService<S extends DescService>(
+    service: S,
+    implementation: Partial<ServiceImpl<S>>,
   ): void {
-    this.services.push({ definition: serviceDefinition, implementation });
+    this.services.push({ service, implementation });
   }
 
-  getServices(): Array<{
-    definition: grpc.ServiceDefinition;
-    implementation: grpc.UntypedServiceImplementation;
-  }> {
+  getServices(): ServiceRegistration<any>[] {
     return [...this.services];
   }
 }
 
 /**
- * gRPC Server implementation
+ * gRPC Server implementation using Connect-ES and Node's HTTP server.
  */
 export class GrpcServerImpl implements GrpcServer {
-  private server: grpc.Server;
-  private running: boolean = false;
+  private server: http.Server | null = null;
+  private running = false;
   private address: string | null = null;
   private config: Required<GrpcServerConfig>;
 
   constructor(
     config: GrpcServerConfig,
-    private serviceRegistry: GrpcServiceRegistry
+    private readonly serviceRegistry: GrpcServiceRegistry,
   ) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.server = new grpc.Server(this.config.options);
   }
 
-  getServer(): grpc.Server {
+  getServer(): http.Server | null {
     return this.server;
   }
 
-  addService(
-    serviceDefinition: grpc.ServiceDefinition,
-    implementation: grpc.UntypedServiceImplementation
+  addService<S extends DescService>(
+    service: S,
+    implementation: Partial<ServiceImpl<S>>,
   ): void {
-    // Only register in the service registry
-    // The actual server.addService() will be called in start()
-    this.serviceRegistry.registerService(serviceDefinition, implementation);
+    this.serviceRegistry.registerService(service, implementation);
   }
 
   async start(): Promise<void> {
@@ -81,39 +80,53 @@ export class GrpcServerImpl implements GrpcServer {
       throw new Error('Server is already running');
     }
 
-    // Register all services from the registry
-    const services = this.serviceRegistry.getServices();
-    for (const { definition, implementation } of services) {
-      this.server.addService(definition, implementation);
-    }
-
-    const bindAddress = `${this.config.host}:${this.config.port}`;
-
-    return new Promise((resolve, reject) => {
-      this.server.bindAsync(
-        bindAddress,
-        this.config.credentials,
-        (error, port) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          this.address = `${this.config.host}:${port}`;
-          this.running = true;
-          resolve();
+    const handler = connectNodeAdapter({
+      requestPathPrefix: this.config.requestPathPrefix,
+      routes: (router) => {
+        const services = this.serviceRegistry.getServices();
+        for (const { service, implementation } of services) {
+          // We intentionally erase the generic type information when wiring
+          // up services, but the registration side is fully type-safe.
+          router.service(service as DescService, implementation as any);
         }
-      );
+      },
+    });
+
+    const server = http.createServer(handler);
+    this.server = server;
+
+    await new Promise<void>((resolve, reject) => {
+      server.once('error', (err) => {
+        if (!this.running) {
+          reject(err);
+        }
+      });
+
+      server.listen(this.config.port, this.config.host, () => {
+        const info = server.address();
+        if (typeof info === 'string') {
+          this.address = info;
+        } else if (info && typeof info === 'object') {
+          this.address = `${info.address}:${info.port}`;
+        } else {
+          this.address = `${this.config.host}:${this.config.port}`;
+        }
+        this.running = true;
+        resolve();
+      });
     });
   }
 
   async stop(): Promise<void> {
-    if (!this.running) {
+    if (!this.running || !this.server) {
       return;
     }
 
-    return new Promise((resolve) => {
-      this.server.tryShutdown(() => {
+    const server = this.server;
+    this.server = null;
+
+    await new Promise<void>((resolve) => {
+      server.close(() => {
         this.running = false;
         this.address = null;
         resolve();
@@ -129,4 +142,3 @@ export class GrpcServerImpl implements GrpcServer {
     return this.address;
   }
 }
-

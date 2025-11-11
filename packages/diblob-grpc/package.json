@@ -39,8 +39,9 @@
     "@speajus/diblob": "workspace:*"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.12.4",
-    "@grpc/proto-loader": "^0.7.15"
+    "@connectrpc/connect": "^2.1.0",
+    "@connectrpc/connect-node": "*",
+    "@bufbuild/protobuf": "^2.10.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
