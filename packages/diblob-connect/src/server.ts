@@ -10,10 +10,12 @@ import * as http from 'node:http';
 import { connectNodeAdapter } from '@connectrpc/connect-node';
 import type { DescService } from '@bufbuild/protobuf';
 import type { ServiceImpl } from '@connectrpc/connect';
-import type {
-  GrpcServer,
-  GrpcServerConfig,
-  GrpcServiceRegistry,
+import {
+  grpcServiceList,
+  ServiceRegistration,
+  type GrpcServer,
+  type GrpcServerConfig,
+  type GrpcServiceRegistry,
 } from './blobs.js';
 
 /**
@@ -25,16 +27,13 @@ const DEFAULT_CONFIG: Required<GrpcServerConfig> = {
   requestPathPrefix: '',
 };
 
-type ServiceRegistration<S extends DescService = DescService> = {
-  service: S;
-  implementation: ServiceImpl<S>;
-};
 
 /**
  * gRPC Service Registry implementation
  */
 export class GrpcServiceRegistryImpl implements GrpcServiceRegistry {
-  private services: ServiceRegistration[] = [];
+
+  constructor(private readonly services = grpcServiceList) {}
 
   registerService<S extends DescService>(
     service: S,
@@ -86,9 +85,7 @@ export class GrpcServerImpl implements GrpcServer {
       routes: (router) => {
         const services = this.serviceRegistry.getServices();
         for (const { service, implementation } of services) {
-          // We intentionally erase the generic type information when wiring
-          // up services, but the registration side is fully type-safe.
-          router.service(service as DescService, implementation as any);
+          router.service(service, implementation);
         }
       },
     });

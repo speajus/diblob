@@ -11,7 +11,8 @@ import {
   grpcServerConfig,
   grpcServer,
   grpcServiceRegistry,
-  type GrpcServerConfig
+  type GrpcServerConfig,
+  grpcServiceList
 } from './blobs.js';
 import {
   GrpcServerImpl,
@@ -63,15 +64,15 @@ export function registerGrpcBlobs(
 	): void {
   // Merge provided config with defaults
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
-
+  container.register(grpcServiceList, () => []);
   // Register server configuration
   container.register(grpcServerConfig, () => finalConfig);
 
   // Register service registry
   container.register(grpcServiceRegistry, GrpcServiceRegistryImpl);
 
-	  // Register gRPC server with its dependencies and lifecycle hooks
-	  container.register(
+ // Register gRPC server with its dependencies and lifecycle hooks
+  container.register(
 	    grpcServer,
 	    GrpcServerImpl,
 	    grpcServerConfig,

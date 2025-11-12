@@ -17,11 +17,15 @@ async function main() {
 
   console.log('🧪 Testing User Service over Connect');
 
+  // Use a unique suffix on each run so the example remains idempotent
+  // even when using a persistent SQLite DB with UNIQUE(email).
+  const runSuffix = Date.now().toString(36);
+
   // Test 1: Create a user
   console.log('1️⃣  Creating a user...');
   const createResponse = await client.createUser({
     name: 'John Doe',
-    email: 'john@example.com',
+    email: `john+${runSuffix}@example.com`,
   });
   console.log('   Created:', createResponse);
 
@@ -38,7 +42,7 @@ async function main() {
   console.log('\n3️⃣  Creating another user...');
   const createResponse2 = await client.createUser({
     name: 'Jane Smith',
-    email: 'jane@example.com',
+    email: `jane+${runSuffix}@example.com`,
   });
   console.log('   Created:', createResponse2);
 

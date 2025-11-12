@@ -5,7 +5,7 @@
  * diblob architecture patterns.
  */
 
-import { createBlob } from '@speajus/diblob';
+import { createBlob, createListBlob } from '@speajus/diblob';
 import type { DescService } from '@bufbuild/protobuf';
 import type { ServiceImpl } from '@connectrpc/connect';
 import type { Server as NodeHttpServer } from 'node:http';
@@ -84,6 +84,10 @@ export interface GrpcServer {
   getAddress(): string | null;
 }
 
+export interface ServiceRegistration<S extends DescService = DescService> {
+  service: S;
+  implementation: ServiceImpl<S>;
+}
 /**
  * Service registry for managing gRPC service implementations
  */
@@ -96,16 +100,13 @@ export interface GrpcServiceRegistry {
    */
   registerService<S extends DescService>(
     service: S,
-    implementation: Partial<ServiceImpl<S>>
+    implementation: ServiceImpl<S>,
   ): void;
 
   /**
    * Get all registered services
    */
-  getServices(): Array<{
-    service: DescService;
-    implementation: Partial<ServiceImpl<DescService>>;
-  }>;
+  getServices(): Array<ServiceRegistration>;
 }
 
 // Blob declarations
@@ -122,4 +123,9 @@ export const grpcServer = createBlob<GrpcServer>('grpcServer', {
 export const grpcServiceRegistry = createBlob<GrpcServiceRegistry>('grpcServiceRegistry', {
   name: 'gRPC Service Registry',
   description: 'Registry for managing gRPC service implementations',
+});
+
+export const grpcServiceList = createListBlob<ServiceRegistration>('grpcServiceList', {
+  name: 'gRPC Service List',
+  description: 'List of registered gRPC services',
 });
