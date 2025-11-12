@@ -10,6 +10,7 @@ import * as http from 'node:http';
 import { connectNodeAdapter } from '@connectrpc/connect-node';
 import type { DescService } from '@bufbuild/protobuf';
 import type { ServiceImpl } from '@connectrpc/connect';
+import type { Logger } from '@speajus/diblob-logger';
 import {
   grpcServiceList,
   ServiceRegistration,
@@ -22,9 +23,40 @@ import {
  * Default gRPC server configuration
  */
 const DEFAULT_CONFIG: Required<GrpcServerConfig> = {
-  host: '0.0.0.0',
-  port: 50051,
-  requestPathPrefix: '',
+	host: '0.0.0.0',
+	port: 50051,
+	requestPathPrefix: '',
+};
+
+const defaultLogger: Logger = {
+	info(message: string, meta?: Record<string, unknown>) {
+		if (meta) {
+			console.log(message, meta);
+		} else {
+			console.log(message);
+		}
+	},
+	warn(message: string, meta?: Record<string, unknown>) {
+		if (meta) {
+			console.warn(message, meta);
+		} else {
+			console.warn(message);
+		}
+	},
+	error(message: string, meta?: Record<string, unknown>) {
+		if (meta) {
+			console.error(message, meta);
+		} else {
+			console.error(message);
+		}
+	},
+	debug(message: string, meta?: Record<string, unknown>) {
+		if (meta) {
+			console.debug(message, meta);
+		} else {
+			console.debug(message);
+		}
+	},
 };
 
 
@@ -52,17 +84,20 @@ export class GrpcServiceRegistryImpl implements GrpcServiceRegistry {
  * gRPC Server implementation using Connect-ES and Node's HTTP server.
  */
 export class GrpcServerImpl implements GrpcServer {
-  private server: http.Server | null = null;
-  private running = false;
-  private address: string | null = null;
-  private config: Required<GrpcServerConfig>;
+	  private server: http.Server | null = null;
+	  private running = false;
+	  private address: string | null = null;
+	  private config: Required<GrpcServerConfig>;
+	  private logger: Logger;
 
-  constructor(
-    config: GrpcServerConfig,
-    private readonly serviceRegistry: GrpcServiceRegistry,
-  ) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
-  }
+	  constructor(
+	    config: GrpcServerConfig,
+	    private readonly serviceRegistry: GrpcServiceRegistry,
+	    logger?: Logger,
+	  ) {
+	    this.config = { ...DEFAULT_CONFIG, ...config };
+	    this.logger = logger ?? defaultLogger;
+	  }
 
   getServer(): http.Server | null {
     return this.server;
@@ -100,7 +135,7 @@ export class GrpcServerImpl implements GrpcServer {
         }
       });
 
-      server.listen(this.config.port, this.config.host, () => {
+	      server.listen(this.config.port, this.config.host, () => {
         const info = server.address();
         if (typeof info === 'string') {
           this.address = info;
@@ -108,8 +143,13 @@ export class GrpcServerImpl implements GrpcServer {
           this.address = `${info.address}:${info.port}`;
         } else {
           this.address = `${this.config.host}:${this.config.port}`;
-        }
-        this.running = true;
+	        }
+	        this.running = true;
+	        this.logger.info(`🚀 gRPC server running at ${this.address}`);
+	        this.logger.info('Available services:');
+	        for (const { service } of this.serviceRegistry.getServices()) {
+	          this.logger.info(`✅  - ${service.typeName}`);
+	        }
         resolve();
       });
     });
@@ -120,15 +160,17 @@ export class GrpcServerImpl implements GrpcServer {
       return;
     }
 
+	    this.logger.info('🛑 Shutting down gRPC server gracefully...');
     const server = this.server;
     this.server = null;
 
     await new Promise<void>((resolve) => {
-      server.close(() => {
-        this.running = false;
-        this.address = null;
-        resolve();
-      });
+	      server.close(() => {
+	        this.running = false;
+	        this.address = null;
+	        this.logger.info('✅ gRPC server stopped');
+	        resolve();
+	      });
     });
   }
 

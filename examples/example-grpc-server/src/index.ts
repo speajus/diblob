@@ -10,6 +10,7 @@
 
 import { createContainer } from '@speajus/diblob';
 import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-connect';
+import { registerLoggerBlobs } from '@speajus/diblob-logger';
 import { registerDrizzleBlobs, databaseClient } from '@speajus/diblob-drizzle';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
@@ -43,12 +44,19 @@ async function main() {
   // Create diblob container
   const container = createContainer();
 
-  // Register gRPC blobs
-  console.log('📦 Registering gRPC blobs...');
-  registerGrpcBlobs(container, {
-    host: '0.0.0.0',
-    port: 50051
-  });
+	// Register logger blobs first so server logging goes through Winston
+	registerLoggerBlobs(container, {
+		level: 'info',
+		prettyPrint: true,
+		defaultMeta: { service: 'example-grpc-server' },
+	});
+
+	// Register gRPC blobs
+	console.log('📦 Registering gRPC blobs...');
+	registerGrpcBlobs(container, {
+	  	host: '0.0.0.0',
+	  	port: 50051
+	  });
 
   // Register Drizzle blobs
   console.log('📦 Registering Drizzle blobs...');
@@ -98,23 +106,18 @@ async function main() {
 	  } as any);
 
   // Start the server by resolving the server blob (lifecycle will call start)
-  console.log('🌐 Starting gRPC server (Connect)...');
   await container.resolve(grpcServer);
 
-  console.log(`\n✅ gRPC server is running on ${grpcServer.getAddress()}`);
-  console.log('\nAvailable services:');
-  console.log('  - user.UserService');
-  console.log('\nPress Ctrl+C to stop the server\n');
 
-  // Handle graceful shutdown
-  process.on('SIGINT', async () => {
-    console.log('\n\n🛑 Shutting down gracefully...');
-    await grpcServer.stop();
-    await databaseClient.close();
-    sqlite.close();
-    console.log('✅ Server stopped');
-    process.exit(0);
-  });
+	  // Handle graceful shutdown
+	  process.on('SIGINT', async () => {
+	    console.log('\n\n🛑 Shutting down gracefully...');
+	    await grpcServer.stop();
+	    await databaseClient.close();
+	    sqlite.close();
+	    console.log('✅ Server stopped');
+	    process.exit(0);
+	  });
 }
 
 main().catch((error) => {
