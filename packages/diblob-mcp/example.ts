@@ -74,14 +74,14 @@ container.register(userService, UserServiceImpl, logger, database);
 
 // Register MCP server blobs
 registerMcpBlobs(container, {
-  name: 'example-diblob-mcp-server',
-  version: '1.0.0',
-  description: 'Example MCP server for diblob container'
-});
+	  name: 'example-diblob-mcp-server',
+	  version: '1.0.0',
+	  description: 'Example MCP server for diblob container'
+	});
 
-// Start the MCP server
+// Start the MCP server by resolving the blob (lifecycle will call start() for you)
 console.log('Starting MCP server...');
-await mcpServer.start();
+await container.resolve(mcpServer);
 console.log('MCP server started successfully!');
 console.log('The server is now listening for MCP requests via stdio.');
 console.log('You can use MCP tools to introspect the container:');

@@ -2,9 +2,9 @@
  * Blob creation and proxy implementation
  */
 
-import type { Container } from './container';
-import type { Blob, BlobMetadata } from './types';
-import { blobPropSymbol } from './types';
+	import type { Container } from './container.js';
+	import type { Blob, BlobMetadata } from './types.js';
+	import { blobPropSymbol } from './types.js';
 
 /**
  * Error thrown when a blob is accessed during constructor execution

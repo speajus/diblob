@@ -20,6 +20,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-connect build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build",
+    "test": "pnpm --filter @speajus/diblob build && tsx --test test/*.test.ts",
+    "test:watch": "tsx --test --watch test/*.test.ts",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "server": "tsx example-server.ts"
@@ -35,7 +39,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
-    "@speajus/diblob": "*",
+    "@speajus/diblob": "workspace:*",
     "@xyflow/svelte": "^1.4.1"
   }
 }

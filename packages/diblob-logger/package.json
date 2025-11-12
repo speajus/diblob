@@ -1,0 +1,50 @@
+{
+  "name": "@speajus/diblob-logger",
+  "version": "0.1.0",
+  "description": "Winston-based logger integration for diblob containers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/speajus/diblob.git"
+  },
+  "bugs": {
+    "url": "https://github.com/speajus/diblob/issues"
+  },
+  "homepage": "https://speajus.github.io/diblob/",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsc --watch",
+    "test": "pnpm run build && tsx --test test/*.test.ts",
+    "test:watch": "tsx --test --watch test/*.test.ts"
+  },
+  "keywords": [
+    "logger",
+    "winston",
+    "dependency-injection",
+    "diblob"
+  ],
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@speajus/diblob": "workspace:*"
+  },
+  "dependencies": {
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

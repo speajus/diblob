@@ -20,9 +20,11 @@
   "homepage": "https://speajus.github.io/diblob/",
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-connect build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build",
     "dev": "tsc --watch",
-    "example": "npm run build && tsx example.ts",
-    "test": "npm run build && tsx --test test/*.test.ts",
+    "example": "pnpm run build && tsx example.ts",
+    "test": "pnpm run build && tsx --test test/*.test.ts",
     "test:watch": "tsx --test --watch test/*.test.ts"
   },
   "keywords": [
@@ -40,7 +42,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "@speajus/diblob": "*"
+    "@speajus/diblob":"workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -38,6 +38,14 @@ features:
     title: MCP Server
     details: Expose container functionality through Model Context Protocol for AI assistant integration.
 
+  - icon: 🌐
+    title: Connect/gRPC Integration
+    details: Build Connect/gRPC servers with automatic dependency injection using diblob-connect.
+
+  - icon: 🗄️
+    title: Database Integration
+    details: Integrate Drizzle ORM with dependency injection using diblob-drizzle.
+
   - icon: 🏷️
     title: Metadata Support
     details: Attach custom metadata to blobs and containers for better debugging and documentation.
@@ -97,8 +105,23 @@ The core dependency injection framework.
 
 Model Context Protocol server for diblob containers.
 
-- [Package README](https://github.com/speajus/diblob/tree/main/packages/diblob-mcp)
-- [npm Package](https://www.npmjs.com/package/@speajus/diblob-mcp)
+- [Documentation](/mcp/)
+- [Getting Started](/mcp/getting-started)
+- [Examples](/mcp/examples)
+
+### @speajus/diblob-connect
+
+Connect-based gRPC server implementation for diblob containers.
+
+- [Documentation](/grpc/)
+- [Example Application](https://github.com/speajus/diblob/tree/main/examples/example-grpc-server)
+
+### @speajus/diblob-drizzle
+
+Drizzle ORM integration for diblob containers.
+
+- [Documentation](/drizzle/)
+- [Example Application](https://github.com/speajus/diblob/tree/main/examples/example-grpc-server)
 
 ### @speajus/diblob-visualizer
 

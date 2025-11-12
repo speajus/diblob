@@ -4,24 +4,30 @@
   "private": true,
   "description": "Monorepo for diblob dependency injection framework and visualizer",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
-    "build": "npm run build:diblob && npm run build:mcp && npm run build:visualizer",
-    "build:diblob": "npm run build -w @speajus/diblob",
-    "build:mcp": "npm run build -w @speajus/diblob-mcp",
-    "build:visualizer": "npm run build -w @speajus/diblob-visualizer",
-    "test": "npm run test -w @speajus/diblob",
-    "test:watch": "npm run test:watch -w @speajus/diblob",
-    "dev:visualizer": "npm run dev -w @speajus/diblob-visualizer",
-    "dev:mcp": "npm run dev -w @speajus/diblob-mcp",
+    "build": "pnpm -r build",
+    "build:diblob": "pnpm --filter @speajus/diblob build",
+    "build:mcp": "pnpm --filter @speajus/diblob-mcp build",
+    "build:grpc": "pnpm --filter @speajus/diblob-connect build",
+    "build:drizzle": "pnpm --filter @speajus/diblob-drizzle build",
+    "build:visualizer": "pnpm --filter @speajus/diblob-visualizer build",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm --filter @speajus/diblob test:watch",
+    "dev:visualizer": "pnpm --filter @speajus/diblob-visualizer dev",
+    "dev:mcp": "pnpm --filter @speajus/diblob-mcp dev",
+    "dev:grpc": "pnpm --filter @speajus/diblob-connect dev",
+    "dev:drizzle": "pnpm --filter @speajus/diblob-drizzle dev",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules && pnpm clean:projects",
+    "clean:projects": "pnpm -r run clean",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run build && changeset publish"
+    "release": "pnpm run build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
