@@ -9,7 +9,7 @@
  */
 
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-connect';
+import { registerGrpcBlobs, grpcServer } from '@speajus/diblob-connect';
 import { registerLoggerBlobs } from '@speajus/diblob-logger';
 import { registerDrizzleBlobs, databaseClient } from '@speajus/diblob-drizzle';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
@@ -19,9 +19,6 @@ import { dirname, join } from 'path';
 import { mkdirSync } from 'fs';
 
 import { registerUserService } from './register.js';
-import { userService, UserServiceImpl } from './user-service.js';
-
-import { UserService } from './generated/user_pb.js';
 import * as schema from './db/schema.js';
 
 const __filename = fileURLToPath(import.meta.url);

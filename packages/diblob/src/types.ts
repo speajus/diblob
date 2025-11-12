@@ -113,4 +113,13 @@ export interface Container {
    * Clear all registrations
    */
   clear(): void;
+
+	  /**
+	   * Dispose all registered instances and clear the container.
+	   *
+	   * Calls any configured dispose hooks for instantiated blobs and
+	   * then clears all registrations. After this, the container should
+	   * be treated as no longer usable.
+	   */
+	  dispose(): Promise<void>;
 }
