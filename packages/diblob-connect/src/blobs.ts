@@ -58,7 +58,7 @@ export interface GrpcServer {
    */
   addService<S extends DescService>(
     service: S,
-    implementation: Partial<ServiceImpl<S>>
+    implementation: ServiceImpl<S>
   ): void;
 
   /**

@@ -126,9 +126,9 @@ async function stopServer(server: ReturnType<typeof spawn>) {
 	    const Database = mod.default ?? mod;
 	    const db = new Database(':memory:');
 	    db.close();
-	  } catch (error: any) {
+	  } catch (error: unknown) {
 	    if (
-	      error &&
+	      error && typeof error ==='object' && ('code' in error) &&
 	      (error.code === 'ERR_DLOPEN_FAILED' ||
 	        error.code === 'ERR_MODULE_NOT_FOUND' ||
 	        error.code === 'MODULE_NOT_FOUND')
