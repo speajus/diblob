@@ -24,6 +24,7 @@
     "@speajus/diblob": "workspace:*",
     "@speajus/diblob-drizzle": "workspace:*",
     "@speajus/diblob-connect": "workspace:*",
+    "@speajus/diblob-logger": "workspace:*",
     "drizzle-orm": "^0.36.0",
     "drizzle-seed": "^0.1.3"
   },

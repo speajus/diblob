@@ -36,7 +36,9 @@
   "author": "Justin Spears <speajus@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@speajus/diblob": "workspace:*"
+    "@speajus/diblob": "workspace:*",
+    "@speajus/diblob-logger": "workspace:*"
+
   },
   "dependencies": {
     "@connectrpc/connect": "^2.1.0",

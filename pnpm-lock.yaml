@@ -35,6 +35,9 @@ importers:
       '@speajus/diblob-drizzle':
         specifier: workspace:*
         version: link:../../packages/diblob-drizzle
+      '@speajus/diblob-logger':
+        specifier: workspace:*
+        version: link:../../packages/diblob-logger
       drizzle-orm:
         specifier: ^0.36.0
         version: 0.36.4(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)
@@ -102,6 +105,9 @@ importers:
       '@speajus/diblob':
         specifier: workspace:*
         version: link:../diblob
+      '@speajus/diblob-logger':
+        specifier: workspace:*
+        version: link:../diblob-logger
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
