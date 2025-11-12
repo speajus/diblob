@@ -27,23 +27,24 @@ const DEFAULT_CONFIG: Required<GrpcServerConfig> = {
 
 type ServiceRegistration<S extends DescService = DescService> = {
   service: S;
-  implementation: Partial<ServiceImpl<S>>;
+  implementation: ServiceImpl<S>;
 };
 
 /**
  * gRPC Service Registry implementation
  */
 export class GrpcServiceRegistryImpl implements GrpcServiceRegistry {
-  private services: ServiceRegistration<any>[] = [];
+  private services: ServiceRegistration[] = [];
 
   registerService<S extends DescService>(
     service: S,
-    implementation: Partial<ServiceImpl<S>>,
+    implementation: ServiceImpl<S>,
   ): void {
     this.services.push({ service, implementation });
+    
   }
 
-  getServices(): ServiceRegistration<any>[] {
+  getServices(): ServiceRegistration[] {
     return [...this.services];
   }
 }
@@ -70,7 +71,7 @@ export class GrpcServerImpl implements GrpcServer {
 
   addService<S extends DescService>(
     service: S,
-    implementation: Partial<ServiceImpl<S>>,
+    implementation: ServiceImpl<S>,
   ): void {
     this.serviceRegistry.registerService(service, implementation);
   }

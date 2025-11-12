@@ -38,7 +38,7 @@ const DEFAULT_CONFIG: GrpcServerConfig = {
  * @example
  * ```typescript
  * import { createContainer } from '@speajus/diblob';
- * import { registerGrpcBlobs } from '@speajus/diblob-grpc';
+ * import { registerGrpcBlobs } from '@speajus/diblob-connect';
  * 
  * const container = createContainer();
  * registerGrpcBlobs(container);
@@ -48,7 +48,7 @@ const DEFAULT_CONFIG: GrpcServerConfig = {
  * ```typescript
  * // With custom configuration
  * import { createContainer } from '@speajus/diblob';
- * import { registerGrpcBlobs } from '@speajus/diblob-grpc';
+ * import { registerGrpcBlobs } from '@speajus/diblob-connect';
  * 
  * const container = createContainer();
  * registerGrpcBlobs(container, {

@@ -39,8 +39,8 @@ features:
     details: Expose container functionality through Model Context Protocol for AI assistant integration.
 
   - icon: 🌐
-    title: gRPC Integration
-    details: Build gRPC servers with automatic dependency injection using diblob-grpc.
+    title: Connect/gRPC Integration
+    details: Build Connect/gRPC servers with automatic dependency injection using diblob-connect.
 
   - icon: 🗄️
     title: Database Integration
@@ -109,9 +109,9 @@ Model Context Protocol server for diblob containers.
 - [Getting Started](/mcp/getting-started)
 - [Examples](/mcp/examples)
 
-### @speajus/diblob-grpc
+### @speajus/diblob-connect
 
-gRPC server implementation for diblob containers.
+Connect-based gRPC server implementation for diblob containers.
 
 - [Documentation](/grpc/)
 - [Example Application](https://github.com/speajus/diblob/tree/main/examples/example-grpc-server)

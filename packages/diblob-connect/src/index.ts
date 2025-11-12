@@ -1,5 +1,5 @@
 /**
- * @speajus/diblob-grpc
+ * @speajus/diblob-connect
  * 
  * gRPC server implementation for diblob dependency injection containers,
  * backed by Connect-ES and Node's HTTP server.
@@ -11,7 +11,7 @@
  *   registerGrpcBlobs,
  *   grpcServer,
  *   grpcServiceRegistry,
- * } from '@speajus/diblob-grpc';
+ * } from '@speajus/diblob-connect';
  *
  * const container = createContainer();
  * registerGrpcBlobs(container, { port: 50051 });

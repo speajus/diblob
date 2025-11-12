@@ -1,15 +1,15 @@
 /**
- * Example gRPC server using diblob-grpc and diblob-drizzle
+ * Example gRPC server using diblob-connect and diblob-drizzle
  * 
  * This example demonstrates:
- * - Setting up a gRPC server with diblob-grpc
+ * - Setting up a gRPC server with diblob-connect
  * - Integrating a database with diblob-drizzle
  * - Using dependency injection for services
  * - Implementing gRPC service handlers
  */
 
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-grpc';
+import { registerGrpcBlobs, grpcServer, grpcServiceRegistry } from '@speajus/diblob-connect';
 import { registerDrizzleBlobs, databaseClient } from '@speajus/diblob-drizzle';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';

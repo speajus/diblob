@@ -1,7 +1,7 @@
 {
-  "name": "@speajus/diblob-grpc",
+  "name": "@speajus/diblob-connect",
   "version": "0.1.0",
-  "description": "gRPC server implementation for diblob dependency injection containers",
+  "description": "Connect-based gRPC server implementation for diblob dependency injection containers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-grpc build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build",
+    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-connect build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build",
     "dev": "tsc --watch",
     "test": "pnpm run build && tsx --test test/*.test.ts",
     "test:watch": "tsx --test --watch test/*.test.ts"

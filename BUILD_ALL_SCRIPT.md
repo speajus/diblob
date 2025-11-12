@@ -13,14 +13,14 @@ pnpm run build:all
 
 ### From any package directory:
 ```bash
-cd packages/diblob-grpc
+cd packages/diblob-connect
 pnpm run build:all
 ```
 
 Both commands will build all packages in the following order:
 1. `@speajus/diblob` (core package)
 2. `@speajus/diblob-mcp`
-3. `@speajus/diblob-grpc`
+ 3. `@speajus/diblob-connect`
 4. `@speajus/diblob-drizzle`
 5. `@speajus/diblob-visualizer`
 
@@ -38,7 +38,7 @@ The script is defined in each package's `package.json`:
 ```json
 {
   "scripts": {
-    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-grpc build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build"
+    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-connect build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build"
   }
 }
 ```
@@ -48,7 +48,7 @@ The script is defined in each package's `package.json`:
 - ✅ Root `package.json`
 - ✅ `packages/diblob/package.json`
 - ✅ `packages/diblob-mcp/package.json`
-- ✅ `packages/diblob-grpc/package.json`
+- ✅ `packages/diblob-connect/package.json`
 - ✅ `packages/diblob-drizzle/package.json`
 - ✅ `packages/diblob-visualizer/package.json`
 

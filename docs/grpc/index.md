@@ -1,15 +1,15 @@
-# diblob-grpc
+# diblob-connect
 
-gRPC server implementation for diblob dependency injection containers.
+Connect-based gRPC server implementation for diblob dependency injection containers.
 
 ## Overview
 
-`@speajus/diblob-grpc` provides a gRPC server that integrates seamlessly with diblob's dependency injection system, allowing you to build gRPC services with automatic dependency resolution.
+`@speajus/diblob-connect` provides a Connect/gRPC server that integrates seamlessly with diblob's dependency injection system, allowing you to build modern gRPC/Connect/gRPC-Web services with automatic dependency resolution.
 
 ## Installation
 
 ```bash
-npm install @speajus/diblob-grpc @speajus/diblob @grpc/grpc-js @grpc/proto-loader
+pnpm add @speajus/diblob-connect @speajus/diblob @connectrpc/connect @connectrpc/connect-node @bufbuild/protobuf
 ```
 
 **Requirements:** Node.js >= 22.0.0
@@ -18,35 +18,35 @@ npm install @speajus/diblob-grpc @speajus/diblob @grpc/grpc-js @grpc/proto-loade
 
 ```typescript
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer } from '@speajus/diblob-grpc';
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
+import {
+  registerGrpcBlobs,
+  grpcServer,
+  grpcServiceRegistry,
+} from '@speajus/diblob-connect';
+import { YourService } from './gen/your_connect.js'; // from protoc-gen-es / protoc-gen-connect-es
 
 // Create a diblob container
 const container = createContainer();
 
-// Register gRPC server blobs
+// Register gRPC/Connect server blobs
 registerGrpcBlobs(container, {
   host: '0.0.0.0',
-  port: 50051
+  port: 50051,
+  // optional: requestPathPrefix: '/api',
 });
 
-// Load your proto file
-const packageDefinition = protoLoader.loadSync('path/to/your.proto');
-const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
+// Register your generated service descriptor + implementation with the
+// service registry. The types come directly from Connect-ES codegen.
+grpcServiceRegistry.registerService(YourService, {
+  async yourMethod(request) {
+    // ...
+    return { /* response */ };
+  },
+});
 
-// Add your service implementation
-grpcServer.addService(
-  protoDescriptor.YourService.service,
-  {
-    yourMethod: (call, callback) => {
-      callback(null, { message: 'Hello!' });
-    }
-  }
-);
-
-// Start the server
-await grpcServer.start();
+// Resolve the grpcServer blob to start the server.
+// The registration uses lifecycle hooks to call server.start() for you.
+await container.resolve(grpcServer);
 console.log('gRPC server running on port 50051');
 ```
 
@@ -80,30 +80,20 @@ registerGrpcBlobs(container, {
 ### Advanced Configuration
 
 ```typescript
-import * as grpc from '@grpc/grpc-js';
-
 registerGrpcBlobs(container, {
   host: '0.0.0.0',
   port: 50051,
-  credentials: grpc.ServerCredentials.createSsl(
-    rootCert,
-    [{ private_key: privateKey, cert_chain: certChain }],
-    false
-  ),
-  options: {
-    'grpc.max_receive_message_length': 4 * 1024 * 1024,
-    'grpc.max_send_message_length': 4 * 1024 * 1024
-  }
+  requestPathPrefix: '/api',
 });
 ```
 
 ## Using with Dependency Injection
 
-The real power of `@speajus/diblob-grpc` comes from integrating it with your injected services:
+The real power of `@speajus/diblob-connect` comes from integrating it with your injected services:
 
 ```typescript
 import { createBlob, createContainer } from '@speajus/diblob';
-import { grpcServer } from '@speajus/diblob-grpc';
+import { grpcServer } from '@speajus/diblob-connect';
 
 // Define your service
 interface UserService {
@@ -147,13 +137,12 @@ grpcServer.addService(UserService.service, {
 
 Registers all gRPC-related blobs with the provided container.
 
-**Parameters:**
-- `container` (Container): The diblob container to register gRPC blobs with
-- `config` (optional): Custom configuration object
-  - `host` (string): Host to bind the server to (default: '0.0.0.0')
-  - `port` (number): Port to bind the server to (default: 50051)
-  - `credentials` (grpc.ServerCredentials): Server credentials (default: insecure)
-  - `options` (grpc.ChannelOptions): Additional server options
+  **Parameters:**
+  - `container` (Container): The diblob container to register gRPC blobs with
+  - `config` (optional): Custom configuration object
+    - `host` (string): Host to bind the server to (default: '0.0.0.0')
+    - `port` (number): Port to bind the server to (default: 50051)
+    - `requestPathPrefix` (string): Optional URL prefix for all RPCs (default: '')
 
 ### Exported Blobs
 
@@ -176,7 +165,7 @@ Registers all gRPC-related blobs with the provided container.
 
 See the complete [example-grpc-server](https://github.com/speajus/diblob/tree/main/examples/example-grpc-server) for a full working example that demonstrates:
 
-- Setting up a gRPC server with diblob-grpc
+- Setting up a gRPC server with diblob-connect
 - Integrating a database with diblob-drizzle
 - Using dependency injection for services
 - Implementing CRUD operations

@@ -1,13 +1,13 @@
-# @speajus/diblob-grpc
+# @speajus/diblob-connect
 
-gRPC server implementation for [diblob](https://github.com/speajus/diblob) dependency injection containers.
+Connect-based gRPC server implementation for [diblob](https://github.com/speajus/diblob) dependency injection containers.
 
-This package provides a gRPC server that integrates seamlessly with diblob's dependency injection system, using [Connect-ES](https://github.com/connectrpc/connect-es) under the hood. It lets you build modern gRPC/Connect/gRPC-Web services with automatic dependency resolution.
+This package provides a Connect/Grpc server that integrates seamlessly with diblob's dependency injection system, using [Connect-ES](https://github.com/connectrpc/connect-es) under the hood. It lets you build modern gRPC/Connect/gRPC-Web services with automatic dependency resolution.
 
 ## Installation
 
 ```bash
-pnpm add @speajus/diblob-grpc @speajus/diblob @connectrpc/connect @connectrpc/connect-node @bufbuild/protobuf
+pnpm add @speajus/diblob-connect @speajus/diblob @connectrpc/connect @connectrpc/connect-node @bufbuild/protobuf
 ```
 
 Requirements: Node.js >= 22.0.0
@@ -20,7 +20,7 @@ import {
   registerGrpcBlobs,
   grpcServer,
   grpcServiceRegistry,
-} from '@speajus/diblob-grpc';
+} from '@speajus/diblob-connect';
 import { YourService } from './gen/your_connect.js'; // from protoc-gen-connect-es
 
 // Create a diblob container
@@ -64,7 +64,7 @@ Registers all gRPC-related blobs with the provided container.
 
 ```typescript
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs } from '@speajus/diblob-grpc';
+import { registerGrpcBlobs } from '@speajus/diblob-connect';
 
 const container = createContainer();
 registerGrpcBlobs(container, {

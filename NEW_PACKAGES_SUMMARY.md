@@ -1,21 +1,21 @@
 # New Packages Summary
 
-This document summarizes the two new packages added to the diblob monorepo: `@speajus/diblob-grpc` and `@speajus/diblob-drizzle`.
+This document summarizes the two new packages added to the diblob monorepo: `@speajus/diblob-connect` and `@speajus/diblob-drizzle`.
 
 ## Created Packages
 
-### 1. @speajus/diblob-grpc
+### 1. @speajus/diblob-connect
 
-**Location:** `packages/diblob-grpc/`
+**Location:** `packages/diblob-connect/`
 
-**Purpose:** gRPC server implementation that integrates with the diblob dependency injection container.
+**Purpose:** Connect-based gRPC server implementation that integrates with the diblob dependency injection container.
 
 **Key Files:**
 - `src/blobs.ts` - Interface and blob definitions (GrpcServer, GrpcServerConfig, GrpcServiceRegistry)
 - `src/server.ts` - Concrete implementations (GrpcServerImpl, GrpcServiceRegistryImpl)
 - `src/register.ts` - Registration function `registerGrpcBlobs(container, config?)`
 - `src/index.ts` - Main export file
-- `package.json` - Package configuration with dependencies on @grpc/grpc-js and @grpc/proto-loader
+- `package.json` - Package configuration with dependencies on @connectrpc/connect, @connectrpc/connect-node, and @bufbuild/protobuf
 - `README.md` - Package documentation
 
 **Architecture Pattern:**
@@ -83,7 +83,7 @@ tsx src/client.ts
 
 ### Created Documentation Files:
 
-1. **docs/grpc/index.md** - Complete documentation for @speajus/diblob-grpc
+1. **docs/grpc/index.md** - Complete documentation for @speajus/diblob-connect
    - Installation instructions
    - Quick start guide
    - Configuration options
@@ -107,7 +107,7 @@ tsx src/client.ts
 ## Build Scripts
 
 Updated `package.json` in the repository root with new build scripts:
-- `build:grpc` - Build the diblob-grpc package
+- `build:grpc` - Build the diblob-connect package
 - `build:drizzle` - Build the diblob-drizzle package
 - `dev:grpc` - Watch mode for diblob-grpc
 - `dev:drizzle` - Watch mode for diblob-drizzle
@@ -153,9 +153,10 @@ Both packages strictly follow the diblob architecture patterns:
 
 ## Dependencies
 
-### diblob-grpc Dependencies:
-- `@grpc/grpc-js` - gRPC implementation
-- `@grpc/proto-loader` - Protocol buffer loader
+### diblob-connect Dependencies:
+- `@connectrpc/connect` - Connect/gRPC client and server API
+- `@connectrpc/connect-node` - Node.js transport and server adapter
+- `@bufbuild/protobuf` - Protobuf-ES runtime
 - `@speajus/diblob` (peer dependency)
 
 ### diblob-drizzle Dependencies:

@@ -1,10 +1,10 @@
 # Example gRPC Server
 
-This example demonstrates how to build a gRPC server using `@speajus/diblob-grpc` and `@speajus/diblob-drizzle` with the diblob dependency injection framework.
+This example demonstrates how to build a gRPC server using `@speajus/diblob-connect` and `@speajus/diblob-drizzle` with the diblob dependency injection framework.
 
 ## Features
 
-- ✅ gRPC server with dependency injection using `@speajus/diblob-grpc`
+- ✅ gRPC server with dependency injection using `@speajus/diblob-connect`
 - ✅ Database integration with Drizzle ORM using `@speajus/diblob-drizzle`
 - ✅ SQLite database for simplicity (easily swappable with PostgreSQL/MySQL)
 - ✅ Complete CRUD operations (Create, Read, Update, Delete)
@@ -117,7 +117,7 @@ The application uses diblob for dependency injection:
 
 ```typescript
 import { createContainer } from '@speajus/diblob';
-import { registerGrpcBlobs } from '@speajus/diblob-grpc';
+import { registerGrpcBlobs } from '@speajus/diblob-connect';
 import { registerDrizzleBlobs } from '@speajus/diblob-drizzle';
 
 const container = createContainer();
