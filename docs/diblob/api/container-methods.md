@@ -219,7 +219,7 @@ container.unregister(logger);
 
 ## clear
 
-Clear all registrations.
+Clear all registrations without calling dispose hooks.
 
 ### Signature
 
@@ -231,6 +231,52 @@ clear(): void
 
 ```typescript
 container.clear();
+```
+
+> Note: `clear()` is a low-level operation that simply forgets registrations
+> and cached instances. It does not call any `dispose` lifecycle hooks. For
+> proper shutdown and resource cleanup, prefer `container.dispose()`.
+
+## dispose
+
+Dispose all instantiated blobs and clear the container.
+
+Use this when shutting down your application or when a container is no longer
+needed. It will:
+
+- Call any configured `dispose` lifecycle hooks for instantiated blobs
+- Wait for async `dispose` hooks to complete
+- Clear all registrations and dependency tracking
+
+After `dispose()` completes, the container should be treated as no longer
+usable.
+
+### Signature
+
+```typescript
+dispose(): Promise<void>
+```
+
+### Examples
+
+#### Graceful shutdown
+
+```typescript
+// At application shutdown
+await container.dispose();
+```
+
+#### With lifecycle hooks
+
+```typescript
+container.register(database, DatabaseImpl, {
+  lifecycle: Lifecycle.Singleton,
+  initialize: 'initialize',
+  dispose: 'dispose',
+});
+
+// Later, when shutting down
+await container.dispose(); // calls database.dispose() and waits for it
 ```
 
 ## See Also

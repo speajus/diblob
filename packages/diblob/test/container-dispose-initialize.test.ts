@@ -389,3 +389,63 @@ describe('Container - Dispose', () => {
   });
 });
 
+describe('Container - Container Dispose', () => {
+	it('should dispose all instantiated singletons when container is disposed', async () => {
+		interface Service {
+			isDisposed: boolean;
+			dispose(): void;
+		}
+
+		class ServiceImpl implements Service {
+			isDisposed = false;
+			dispose() {
+				this.isDisposed = true;
+			}
+		}
+
+		const a = createBlob<Service>();
+		const b = createBlob<Service>();
+		const container = createContainer();
+
+		container.register(a, ServiceImpl, { lifecycle: Lifecycle.Singleton, dispose: 'dispose' });
+		container.register(b, ServiceImpl, { lifecycle: Lifecycle.Singleton, dispose: 'dispose' });
+
+		const aInstance = await container.resolve(a);
+		const bInstance = await container.resolve(b);
+
+		await container.dispose();
+
+		assert.strictEqual(aInstance.isDisposed, true);
+		assert.strictEqual(bInstance.isDisposed, true);
+		assert.strictEqual(container.has(a), false);
+		assert.strictEqual(container.has(b), false);
+	});
+
+	it('should wait for async dispose methods before completing container.dispose', async () => {
+		interface AsyncService {
+			isDisposed: boolean;
+			dispose(): Promise<void>;
+		}
+
+		class AsyncServiceImpl implements AsyncService {
+			isDisposed = false;
+
+			async dispose(): Promise<void> {
+				await new Promise((resolve) => setTimeout(resolve, 10));
+				this.isDisposed = true;
+			}
+		}
+
+		const service = createBlob<AsyncService>();
+		const container = createContainer();
+
+		container.register(service, AsyncServiceImpl, { lifecycle: Lifecycle.Singleton, dispose: 'dispose' });
+
+		const instance = await container.resolve(service);
+
+		await container.dispose();
+
+		assert.strictEqual(instance.isDisposed, true);
+	});
+});
+

@@ -473,6 +473,35 @@ export class Container implements IContainer {
     blobHandlers.delete(blobId);
   }
 
+	  async dispose(): Promise<void> {
+	    const disposePromises: Promise<void>[] = [];
+
+	    for (const registration of this.registrations.values()) {
+	      if (registration.instance && registration.dispose) {
+	        try {
+	          const result = this.callLifecycleMethod(registration.instance, registration.dispose);
+	          if (result instanceof Promise) {
+	            const handled = result.catch((error) => {
+	              console.error('Error in dispose method:', error);
+	            });
+	            disposePromises.push(handled);
+	          }
+	        } catch (error) {
+	          console.error('Error in dispose method:', error);
+	        }
+
+	        delete registration.instance;
+	      }
+	    }
+
+	    // Clear registrations, blob handlers, and dependency tracking
+	    this.clear();
+
+	    if (disposePromises.length > 0) {
+	      await Promise.all(disposePromises);
+	    }
+	  }
+	
   clear(): void {
     this.registrations.clear();
     blobHandlers.clear();
