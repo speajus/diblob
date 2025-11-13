@@ -10,7 +10,7 @@ export const blobPropSymbol = Symbol('blobProp');
 export interface BlobMetadata {
   name?: string;
   description?: string;
-  [key: string]: any;
+	[key: string]: unknown;
 }
 
 /**
@@ -22,8 +22,9 @@ export type Blob<T> = T & {
   readonly [blobPropSymbol]: symbol;
 };
 
-
+// biome-ignore lint/suspicious/noExplicitAny: it needs any
 export type Ctor<T> = new (...args: any[]) => T;
+// biome-ignore lint/suspicious/noExplicitAny: it needs any
 export type FactoryFn<T> = (...args: any[]) => T | Promise<T>;
 
 /**

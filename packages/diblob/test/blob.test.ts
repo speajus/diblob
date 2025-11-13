@@ -40,7 +40,7 @@ describe('Blob Creation', () => {
 
   it('should have blobPropSymbol property', () => {
     const blob = createBlob<{ test: string }>();
-    const id = (blob as any)[blobPropSymbol];
+	    const id = blob[blobPropSymbol];
     assert.ok(id);
     assert.strictEqual(typeof id, 'symbol');
   });
@@ -62,6 +62,7 @@ describe('Blob Creation', () => {
 
   it('should throw error for invalid blob in getBlobId', () => {
     assert.throws(
+      // biome-ignore lint/suspicious/noExplicitAny: it's a test
       () => getBlobId({} as any),
       /Invalid blob/
     );

@@ -81,7 +81,7 @@ describe('Edge Cases - Error Handling', () => {
     const service = createBlob<Service>();
     const container = createContainer();
     
-    container.register(service, () => new String('test') as any);
+    container.register(service, () => ({ toString: () => 'test' }));
     
     assert.strictEqual(service.toString(), 'test');
   });

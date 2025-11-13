@@ -31,7 +31,7 @@ export interface DatabaseConfig {
   /**
    * Additional driver-specific options
    */
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 
   /**
    * Enable logging
@@ -43,7 +43,7 @@ export interface DatabaseConfig {
  * Database client interface
  * Generic wrapper around Drizzle database instances
  */
-export interface DatabaseClient<TDatabase = any> {
+export interface DatabaseClient<TDatabase = unknown> {
   /**
    * Initialize the database connection with a Drizzle instance
    */
@@ -57,6 +57,7 @@ export interface DatabaseClient<TDatabase = any> {
   /**
    * Execute a raw SQL query
    */
+  // biome-ignore lint/suspicious/noExplicitAny: any is appropriate here
   execute<T = any>(query: string, params?: any[]): Promise<T>;
 
   /**

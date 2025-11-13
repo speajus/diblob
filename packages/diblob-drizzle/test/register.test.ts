@@ -19,7 +19,7 @@ test('registerDrizzleBlobs registers config and database client', async () => {
     logging: false,
   };
 
-  registerDrizzleBlobs(container as any, config);
+  registerDrizzleBlobs(container, config);
 
   const resolvedConfig = await container.resolve(databaseConfig);
   assert.equal(resolvedConfig.driver, 'sqlite');
@@ -27,6 +27,6 @@ test('registerDrizzleBlobs registers config and database client', async () => {
 
   const client = await container.resolve(databaseClient);
   assert.ok(client, 'expected a database client instance');
-  assert.equal(typeof (client as any).initialize, 'function');
+  assert.equal(typeof client.initialize, 'function');
 });
 

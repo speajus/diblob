@@ -19,7 +19,7 @@ export interface Cache {
 }
 
 export interface UserService {
-  getUser(id: number): unknown;
+  getUser(id: number): { id: number; name: string; email: string };
 }
 
 export interface EmailService {
@@ -77,7 +77,7 @@ export class NotificationServiceImpl implements NotificationService {
   notify(userId: number, message: string) {
     this.logger.log(`Notifying user ${userId}: ${message}`);
     const user = this.userService.getUser(userId);
-    this.emailService.sendEmail((user as any)?.email || 'unknown', message);
+    this.emailService.sendEmail(user?.email || 'unknown', message);
   }
 }
 
@@ -89,32 +89,16 @@ export class MetricsServiceImpl implements MetricsService {
 }
 
 // Lazy blob creation - only create when first accessed
-let _logger: ReturnType<typeof createBlob<Logger>> | null = null;
-let _database: ReturnType<typeof createBlob<Database>> | null = null;
-let _cache: ReturnType<typeof createBlob<Cache>> | null = null;
-let _userService: ReturnType<typeof createBlob<UserService>> | null = null;
-let _emailService: ReturnType<typeof createBlob<EmailService>> | null = null;
-let _notificationService: ReturnType<typeof createBlob<NotificationService>> | null = null;
-let _metrics: ReturnType<typeof createBlob<MetricsService>> | null = null;
 
 function getBlobs() {
-  if (!_logger) {
-    _logger = createBlob<Logger>('logger');
-    _database = createBlob<Database>('database');
-    _cache = createBlob<Cache>('cache');
-    _userService = createBlob<UserService>('userService');
-    _emailService = createBlob<EmailService>('emailService');
-    _notificationService = createBlob<NotificationService>('notificationService');
-    _metrics = createBlob<MetricsService>('metrics');
-  }
   return {
-    logger: _logger,
-    database: _database!,
-    cache: _cache!,
-    userService: _userService!,
-    emailService: _emailService!,
-    notificationService: _notificationService!,
-    metrics: _metrics!
+    logger: createBlob<Logger>('logger'),
+    database: createBlob<Database>('database'),
+    cache: createBlob<Cache>('cache'),
+    userService: createBlob<UserService>('userService'),
+    emailService: createBlob<EmailService>('emailService'),
+    notificationService: createBlob<NotificationService>('notificationService'),
+    metrics: createBlob<MetricsService>('metrics')
   };
 }
 

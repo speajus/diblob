@@ -14,7 +14,7 @@ describe('Integration - Real World Scenarios', () => {
     }
     
     interface Database {
-      query(sql: string): Promise<any[]>;
+      query(sql: string): Promise<unknown[]>;
     }
     
     interface UserRepository {
@@ -43,7 +43,7 @@ describe('Integration - Real World Scenarios', () => {
     class PostgresDatabase implements Database {
       constructor(private log = logger) {}
       
-      async query(sql: string): Promise<any[]> {
+      async query(sql: string) {
         this.log.log(`Executing: ${sql}`);
         await new Promise(resolve => setTimeout(resolve, 10));
         return [{ id: 1, name: 'Alice' }];

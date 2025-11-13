@@ -13,7 +13,7 @@ interface Logger {
 }
 
 interface Database {
-  query(sql: string): Promise<any>;
+  query(sql: string): Promise<unknown[]>;
 }
 
 interface UserService {
@@ -46,7 +46,7 @@ class ConsoleLogger implements Logger {
 class MockDatabase implements Database {
   constructor(private log: Logger) {}
   
-  async query(sql: string): Promise<any> {
+  async query(sql: string): Promise<unknown[]> {
     this.log.log(`Executing query: ${sql}`);
     return [];
   }

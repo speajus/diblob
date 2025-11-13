@@ -1,19 +1,24 @@
 <script lang="ts">
+  import type { Container } from '@speajus/diblob';
   import { onMount } from 'svelte';
   import { extractDependencyGraph, type DependencyGraph as GraphData, getGraphStats } from './container-introspection';
+  // biome-ignore lint/correctness/noUnusedImports: used but biome doesn't get it    
+  import DependencyGraph from './DependencyGraph.svelte';
 
   const {
     container,
     autoRefresh = false,
     refreshInterval = 1000
   }: {
-    container: any;
+    container: Container;
     autoRefresh?: boolean;
     refreshInterval?: number;
   } = $props();
 
-  let _graph = $state<GraphData>({ nodes: [], edges: [] });
-  let _stats = $state({
+  // biome-ignore lint/correctness/noUnusedVariables : used but biome doesn't get it    
+  let graph = $state<GraphData>({ nodes: [], edges: [] });
+  // biome-ignore lint/correctness/noUnusedVariables : used but biome doesn't get it    
+  let stats = $state({
     totalNodes: 0,
     totalEdges: 0,
     singletons: 0,
@@ -24,14 +29,12 @@
 
   function updateGraph() {
     const newGraph = extractDependencyGraph(container);
-    _graph = newGraph;
-    _stats = getGraphStats(newGraph);
+    graph = newGraph;
+    stats = getGraphStats(newGraph);
   }
 
   // Initialize on mount
-  onMount(() => {
-    updateGraph();
-  });
+  onMount(updateGraph);
 
   // Auto-refresh if enabled
   $effect(() => {
@@ -41,7 +44,8 @@
     }
   });
 
-  function _handleRefresh() {
+  // biome-ignore lint/correctness/noUnusedVariables : used but biome doesn't get it    
+  function handleRefresh() {
     updateGraph();
   }
 </script>

@@ -12,11 +12,6 @@ describe('Constructor Resolution - Default Parameters', () => {
       log(msg: string): string;
     }
     
-    class MyService {
-      constructor(private logger = createBlob<Logger>()) {}
-      work() { return this.logger.log('working'); }
-    }
-    
     const logger = createBlob<Logger>();
     const container = createContainer();
     

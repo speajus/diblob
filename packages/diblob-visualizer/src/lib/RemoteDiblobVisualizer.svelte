@@ -1,7 +1,7 @@
 <script lang="ts">
   
-  import { onMount } from 'svelte';
-  import { type DependencyGraph as GraphData, getGraphStats } from './container-introspection';
+	import { onMount } from 'svelte';
+	import { type DependencyGraph as GraphData, type GraphStats, getGraphStats } from './container-introspection';
 
   const {
     url
@@ -9,8 +9,8 @@
     url: string;
   } = $props();
 
-  let _graph = $state<GraphData>({ nodes: [], edges: [] });
-  let _stats = $state({
+	let _graph = $state<GraphData>({ nodes: [], edges: [] });
+	let _stats = $state<GraphStats>({
     totalNodes: 0,
     totalEdges: 0,
     singletons: 0,
@@ -23,7 +23,12 @@
 
   let eventSource: EventSource | null = null;
 
-  function updateFromData(data: any) {
+	type RemoteVisualizerPayload = {
+	  graph: GraphData;
+	  stats?: GraphStats;
+	};
+
+	function updateFromData(data: RemoteVisualizerPayload) {
     if (data.graph) {
       _graph = data.graph;
       _stats = data.stats || getGraphStats(data.graph);

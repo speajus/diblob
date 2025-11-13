@@ -18,7 +18,7 @@ import type {
  * This is a generic wrapper that can work with any Drizzle database instance.
  * For specific database implementations, extend this class or create custom implementations.
  */
-export class DatabaseClientImpl<TDatabase = any> implements DatabaseClient<TDatabase> {
+export class DatabaseClientImpl<TDatabase> implements DatabaseClient<TDatabase> {
   private db: TDatabase;
   private connected: boolean = false;
 
@@ -26,7 +26,7 @@ export class DatabaseClientImpl<TDatabase = any> implements DatabaseClient<TData
     private connectionManager: DatabaseConnectionManager
   ) {
     // The actual db instance will be set during connection
-    this.db = null as any;
+    this.db = null as TDatabase;
   }
 
   /**
@@ -45,7 +45,7 @@ export class DatabaseClientImpl<TDatabase = any> implements DatabaseClient<TData
     }
     return this.db;
   }
-
+  // biome-ignore lint/suspicious/noExplicitAny: it's a generic implementation
   async execute<T = any>(_query: string, _params?: any[]): Promise<T> {
     if (!this.connected) {
       throw new Error('Database not connected');
@@ -84,13 +84,7 @@ export class DatabaseConnectionManagerImpl implements DatabaseConnectionManager 
 
   constructor(private config: DatabaseConfig) {}
 
-  /**
-   * Set the connection instance
-   * This should be called by the driver-specific implementation
-   */
-  setConnection(connection: any): void {
-    this.connectionInstance = connection;
-  }
+  
 
   async connect(): Promise<void> {
     if (this.connected) {
@@ -113,7 +107,6 @@ export class DatabaseConnectionManagerImpl implements DatabaseConnectionManager 
 
     // Cleanup is handled by the driver-specific implementation
     this.connected = false;
-    this.connectionInstance = null;
 
     if (this.config.logging) {
       console.log(`Disconnected from ${this.config.driver} database`);
@@ -152,8 +145,6 @@ export class DatabaseConnectionManagerImpl implements DatabaseConnectionManager 
  * Migration Runner implementation
  */
 export class MigrationRunnerImpl implements MigrationRunner {
-  constructor(_config: DatabaseConfig,_client: DatabaseClient
-  ) {}
 
   async migrate(): Promise<void> {
     // This is a placeholder - actual migration logic depends on the driver

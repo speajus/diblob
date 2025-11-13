@@ -10,7 +10,7 @@ interface Logger {
 }
 
 interface Database {
-  query(sql: string): any[];
+  query(sql: string): unknown[];
 }
 
 interface UserService {
@@ -32,7 +32,7 @@ class MockDatabase implements Database {
     { id: 3, name: 'Charlie' },
   ];
 
-  query(sql: string): any[] {
+  query(sql: string): unknown[] {
     console.log(`[DB] Executing: ${sql}`);
     return this.data;
   }
@@ -47,12 +47,12 @@ class UserServiceImpl implements UserService {
   getUser(id: number) {
     this.logger.log(`Fetching user ${id}`);
     const users = this.db.query(`SELECT * FROM users WHERE id = ${id}`);
-    return users[0];
+    return users[0] as { id: number; name: string };
   }
 
   getAllUsers() {
     this.logger.log('Fetching all users');
-    return this.db.query('SELECT * FROM users');
+    return this.db.query('SELECT * FROM users') as { id: number; name: string }[];
   }
 }
 

@@ -9,7 +9,7 @@ interface Logger {
 }
 
 interface Database {
-  query(sql: string): Promise<any>;
+  query(sql: string): Promise<unknown[]>;
 }
 
 const logger = createBlob<Logger>();

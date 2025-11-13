@@ -13,6 +13,8 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { reset, seed } from 'drizzle-seed';
 import * as schema from './schema.js';
 
+type SeedDatabase = Parameters<typeof reset>[0];
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -48,17 +50,17 @@ async function main() {
     )
   `);
 
-  // Reset database if requested
-  if (shouldReset) {
-    console.log('🗑️  Resetting database...');
-    await reset(db as any, schema);
-    console.log('✅ Database reset complete\n');
-  }
+	  // Reset database if requested
+	  if (shouldReset) {
+	    console.log('🗑️  Resetting database...');
+	    await reset(db as SeedDatabase, schema);
+	    console.log('✅ Database reset complete\n');
+	  }
 
   // Seed the database with sample data using refinements for realistic data
   console.log('🌱 Seeding users table with realistic data...');
 
-  await seed(db as any, schema, {
+	  await seed(db as SeedDatabase, schema, {
     count: 20,  // Generate 20 sample users
     seed: 12345 // Use a fixed seed for reproducible data
   }).refine((funcs) => ({
