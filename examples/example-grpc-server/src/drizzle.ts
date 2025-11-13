@@ -1,9 +1,9 @@
 /**
- * Example gRPC server using diblob-connect and diblob-drizzle
- * 
- * This example demonstrates:
+ * Example gRPC server using diblob-connect with a Drizzle ORM-backed database
+ *
+ * This module demonstrates:
  * - Setting up a gRPC server with diblob-connect
- * - Integrating a database with diblob-drizzle
+ * - Integrating a database using Drizzle ORM
  * - Using dependency injection for services
  * - Implementing gRPC service handlers
  */

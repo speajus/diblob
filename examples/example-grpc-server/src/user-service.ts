@@ -2,7 +2,7 @@
  * User service implementation
  * 
  * This service demonstrates dependency injection with diblob,
- * using the database client from diblob-drizzle.
+ * using a Drizzle ORM-backed database client.
  */
 
 import { create } from '@bufbuild/protobuf';
@@ -23,7 +23,9 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
   ) {}
 
   async getUser({id}:{id: number}):Promise<GetUserResponse> {
-    const [user] = await this.db.select().from(users).where(eq(users.id, id));
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, id)
+    });
     if (!user){
       throw new Error(`user not found`);
     }

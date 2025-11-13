@@ -1,7 +1,7 @@
 {
   "name": "example-grpc-server",
   "version": "0.0.1",
-  "description": "Example gRPC server using diblob-connect and diblob-drizzle",
+  "description": "Example gRPC server using diblob-connect with a Drizzle ORM-backed database",
   "type": "module",
   "private": true,
   "scripts": {
