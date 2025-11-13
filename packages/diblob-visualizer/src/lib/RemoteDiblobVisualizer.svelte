@@ -1,7 +1,7 @@
 <script lang="ts">
-  import DependencyGraph from './DependencyGraph.svelte';
-  import { getGraphStats, type DependencyGraph as GraphData } from './container-introspection';
+  
   import { onMount } from 'svelte';
+  import { type DependencyGraph as GraphData, getGraphStats } from './container-introspection';
 
   const {
     url
@@ -9,8 +9,8 @@
     url: string;
   } = $props();
 
-  let graph = $state<GraphData>({ nodes: [], edges: [] });
-  let stats = $state({
+  let _graph = $state<GraphData>({ nodes: [], edges: [] });
+  let _stats = $state({
     totalNodes: 0,
     totalEdges: 0,
     singletons: 0,
@@ -18,28 +18,28 @@
     unregistered: 0,
     maxDepth: 0,
   });
-  let connectionStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
-  let errorMessage = $state<string>('');
+  let _connectionStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  let _errorMessage = $state<string>('');
 
   let eventSource: EventSource | null = null;
 
   function updateFromData(data: any) {
     if (data.graph) {
-      graph = data.graph;
-      stats = data.stats || getGraphStats(data.graph);
+      _graph = data.graph;
+      _stats = data.stats || getGraphStats(data.graph);
     }
   }
 
   function connect() {
     disconnect();
-    connectionStatus = 'connecting';
-    errorMessage = '';
+    _connectionStatus = 'connecting';
+    _errorMessage = '';
 
     try {
       eventSource = new EventSource(url);
 
       eventSource.onopen = () => {
-        connectionStatus = 'connected';
+        _connectionStatus = 'connected';
       };
 
       eventSource.onmessage = (event) => {
@@ -52,13 +52,13 @@
       };
 
       eventSource.onerror = (err) => {
-        connectionStatus = 'error';
-        errorMessage = 'SSE connection error';
+        _connectionStatus = 'error';
+        _errorMessage = 'SSE connection error';
         console.error('SSE error:', err);
       };
     } catch (err) {
-      connectionStatus = 'error';
-      errorMessage = err instanceof Error ? err.message : 'Failed to connect';
+      _connectionStatus = 'error';
+      _errorMessage = err instanceof Error ? err.message : 'Failed to connect';
     }
   }
 
@@ -67,7 +67,7 @@
       eventSource.close();
       eventSource = null;
     }
-    connectionStatus = 'disconnected';
+    _connectionStatus = 'disconnected';
   }
 
   onMount(() => {
@@ -75,7 +75,7 @@
     return () => disconnect();
   });
 
-  function handleReconnect() {
+  function _handleReconnect() {
     connect();
   }
 </script>

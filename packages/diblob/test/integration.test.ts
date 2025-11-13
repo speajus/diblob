@@ -2,8 +2,8 @@
  * Integration tests - complex real-world scenarios
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer } from '../src';
 
 describe('Integration - Real World Scenarios', () => {

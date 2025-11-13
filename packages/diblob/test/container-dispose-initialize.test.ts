@@ -2,8 +2,8 @@
  * Container dispose and initialize lifecycle tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer, Lifecycle } from '../src';
 
 describe('Container - Initialize', () => {
@@ -309,7 +309,7 @@ describe('Container - Dispose', () => {
 
     class ServiceImpl implements Service {
       isDisposed = false;
-      constructor(private logger: Logger) {}
+      constructor(_logger: Logger) {}
       dispose() {
         this.isDisposed = true;
       }
@@ -356,13 +356,13 @@ describe('Container - Dispose', () => {
 
     class BImpl implements B {
       isDisposed = false;
-      constructor(private a: A) {}
+      constructor(_a: A) {}
       dispose() { this.isDisposed = true; }
     }
 
     class CImpl implements C {
       isDisposed = false;
-      constructor(private b: B) {}
+      constructor(_b: B) {}
       dispose() { this.isDisposed = true; }
     }
 

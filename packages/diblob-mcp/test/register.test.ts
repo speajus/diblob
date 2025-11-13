@@ -1,8 +1,8 @@
-import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { test } from 'node:test';
 import { createContainer } from '@speajus/diblob';
+import { containerIntrospector, mcpServerConfig } from '../src/blobs.js';
 import { registerMcpBlobs } from '../src/register.js';
-import { mcpServerConfig, containerIntrospector } from '../src/blobs.js';
 
 // Verify registerMcpBlobs registers config and container introspector
 // against a real diblob Container using the provided configuration.

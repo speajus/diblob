@@ -1,12 +1,12 @@
-import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { test } from 'node:test';
 import { createContainer } from '@speajus/diblob';
-import { registerDrizzleBlobs } from '../src/register.js';
 import {
-  databaseConfig,
-  databaseClient,
   type DatabaseConfig,
+  databaseClient,
+  databaseConfig,
 } from '../src/blobs.js';
+import { registerDrizzleBlobs } from '../src/register.js';
 
 // Basic sanity check that registerDrizzleBlobs wires up the database
 // configuration and client in the container.

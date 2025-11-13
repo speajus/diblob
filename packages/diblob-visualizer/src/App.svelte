@@ -1,23 +1,22 @@
 <script lang="ts">
-  import DiblobVisualizer from './lib/DiblobVisualizer.svelte';
-  import RemoteDiblobVisualizer from './lib/RemoteDiblobVisualizer.svelte';
+  
   import {
-    createSampleContainer,
     addMetricsService,
+    createSampleContainer,
     getLoggerBlob,
     getLoggerImpl
   } from './examples/sample-container.js';
 
-  const mode = $state<'local' | 'remote'>('local');
-  const remoteUrl = $state('http://localhost:3001/events');
+  const _mode = $state<'local' | 'remote'>('local');
+  const _remoteUrl = $state('http://localhost:3001/events');
 
   // Create sample container for local mode demo
   const container = createSampleContainer();
-  const logger = getLoggerBlob();
-  const ConsoleLogger = getLoggerImpl();
+  const _logger = getLoggerBlob();
+  const _ConsoleLogger = getLoggerImpl();
 
   // Function to add more services dynamically
-  function addMoreServices() {
+  function _addMoreServices() {
     addMetricsService(container);
   }
 </script>

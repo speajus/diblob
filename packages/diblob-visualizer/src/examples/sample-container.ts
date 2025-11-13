@@ -54,7 +54,7 @@ export class MemoryCache implements Cache {
 }
 
 export class UserServiceImpl implements UserService {
-  constructor(private logger: Logger, private database: Database, private cache: Cache) {}
+  constructor(private logger: Logger, private database: Database, _cache: Cache) {}
   getUser(id: number) {
     this.logger.log(`Getting user ${id}`);
     return this.database.query(`SELECT * FROM users WHERE id = ${id}`)[0];

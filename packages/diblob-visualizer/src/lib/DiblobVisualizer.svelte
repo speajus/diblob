@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import DependencyGraph from './DependencyGraph.svelte';
-  import { extractDependencyGraph, getGraphStats, type DependencyGraph as GraphData } from './container-introspection';
+  import { extractDependencyGraph, type DependencyGraph as GraphData, getGraphStats } from './container-introspection';
 
   const {
     container,
@@ -13,8 +12,8 @@
     refreshInterval?: number;
   } = $props();
 
-  let graph = $state<GraphData>({ nodes: [], edges: [] });
-  let stats = $state({
+  let _graph = $state<GraphData>({ nodes: [], edges: [] });
+  let _stats = $state({
     totalNodes: 0,
     totalEdges: 0,
     singletons: 0,
@@ -25,8 +24,8 @@
 
   function updateGraph() {
     const newGraph = extractDependencyGraph(container);
-    graph = newGraph;
-    stats = getGraphStats(newGraph);
+    _graph = newGraph;
+    _stats = getGraphStats(newGraph);
   }
 
   // Initialize on mount
@@ -42,7 +41,7 @@
     }
   });
 
-  function handleRefresh() {
+  function _handleRefresh() {
     updateGraph();
   }
 </script>

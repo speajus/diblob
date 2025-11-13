@@ -5,7 +5,7 @@
  */
 
 import { createBlob, createContainer } from '@speajus/diblob';
-import { registerMcpBlobs, mcpServer } from './src/index.js';
+import { mcpServer, registerMcpBlobs } from './src/index.js';
 
 // Define some example services
 interface Logger {

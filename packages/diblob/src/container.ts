@@ -2,17 +2,17 @@
  * DI Container implementation
  */
 
-	import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking, setBlobContainer, BlobNotReadyError, isTrackingConstructor } from './blob.js';
-	import { blobPropSymbol, Lifecycle } from './types.js';
+	import { BlobNotReadyError, beginConstructorTracking, blobHandlers, blobInstanceGetters, endConstructorTracking, getBlobId, isBlob, isTrackingConstructor, setBlobContainer } from './blob.js';
 import {
   beginTracking,
-  endTracking,
-  trackDependency,
-  getDependents,
-  clearDependencies,
   clearAllDependencies,
+  clearDependencies,
+  endTracking,
+  getDependents,
+  trackDependency,
 	} from './reactive.js';
-	import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams, BlobMetadata, Ctor, FactoryFn, RegistrationOptions } from './types.js';
+	import type { Blob, BlobMetadata, Ctor, Factory, FactoryFn, FactoryParams, Container as IContainer, RegisterParams, RegistrationOptions } from './types.js';
+	import { blobPropSymbol, Lifecycle } from './types.js';
 
 interface Registration<T = unknown> {
   factory: Factory<T>;

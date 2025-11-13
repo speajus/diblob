@@ -2,8 +2,8 @@
  * Edge cases and error handling tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer } from '../src';
 
 describe('Edge Cases - Error Handling', () => {

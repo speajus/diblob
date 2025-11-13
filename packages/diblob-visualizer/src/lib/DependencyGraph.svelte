@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SvelteFlow, Controls, Background, MiniMap } from '@xyflow/svelte';
-  import type { Node, Edge } from '@xyflow/svelte';
+  
+  import type { Edge, Node } from '@xyflow/svelte';
   import '@xyflow/svelte/dist/style.css';
   import type { DependencyGraph } from './container-introspection';
   import { createBlobLabel } from './container-introspection';
@@ -59,14 +59,14 @@
   }
 
   // Use Svelte 5 $state.raw for nodes and edges
-  let nodes = $state.raw<Node[]>([]);
-  let edges = $state.raw<Edge[]>([]);
+  let _nodes = $state.raw<Node[]>([]);
+  let _edges = $state.raw<Edge[]>([]);
 
   // Update when graph changes
   $effect(() => {
     const updated = convertToFlowGraph(graph);
-    nodes = updated.nodes;
-    edges = updated.edges;
+    _nodes = updated.nodes;
+    _edges = updated.edges;
   });
 </script>
 

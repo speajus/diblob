@@ -2,8 +2,8 @@
  * Blob creation and basic functionality tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, getBlobId, isBlob } from '../src/blob';
 import { blobPropSymbol } from '../src/types';
 

@@ -26,29 +26,28 @@
  * ```
  */
 
-// Export registration function
-export { registerDrizzleBlobs } from './register.js';
-
-// Export blob declarations
-export {
-  databaseConfig,
-  databaseClient,
-  databaseConnectionManager,
-  migrationRunner
-} from './blobs.js';
 
 // Export types
 export type {
-  DatabaseConfig,
   DatabaseClient,
+  DatabaseConfig,
   DatabaseConnectionManager,
   MigrationRunner
 } from './blobs.js';
 
+// Export blob declarations
+export {
+  databaseClient,
+  databaseConfig,
+  databaseConnectionManager,
+  migrationRunner
+} from './blobs.js';
 // Export implementations (for advanced use cases)
 export {
   DatabaseClientImpl,
   DatabaseConnectionManagerImpl,
   MigrationRunnerImpl
 } from './client.js';
+// Export registration function
+export { registerDrizzleBlobs } from './register.js';
 

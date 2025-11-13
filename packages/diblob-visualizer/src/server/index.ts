@@ -4,7 +4,7 @@
  * Exposes container introspection data via SSE and REST API
  */
 
-import { createServer } from 'http';
+import { createServer } from 'node:http';
 import type { Container } from '@speajus/diblob';
 import { extractDependencyGraph, getGraphStats } from '../lib/container-introspection.js';
 

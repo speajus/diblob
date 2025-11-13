@@ -3,7 +3,7 @@
  */
 
 import type { Container } from '@speajus/diblob';
-import { loggerConfig, logger, type LoggerConfig } from './blobs.js';
+import { type LoggerConfig, logger, loggerConfig } from './blobs.js';
 import { createWinstonLogger } from './logger.js';
 
 const DEFAULT_LOGGER_CONFIG: LoggerConfig = {

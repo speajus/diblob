@@ -5,12 +5,12 @@
  * Run with: npm run db:seed
  */
 
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import Database from 'better-sqlite3';
-import { seed, reset } from 'drizzle-seed';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { mkdirSync } from 'fs';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { reset, seed } from 'drizzle-seed';
 import * as schema from './schema.js';
 
 const __filename = fileURLToPath(import.meta.url);

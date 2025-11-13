@@ -1,6 +1,6 @@
+import { glob } from 'node:fs/promises';
 import { run } from 'node:test';
 import { spec as specReporter } from 'node:test/reporters';
-import { glob } from 'node:fs/promises';
 
 async function runTests() {
   // Find all test files

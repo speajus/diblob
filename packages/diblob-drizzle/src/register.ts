@@ -7,11 +7,11 @@
 
 import type { IContainer } from '@speajus/diblob';
 import {
-  databaseConfig,
+  type DatabaseConfig, 
   databaseClient,
+  databaseConfig,
   databaseConnectionManager,
-  migrationRunner,
-  type DatabaseConfig
+  migrationRunner
 } from './blobs.js';
 import {
   DatabaseClientImpl,

@@ -1,8 +1,8 @@
 /**
  * Utilities for introspecting diblob containers to extract dependency graph data
  */
-import type { Container, Blob, BlobMetadata } from '@speajus/diblob';
-import { getBlobId, isBlob, Lifecycle, getBlobMetadata } from '@speajus/diblob';
+import type { BlobMetadata, } from '@speajus/diblob';
+import { getBlobId, getBlobMetadata, isBlob, Lifecycle } from '@speajus/diblob';
 
 export interface BlobNode {
   id: string;

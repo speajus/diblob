@@ -8,15 +8,15 @@
 import type { Container } from '@speajus/diblob';
 import { Lifecycle } from '@speajus/diblob';
 import {
-	  mcpServerConfig,
-	  mcpServer,
-	  mcpTransport,
 	  containerIntrospector,
+	  mcpServer,
+	  mcpServerConfig,
+	  mcpTransport,
 	} from './blobs.js';
 import {
+  ContainerIntrospectorImpl,
   McpServerImpl,
   StdioMcpTransport,
-  ContainerIntrospectorImpl,
 } from './server.js';
 
 /**

@@ -38,7 +38,6 @@ instance.someMethod(); // Should print: Hello Jane
 console.log('\n=== Test 3: Property initialization with blob ===');
 class MyPropImpl {
   private blob = myBlob;
-  constructor() {}
   someMethod() {
     this.blob.someMethod();
   }

@@ -5,15 +5,15 @@
  * using the database client from diblob-drizzle.
  */
 
-import { createBlob } from '@speajus/diblob';
-import { databaseClient, type DatabaseClient } from '@speajus/diblob-drizzle';
-import { eq } from 'drizzle-orm';
-import { users, type User, type NewUser } from './db/schema.js';
-import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse, 
-  DeleteUserResponseSchema, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type CreateUserRequest, type CreateUserResponse, type GetUserResponse, type UserService } from './generated/user_pb.js';
-import type { ServiceImpl } from '@connectrpc/connect';
 import { create } from '@bufbuild/protobuf';
+import type { ServiceImpl } from '@connectrpc/connect';
+import { createBlob } from '@speajus/diblob';
+import { type DatabaseClient, databaseClient } from '@speajus/diblob-drizzle';
+import { eq } from 'drizzle-orm';
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { type NewUser, type User, users } from './db/schema.js';
+import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse, 
+  DeleteUserResponseSchema, type GetUserResponse, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type UserService } from './generated/user_pb.js';
 
 /**
  * User service implementation

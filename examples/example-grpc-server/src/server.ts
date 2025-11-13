@@ -8,18 +8,17 @@
  * - Implementing gRPC service handlers
  */
 
+import { mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 	import { createBlob, createContainer, Lifecycle } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer } from '@speajus/diblob-connect';
+import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
+import { databaseClient, registerDrizzleBlobs } from '@speajus/diblob-drizzle';
 import { registerLoggerBlobs } from '@speajus/diblob-logger';
-import { registerDrizzleBlobs, databaseClient } from '@speajus/diblob-drizzle';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { mkdirSync } from 'fs';
-
-import { registerUserService } from './register.js';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './db/schema.js';
+import { registerUserService } from './register.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

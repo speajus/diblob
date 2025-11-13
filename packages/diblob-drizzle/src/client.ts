@@ -22,8 +22,7 @@ export class DatabaseClientImpl<TDatabase = any> implements DatabaseClient<TData
   private db: TDatabase;
   private connected: boolean = false;
 
-  constructor(
-    private config: DatabaseConfig,
+  constructor(_config: DatabaseConfig,
     private connectionManager: DatabaseConnectionManager
   ) {
     // The actual db instance will be set during connection
@@ -47,7 +46,7 @@ export class DatabaseClientImpl<TDatabase = any> implements DatabaseClient<TData
     return this.db;
   }
 
-  async execute<T = any>(query: string, params?: any[]): Promise<T> {
+  async execute<T = any>(_query: string, _params?: any[]): Promise<T> {
     if (!this.connected) {
       throw new Error('Database not connected');
     }
@@ -56,7 +55,7 @@ export class DatabaseClientImpl<TDatabase = any> implements DatabaseClient<TData
     throw new Error('execute() must be implemented by driver-specific client');
   }
 
-  async transaction<T>(callback: (tx: TDatabase) => Promise<T>): Promise<T> {
+  async transaction<T>(_callback: (tx: TDatabase) => Promise<T>): Promise<T> {
     if (!this.connected) {
       throw new Error('Database not connected');
     }
@@ -82,7 +81,6 @@ export class DatabaseClientImpl<TDatabase = any> implements DatabaseClient<TData
  */
 export class DatabaseConnectionManagerImpl implements DatabaseConnectionManager {
   private connected: boolean = false;
-  private connectionInstance: any = null;
 
   constructor(private config: DatabaseConfig) {}
 
@@ -130,7 +128,7 @@ export class DatabaseConnectionManagerImpl implements DatabaseConnectionManager 
     try {
       // Basic health check - can be overridden by driver-specific implementation
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -154,9 +152,7 @@ export class DatabaseConnectionManagerImpl implements DatabaseConnectionManager 
  * Migration Runner implementation
  */
 export class MigrationRunnerImpl implements MigrationRunner {
-  constructor(
-    private config: DatabaseConfig,
-    private client: DatabaseClient
+  constructor(_config: DatabaseConfig,_client: DatabaseClient
   ) {}
 
   async migrate(): Promise<void> {

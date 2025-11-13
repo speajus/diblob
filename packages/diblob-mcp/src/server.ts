@@ -13,10 +13,10 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Container } from '@speajus/diblob';
 import type {
+  ContainerIntrospector, 
   McpServer,
   McpServerConfig,
-  McpTransport,
-  ContainerIntrospector
+  McpTransport
 } from './blobs.js';
 
 /**
@@ -50,8 +50,7 @@ export class McpServerImpl implements McpServer {
   private server: Server;
   private running: boolean = false;
 
-  constructor(
-    private config: McpServerConfig,
+  constructor(config: McpServerConfig,
     private transport: McpTransport,
     private introspector: ContainerIntrospector
   ) {
