@@ -90,8 +90,6 @@ export function registerDrizzleBlobs(
   container.register(
     migrationRunner,
     MigrationRunnerImpl,
-    databaseConfig,
-    databaseClient
   );
 }
 
