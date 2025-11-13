@@ -8,8 +8,8 @@
     getLoggerImpl
   } from './examples/sample-container.js';
 
-  let mode = $state<'local' | 'remote'>('local');
-  let remoteUrl = $state('http://localhost:3001/events');
+  const mode = $state<'local' | 'remote'>('local');
+  const remoteUrl = $state('http://localhost:3001/events');
 
   // Create sample container for local mode demo
   const container = createSampleContainer();

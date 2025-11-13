@@ -5,7 +5,7 @@
   import type { DependencyGraph } from './container-introspection';
   import { createBlobLabel } from './container-introspection';
 
-  let { graph }: { graph: DependencyGraph } = $props();
+  const { graph }: { graph: DependencyGraph } = $props();
 
   // Convert our graph format to Svelte Flow format
   function convertToFlowGraph(depGraph: DependencyGraph): { nodes: Node[]; edges: Edge[] } {

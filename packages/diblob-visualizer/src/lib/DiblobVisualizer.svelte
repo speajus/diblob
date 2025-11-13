@@ -3,7 +3,7 @@
   import DependencyGraph from './DependencyGraph.svelte';
   import { extractDependencyGraph, getGraphStats, type DependencyGraph as GraphData } from './container-introspection';
 
-  let {
+  const {
     container,
     autoRefresh = false,
     refreshInterval = 1000

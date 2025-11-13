@@ -16,6 +16,8 @@
     "build:visualizer": "pnpm --filter @speajus/diblob-visualizer build",
     "test": "pnpm -r test",
     "test:watch": "pnpm --filter @speajus/diblob test:watch",
+    "lint": "pnpm exec biome lint .",
+    "lint:fix": "pnpm exec biome check .",
     "dev:visualizer": "pnpm --filter @speajus/diblob-visualizer dev",
     "dev:mcp": "pnpm --filter @speajus/diblob-mcp dev",
     "dev:grpc": "pnpm --filter @speajus/diblob-connect dev",
@@ -30,6 +32,7 @@
     "release": "pnpm run build && changeset publish"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.5",
     "@changesets/cli": "^2.27.1",
     "vitepress": "^1.6.4"
   },

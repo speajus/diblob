@@ -3,7 +3,7 @@
   import { getGraphStats, type DependencyGraph as GraphData } from './container-introspection';
   import { onMount } from 'svelte';
 
-  let {
+  const {
     url
   }: {
     url: string;

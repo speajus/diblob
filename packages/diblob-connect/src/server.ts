@@ -13,7 +13,7 @@ import type { ServiceImpl } from '@connectrpc/connect';
 import type { Logger } from '@speajus/diblob-logger';
 import {
   grpcServiceList,
-  ServiceRegistration,
+  type ServiceRegistration,
   type GrpcServer,
   type GrpcServerConfig,
   type GrpcServiceRegistry,
