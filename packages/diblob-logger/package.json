@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob-logger",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Winston-based logger integration for diblob containers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

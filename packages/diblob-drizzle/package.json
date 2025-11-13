@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob-drizzle",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Drizzle ORM integration for diblob dependency injection containers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -51,4 +51,3 @@
     "node": ">=22.0.0"
   }
 }
-
