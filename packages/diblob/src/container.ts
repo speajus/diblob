@@ -62,8 +62,8 @@ export class Container implements IContainer {
 	      if (isLifecycleOption(lastDep)) {
 	        const options = lastDep as RegistrationOptions<T>;
 	        lifecycle = options.lifecycle ?? Lifecycle.Singleton;
-	        dispose = options.dispose;
-	        initialize = options.initialize;
+	        dispose = options.dispose as Registration<T>["dispose"];
+	        initialize = options.initialize as Registration<T>["initialize"];
 	        actualDeps = deps.slice(0, -1) as FactoryParams<TFactory>;
 	      } else {
 	        actualDeps = deps as FactoryParams<TFactory>;
@@ -158,8 +158,8 @@ export class Container implements IContainer {
 	      factory,
 	      deps: actualDeps,
 	      lifecycle,
-	      dispose,
-	      initialize,
+	      dispose:(dispose as Registration<unknown>["dispose"]),
+	      initialize:(initialize as Registration<unknown>["initialize"]),
 	    });
   }
 
