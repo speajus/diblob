@@ -8,32 +8,12 @@
  * - Implementing gRPC service handlers
  */
 
-import { mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-	import { createBlob, createContainer, Lifecycle } from '@speajus/diblob';
+	import {  createContainer } from '@speajus/diblob';
 import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
-import { databaseClient, registerDrizzleBlobs } from '@speajus/diblob-drizzle';
 import { registerLoggerBlobs } from '@speajus/diblob-logger';
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import * as schema from './db/schema.js';
 import { registerUserService } from './register.js';
+import { registerDrizzleBlobs, sqlite } from './drizzle.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-	const DEFAULT_DB_PATH = join(__dirname, '../data/app.db');
-	const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
-
-	interface AppResources {
-	  dispose(): Promise<void>;
-	}
-
-	const appResources = createBlob<AppResources>('appResources', {
-	  name: 'Application Resources',
-	  description: 'Handles shutdown of database connections and other app resources',
-	});
 
 	async function main() {
   console.log('🚀 Starting gRPC server with diblob...\n');
@@ -49,32 +29,12 @@ const __dirname = dirname(__filename);
 	});
 
 	// Register gRPC blobs
-	console.log('📦 Registering gRPC blobs...');
 	registerGrpcBlobs(container, {
 	  	host: '0.0.0.0',
 	  	port: 50051
 	  });
-
-  // Register Drizzle blobs
-  console.log('📦 Registering Drizzle blobs...');
-  registerDrizzleBlobs(container, {
-    driver: 'better-sqlite3',
-    connection: DB_PATH,
-    logging: true
-  });
-
-	  // Initialize database
-	  console.log('💾 Initializing database...');
-	  if (DB_PATH !== ':memory:') {
-	    mkdirSync(dirname(DB_PATH), { recursive: true });
-	  }
-	  const sqlite = new Database(DB_PATH);
-	  const db = drizzle(sqlite, { schema });
-	  
-	  // Initialize the database client through the container
-	  const dbClient = await container.resolve(databaseClient);
-	  await dbClient.initialize(db);
-
+      
+	  registerDrizzleBlobs(container);
 	  // Create tables if they don't exist
 	  sqlite.exec(`
 	    CREATE TABLE IF NOT EXISTS users (
@@ -85,20 +45,6 @@ const __dirname = dirname(__filename);
 	    )
 	  `);
 
-	  // Register application-level resources so container.dispose() cleans them up
-	  container.register(
-	    appResources,
-	    () => ({
-	      async dispose() {
-	        await dbClient.close();
-	        sqlite.close();
-	      },
-	    }),
-	    {
-	      lifecycle: Lifecycle.Singleton,
-	      dispose: 'dispose',
-	    },
-	  );
 
 	  // Register user service
 	  console.log('📦 Registering user service...');
