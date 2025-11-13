@@ -12,7 +12,7 @@
 import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
 import { registerLoggerBlobs } from '@speajus/diblob-logger';
 import { registerUserService } from './register.js';
-import { registerDrizzleBlobs, sqlite } from './drizzle.js';
+import { registerDrizzleBlobs } from './drizzle.js';
 
 
 async function main(container = createContainer()) {
