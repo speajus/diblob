@@ -1,13 +1,13 @@
-import { type Container, Lifecycle } from '@speajus/diblob'
-import { createPromiseClient, type PromiseClient } from '@connectrpc/connect'
+import { type Client, createClient } from '@connectrpc/connect'
 import { createConnectTransport } from '@connectrpc/connect-web'
+import { type Container, Lifecycle } from '@speajus/diblob'
 
 import { UserService } from '../grpc/user_pb.js'
 import {
-  avatarUrlProvider,
-  exampleWebConfig,
-  type ExampleWebConfig,
   type AvatarUrlProvider,
+  avatarUrlProvider,
+  type ExampleWebConfig,
+  exampleWebConfig,
   type UserGateway,
   userGateway,
 } from './blobs'
@@ -25,13 +25,14 @@ class PlaceholderAvatarUrlProvider implements AvatarUrlProvider {
 }
 
 class ConnectUserGateway implements UserGateway {
-  private client: PromiseClient<typeof UserService>
+  private client: Client<typeof UserService>
 
   constructor(private readonly config: ExampleWebConfig) {
     const transport = createConnectTransport({
       baseUrl: config.apiBaseUrl,
     })
-    this.client = createPromiseClient(UserService, transport)
+
+    this.client = createClient(UserService, transport)
   }
 
   async fetchUsers(params?: { limit?: number; offset?: number }) {
@@ -44,7 +45,9 @@ class ConnectUserGateway implements UserGateway {
       id: user.id,
       name: user.name,
       email: user.email,
-      createdAt: user.createdAt ? new Date(Number(user.createdAt)) : null,
+      createdAt: user.createdAt
+        ? new Date(Number(user.createdAt) * 1000)
+        : null,
     }))
   }
 }

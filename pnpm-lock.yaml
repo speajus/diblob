@@ -80,6 +80,52 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  examples/example-web-svelte:
+    dependencies:
+      '@bufbuild/protobuf':
+        specifier: ^2.10.0
+        version: 2.10.0
+      '@connectrpc/connect':
+        specifier: ^2.1.0
+        version: 2.1.0(@bufbuild/protobuf@2.10.0)
+      '@connectrpc/connect-web':
+        specifier: ^2.1.0
+        version: 2.1.0(@bufbuild/protobuf@2.10.0)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0))
+      '@speajus/diblob':
+        specifier: workspace:*
+        version: link:../../packages/diblob
+      '@speajus/diblob-svelte':
+        specifier: workspace:*
+        version: link:../../packages/diblob-svelte
+      '@speajus/diblob-visualizer':
+        specifier: workspace:*
+        version: link:../../packages/diblob-visualizer
+    devDependencies:
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^6.2.1
+        version: 6.2.1(svelte@5.43.6)(vite@7.2.2(@types/node@24.10.0)(tsx@4.20.6)(yaml@2.8.1))
+      '@tsconfig/svelte':
+        specifier: ^5.0.5
+        version: 5.0.5
+      '@types/node':
+        specifier: ^24.6.0
+        version: 24.10.0
+      svelte:
+        specifier: ^5.39.6
+        version: 5.43.6
+      svelte-check:
+        specifier: ^4.3.2
+        version: 4.3.4(picomatch@4.0.3)(svelte@5.43.6)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.1.7
+        version: 7.2.2(@types/node@24.10.0)(tsx@4.20.6)(yaml@2.8.1)
+
   packages/diblob:
     devDependencies:
       '@types/node':
@@ -162,6 +208,25 @@ importers:
         version: 4.20.6
       typescript:
         specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/diblob-svelte:
+    dependencies:
+      '@speajus/diblob':
+        specifier: workspace:*
+        version: link:../diblob
+    devDependencies:
+      '@types/node':
+        specifier: ^24.6.0
+        version: 24.10.0
+      svelte:
+        specifier: ^5.39.6
+        version: 5.43.6
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
+      typescript:
+        specifier: ~5.9.3
         version: 5.9.3
 
   packages/diblob-visualizer:
@@ -475,6 +540,12 @@ packages:
   '@connectrpc/connect-node@2.1.0':
     resolution: {integrity: sha512-6akCXZSX5uWHLR654ne9Tnq7AnPUkLS65NvgsI5885xBkcuVy2APBd8sA4sLqaplUt84cVEr6LhjEFNx6W1KtQ==}
     engines: {node: '>=20'}
+    peerDependencies:
+      '@bufbuild/protobuf': ^2.7.0
+      '@connectrpc/connect': 2.1.0
+
+  '@connectrpc/connect-web@2.1.0':
+    resolution: {integrity: sha512-4IBFeMeXS1RVtmmFE/MwH+vWq/5vDRKys70va+DAaWDh83Rdy0iUQOJbITUDzvonlY5as3vwfs5yy9Yp2miHSw==}
     peerDependencies:
       '@bufbuild/protobuf': ^2.7.0
       '@connectrpc/connect': 2.1.0
@@ -3286,6 +3357,11 @@ snapshots:
   '@colors/colors@1.6.0': {}
 
   '@connectrpc/connect-node@2.1.0(@bufbuild/protobuf@2.10.0)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0))':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.0
+      '@connectrpc/connect': 2.1.0(@bufbuild/protobuf@2.10.0)
+
+  '@connectrpc/connect-web@2.1.0(@bufbuild/protobuf@2.10.0)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0))':
     dependencies:
       '@bufbuild/protobuf': 2.10.0
       '@connectrpc/connect': 2.1.0(@bufbuild/protobuf@2.10.0)

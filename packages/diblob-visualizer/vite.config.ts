@@ -13,7 +13,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, 'index.html'),
+		      entry: resolve(__dirname, 'index.html'),
       name: 'DiblobVisualizer',
       fileName: 'index',
       formats: ['es'],

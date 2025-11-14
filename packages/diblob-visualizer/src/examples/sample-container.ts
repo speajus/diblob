@@ -2,37 +2,24 @@
  * Sample DI container setup for demonstration purposes
  */
 
-import { createBlob, createContainer, Lifecycle } from '@speajus/diblob';
-
-// Define interfaces
-export interface Logger {
-  log(message: string): void;
-}
-
-export interface Database {
-  query(sql: string): unknown[];
-}
-
-export interface Cache {
-  get(key: string): unknown;
-  set(key: string, value: unknown): void;
-}
-
-export interface UserService {
-  getUser(id: number): { id: number; name: string; email: string };
-}
-
-export interface EmailService {
-  sendEmail(to: string, subject: string): void;
-}
-
-export interface NotificationService {
-  notify(userId: number, message: string): void;
-}
-
-export interface MetricsService {
-  track(event: string): void;
-}
+import { createContainer, Lifecycle } from '@speajus/diblob';
+import {
+	  type Cache,
+	  cache,
+	  type Database,
+	  database,
+	  type EmailService,
+	  emailService,
+	  type Logger,
+	  logger,
+	  type MetricsService,
+	  metrics,
+	  type NotificationService,
+	  notificationService,
+	  type User,
+	  type UserService,
+	  userService,
+} from './blob.js';
 
 // Implementations
 export class ConsoleLogger implements Logger {
@@ -54,7 +41,6 @@ export class MemoryCache implements Cache {
 }
 
 export class UserServiceImpl implements UserService {
-  constructor(private logger: Logger, private database: Database, _cache: Cache) {}
   constructor(private logger: Logger, private database: Database, _cache: Cache) {}
   getUser(id: number) {
     this.logger.log(`Getting user ${id}`);
@@ -79,7 +65,6 @@ export class NotificationServiceImpl implements NotificationService {
     this.logger.log(`Notifying user ${userId}: ${message}`);
     const user = this.userService.getUser(userId);
     this.emailService.sendEmail(user?.email || 'unknown', message);
-    this.emailService.sendEmail(user?.email || 'unknown', message);
   }
 }
 
@@ -88,20 +73,6 @@ export class MetricsServiceImpl implements MetricsService {
   track(event: string) {
     this.logger.log(`Tracking: ${event}`);
   }
-}
-
-// Lazy blob creation - only create when first accessed
-
-function getBlobs() {
-  return {
-    logger: createBlob<Logger>('logger'),
-    database: createBlob<Database>('database'),
-    cache: createBlob<Cache>('cache'),
-    userService: createBlob<UserService>('userService'),
-    emailService: createBlob<EmailService>('emailService'),
-    notificationService: createBlob<NotificationService>('notificationService'),
-    metrics: createBlob<MetricsService>('metrics')
-  };
 }
 
 /**
