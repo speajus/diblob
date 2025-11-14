@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { SvelteFlow, Controls, Background, MiniMap } from '@xyflow/svelte';
-  import type { Node, Edge } from '@xyflow/svelte';
   import '@xyflow/svelte/dist/style.css';
-  import type { DependencyGraph } from './container-introspection';
   import { createBlobLabel } from './container-introspection';
+  import type { DependencyGraph } from './container-introspection';
 
-  let { graph }: { graph: DependencyGraph } = $props();
+  // biome-ignore lint/correctness/noUnusedImports: used but biome doesn't get it    
+  import { Background, Controls, MiniMap, SvelteFlow, type Edge, type Node } from '@xyflow/svelte';
+
+  const { graph }: { graph: DependencyGraph } = $props();
 
   // Convert our graph format to Svelte Flow format
   function convertToFlowGraph(depGraph: DependencyGraph): { nodes: Node[]; edges: Edge[] } {

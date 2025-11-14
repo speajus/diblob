@@ -9,7 +9,7 @@ interface Logger {
 }
 
 interface Database {
-  query(sql: string): Promise<any>;
+  query(sql: string): Promise<unknown[]>;
 }
 
 const logger = createBlob<Logger>();
@@ -22,7 +22,7 @@ class ConsoleLogger implements Logger {
 }
 
 class AsyncDatabase implements Database {
-  async query(sql: string): Promise<any> {
+  async query(sql: string) {
     logger.log(`Executing: ${sql}`);
     await new Promise(resolve => setTimeout(resolve, 10));
     return [{ id: 1, name: 'Alice' }];

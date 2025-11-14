@@ -3,8 +3,8 @@
  * Tests that factory functions can receive blob dependencies as parameters
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer, Lifecycle } from '../src';
 
 describe('Factory Injection - Basic', () => {

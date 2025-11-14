@@ -2,8 +2,8 @@
  * Cyclic dependency tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer } from '../src';
 
 describe('Cyclic Dependencies - Direct Cycles', () => {
@@ -151,12 +151,12 @@ describe('Cyclic Dependencies - With Factories', () => {
 
     container.register(logger, () => ({
       log: (msg: string) => console.log(msg),
-      getMonitor: () => monitor as any
+	      getMonitor: () => monitor
     }));
 
     container.register(monitor, () => ({
       track: (event: string) => console.log(`Track: ${event}`),
-      getLogger: () => logger as any
+	      getLogger: () => logger
     }));
 
     const loggerInstance = await container.resolve(logger);
@@ -189,7 +189,7 @@ describe('Cyclic Dependencies - Async', () => {
       await new Promise(resolve => setTimeout(resolve, 10));
       return {
         getValue: () => 'A',
-        getB: () => serviceB as any
+        getB: () => serviceB
       };
     });
 
@@ -197,7 +197,7 @@ describe('Cyclic Dependencies - Async', () => {
       await new Promise(resolve => setTimeout(resolve, 10));
       return {
         getValue: () => 'B',
-        getA: () => serviceA as any
+        getA: () => serviceA 
       };
     });
 
@@ -234,7 +234,7 @@ describe('Cyclic Dependencies - Async', () => {
       await new Promise(resolve => setTimeout(resolve, 10));
       return {
         name: 'async',
-        getSync: () => syncBlob as any
+        getSync: () => syncBlob
       };
     });
 

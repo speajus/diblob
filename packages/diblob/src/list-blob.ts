@@ -2,7 +2,7 @@
  * Array blob implementation for managing arrays with automatic invalidation
  */
 
-import { blobHandlers, blobInstanceGetters, BlobNotReadyError, getBlobContainer, registerBlobId } from './blob';
+import { BlobNotReadyError, blobHandlers, blobInstanceGetters, getBlobContainer, registerBlobId } from './blob';
 import type { Blob, BlobMetadata, Container } from './types';
 import { blobPropSymbol } from './types';
 

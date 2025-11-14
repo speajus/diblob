@@ -2,8 +2,8 @@
  * Metadata functionality tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer, getBlobMetadata, getContainerMetadata } from '../src';
 
 describe('Blob Metadata', () => {

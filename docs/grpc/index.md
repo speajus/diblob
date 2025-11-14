@@ -166,7 +166,7 @@ Registers all gRPC-related blobs with the provided container.
 See the complete [example-grpc-server](https://github.com/speajus/diblob/tree/main/examples/example-grpc-server) for a full working example that demonstrates:
 
 - Setting up a gRPC server with diblob-connect
-- Integrating a database with diblob-drizzle
+- Integrating a database with Drizzle ORM
 - Using dependency injection for services
 - Implementing CRUD operations
 

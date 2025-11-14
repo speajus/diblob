@@ -23,7 +23,7 @@ container1.register(
     connect: () => `Connected to ${dbName} at ${host}:${port}`
   }),
   process.env.DB_HOST || 'localhost',
-  parseInt(process.env.DB_PORT || '5432'),
+  parseInt(process.env.DB_PORT || '5432', 10),
   process.env.DB_NAME || 'mydb'
 );
 
@@ -60,12 +60,12 @@ const container2 = createContainer();
 container2.register(config, () => ({
   database: {
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
+    port: parseInt(process.env.DB_PORT || '5432', 10),
     name: process.env.DB_NAME || 'mydb'
   },
   api: {
     baseUrl: process.env.API_BASE_URL || 'https://api.example.com',
-    timeout: parseInt(process.env.API_TIMEOUT || '5000')
+    timeout: parseInt(process.env.API_TIMEOUT || '5000', 10)
   }
 }));
 
@@ -113,7 +113,7 @@ container3.register(configService, () => ({
   
   getInt: (key: string, defaultValue = 0) => {
     const value = process.env[key];
-    return value ? parseInt(value) : defaultValue;
+    return value ? parseInt(value, 10) : defaultValue;
   },
   
   getBool: (key: string, defaultValue = false) => {
@@ -125,7 +125,7 @@ container3.register(configService, () => ({
 
 // Register service that uses config service
 container3.register(emailService, (cfg: ConfigService) => ({
-  send: (to: string, subject: string) => {
+  send: (to: string, _subject: string) => {
     const smtpHost = cfg.get('SMTP_HOST') || 'smtp.example.com';
     const smtpPort = cfg.getInt('SMTP_PORT', 587);
     const useTls = cfg.getBool('SMTP_TLS', true);
@@ -199,8 +199,8 @@ const container5 = createContainer();
 
 // Helper function to validate and parse config
 function loadConfig(): AppConfig {
-  const port = parseInt(process.env.PORT || '3000');
-  if (isNaN(port) || port < 1 || port > 65535) {
+  const port = parseInt(process.env.PORT || '3000', 10);
+  if (Number.isNaN(port) || port < 1 || port > 65535) {
     throw new Error(`Invalid PORT: ${process.env.PORT}`);
   }
 
@@ -209,7 +209,7 @@ function loadConfig(): AppConfig {
     host: process.env.HOST || '0.0.0.0',
     database: {
       url: process.env.DATABASE_URL || 'postgresql://localhost/mydb',
-      poolSize: parseInt(process.env.DB_POOL_SIZE || '10')
+      poolSize: parseInt(process.env.DB_POOL_SIZE || '10', 10)
     },
     features: {
       enableCache: process.env.ENABLE_CACHE === 'true',

@@ -2,8 +2,8 @@
  * Container lifecycle tests (singleton vs transient)
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer, Lifecycle } from '../src';
 
 describe('Container - Lifecycle', () => {

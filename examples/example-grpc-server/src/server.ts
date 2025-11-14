@@ -1,46 +1,25 @@
 /**
- * Example gRPC server using diblob-connect and diblob-drizzle
- * 
+ * Example gRPC server using diblob-connect with a Drizzle ORM-backed database
+ *
  * This example demonstrates:
  * - Setting up a gRPC server with diblob-connect
- * - Integrating a database with diblob-drizzle
+ * - Integrating a database using Drizzle ORM
  * - Using dependency injection for services
  * - Implementing gRPC service handlers
  */
 
-	import { createBlob, createContainer, Lifecycle } from '@speajus/diblob';
-import { registerGrpcBlobs, grpcServer } from '@speajus/diblob-connect';
+import {  createContainer } from '@speajus/diblob';
+import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
 import { registerLoggerBlobs } from '@speajus/diblob-logger';
-import { registerDrizzleBlobs, databaseClient } from '@speajus/diblob-drizzle';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { mkdirSync } from 'fs';
+import {
+	registerVisualizerBlobs,
+	visualizerServer,
+} from '@speajus/diblob-visualizer/server';
+import { registerDrizzleBlobs, registerUserService } from './register.js';
 
-import { registerUserService } from './register.js';
-import * as schema from './db/schema.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-	const DEFAULT_DB_PATH = join(__dirname, '../data/app.db');
-	const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
-
-	interface AppResources {
-	  dispose(): Promise<void>;
-	}
-
-	const appResources = createBlob<AppResources>('appResources', {
-	  name: 'Application Resources',
-	  description: 'Handles shutdown of database connections and other app resources',
-	});
-
-	async function main() {
+async function main(container = createContainer()) {
   console.log('🚀 Starting gRPC server with diblob...\n');
-
-  // Create diblob container
-  const container = createContainer();
 
 	// Register logger blobs first so server logging goes through Winston
 	registerLoggerBlobs(container, {
@@ -50,70 +29,35 @@ const __dirname = dirname(__filename);
 	});
 
 	// Register gRPC blobs
-	console.log('📦 Registering gRPC blobs...');
 	registerGrpcBlobs(container, {
-	  	host: '0.0.0.0',
-	  	port: 50051
-	  });
+		host: process.env.HOST || '0.0.0.0',
+		port: process.env.PORT ? Number(process.env.PORT) : 50051,
+	});
 
-  // Register Drizzle blobs
-  console.log('📦 Registering Drizzle blobs...');
-  registerDrizzleBlobs(container, {
-    driver: 'better-sqlite3',
-    connection: DB_PATH,
-    logging: true
-  });
+	registerDrizzleBlobs(container);
+	
+	registerUserService(container);
 
-	  // Initialize database
-	  console.log('💾 Initializing database...');
-	  if (DB_PATH !== ':memory:') {
-	    mkdirSync(dirname(DB_PATH), { recursive: true });
-	  }
-	  const sqlite = new Database(DB_PATH);
-	  const db = drizzle(sqlite, { schema });
-	  
-	  // Initialize the database client through the container
-	  const dbClient = await container.resolve(databaseClient);
-	  await dbClient.initialize(db);
+	// Register visualizer server blobs so the container graph is exposed via HTTP
+	registerVisualizerBlobs(container, {
+		host: process.env.VISUALIZER_HOST || '0.0.0.0',
+		port: process.env.VISUALIZER_PORT ? Number(process.env.VISUALIZER_PORT) : 3001,
+	});
 
-	  // Create tables if they don't exist
-	  sqlite.exec(`
-	    CREATE TABLE IF NOT EXISTS users (
-	      id INTEGER PRIMARY KEY AUTOINCREMENT,
-	      name TEXT NOT NULL,
-	      email TEXT NOT NULL UNIQUE,
-	      created_at INTEGER NOT NULL
-	    )
-	  `);
+	// Start the servers by resolving their blobs (lifecycle will call start)
+	await Promise.all([
+		container.resolve(grpcServer),
+		container.resolve(visualizerServer),
+	]);
 
-	  // Register application-level resources so container.dispose() cleans them up
-	  container.register(
-	    appResources,
-	    () => ({
-	      async dispose() {
-	        await dbClient.close();
-	        sqlite.close();
-	      },
-	    }),
-	    {
-	      lifecycle: Lifecycle.Singleton,
-	      dispose: 'dispose',
-	    },
-	  );
-
-	  // Register user service
-	  console.log('📦 Registering user service...');
-	  registerUserService(container);
-	  // Start the server by resolving the server blob (lifecycle will call start)
-	  await container.resolve(grpcServer);
-
-	  // Handle graceful shutdown via container.dispose()
-	  process.on('SIGINT', async () => {
-	    console.log('\n\n🛑 Shutting down gracefully...');
-	    await container.dispose();
-	    console.log('✅ Server stopped');
-	    process.exit(0);
-	  });
+	console.log(`gRPC server running at ${grpcServer.getAddress()}`);
+	// Handle graceful shutdown via container.dispose()
+	process.on('SIGINT', async () => {
+		console.log('\n\n🛑 Shutting down gracefully...');
+		await container.dispose();
+		console.log('✅ Server stopped');
+		process.exit(0);
+	});
 }
 
 main().catch((error) => {

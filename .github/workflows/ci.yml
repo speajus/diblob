@@ -40,3 +40,6 @@ jobs:
       - name: Type check
         run: pnpm exec tsc --build --force
 
+      - name: Lint (Biome)
+        run: pnpm exec biome lint .
+
