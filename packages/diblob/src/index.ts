@@ -19,10 +19,11 @@
  * ```
  */
 	import  type { Container as _Container } from './types.js';
-	export type { Blob, Factory, RegistrationOptions, BlobMetadata } from './types.js';
-	export  { Lifecycle } from './types.js';
-	export { createBlob, getBlobId, isBlob, getBlobMetadata } from './blob.js';
+
+	export { createBlob, getBlobId, getBlobMetadata, isBlob } from './blob.js';
 	export { createContainer, getContainerMetadata } from './container.js';
 	export { createListBlob } from './list-blob.js';
+	export type { Blob, BlobMetadata, Factory, RegistrationOptions } from './types.js';
+	export  { Lifecycle } from './types.js';
 export type IContainer  =  _Container;
 export type Container = _Container;

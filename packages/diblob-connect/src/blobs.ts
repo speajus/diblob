@@ -5,10 +5,10 @@
  * diblob architecture patterns.
  */
 
-import { createBlob, createListBlob } from '@speajus/diblob';
+import type { Server as NodeHttpServer } from 'node:http';
 import type { DescService } from '@bufbuild/protobuf';
 import type { ServiceImpl } from '@connectrpc/connect';
-import type { Server as NodeHttpServer } from 'node:http';
+import { createBlob, createListBlob } from '@speajus/diblob';
 
 /**
  * Configuration for the gRPC (Connect) server

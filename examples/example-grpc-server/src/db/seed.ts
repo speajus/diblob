@@ -5,37 +5,19 @@
  * Run with: npm run db:seed
  */
 
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
-import { seed, reset } from 'drizzle-seed';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { mkdirSync } from 'fs';
+import { createContainer } from '@speajus/diblob';
+import { reset, seed } from 'drizzle-seed';
+import { database, sqlite,  } from '../drizzle.js';
+import { registerDrizzleBlobs } from '../register.js';
 import * as schema from './schema.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-async function main() {
-  // Check if --reset flag is provided
-  const shouldReset = process.argv.includes('--reset');
-  
+async function registerSeed( shouldReset = false, ctx = createContainer(),) {
+  registerDrizzleBlobs(ctx);
   console.log('🌱 Starting database seeding...\n');
   
   if (shouldReset) {
     console.log('🔄 Reset mode enabled - will clear existing data\n');
   }
-
-  // Ensure data directory exists
-  const dataDir = join(__dirname, '../../data');
-  mkdirSync(dataDir, { recursive: true });
-
-  // Initialize database connection
-  const dbPath = join(dataDir, 'app.db');
-  console.log(`📂 Database path: ${dbPath}`);
-  
-  const sqlite = new Database(dbPath);
-  const db = drizzle(sqlite, { schema });
 
   // Create tables if they don't exist
   console.log('📋 Creating tables if needed...');
@@ -48,17 +30,19 @@ async function main() {
     )
   `);
 
-  // Reset database if requested
-  if (shouldReset) {
-    console.log('🗑️  Resetting database...');
-    await reset(db as any, schema);
-    console.log('✅ Database reset complete\n');
-  }
+	  // Reset database if requested
+	  if (shouldReset) {
+	    console.log('🗑️  Resetting database...');
+	    // biome-ignore lint/suspicious/noExplicitAny: drizzle-seed does not do the types correctly for SQLBetter3
+	    await reset(database as any, { users: schema.users });
+	    console.log('✅ Database reset complete\n');
+	  }
 
-  // Seed the database with sample data using refinements for realistic data
-  console.log('🌱 Seeding users table with realistic data...');
+   // Seed the database with sample data using refinements for realistic data
+   console.log('🌱 Seeding users table with realistic data...');
 
-  await seed(db as any, schema, {
+	  // biome-ignore lint/suspicious/noExplicitAny: drizzle-seed does not do the types correctly for SQLBetter3
+	  await seed(database as any, schema, {
     count: 20,  // Generate 20 sample users
     seed: 12345 // Use a fixed seed for reproducible data
   }).refine((funcs) => ({
@@ -81,11 +65,11 @@ async function main() {
   console.log(`📊 Total users in database: ${userCount.count}`);
 
   // Close the database connection
-  sqlite.close();
+  await ctx.dispose();
   console.log('\n✨ Done!');
 }
 
-main().catch((error) => {
+registerSeed(process.argv.includes('--reset')).catch((error) => {
   console.error('❌ Seeding failed:', error);
   process.exit(1);
 });

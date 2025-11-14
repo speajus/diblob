@@ -12,14 +12,14 @@
     "build:diblob": "pnpm --filter @speajus/diblob build",
     "build:mcp": "pnpm --filter @speajus/diblob-mcp build",
     "build:grpc": "pnpm --filter @speajus/diblob-connect build",
-    "build:drizzle": "pnpm --filter @speajus/diblob-drizzle build",
     "build:visualizer": "pnpm --filter @speajus/diblob-visualizer build",
     "test": "pnpm -r test",
     "test:watch": "pnpm --filter @speajus/diblob test:watch",
+    "lint": "biome lint .",
+    "lint:fix": "biome check --write .",
     "dev:visualizer": "pnpm --filter @speajus/diblob-visualizer dev",
     "dev:mcp": "pnpm --filter @speajus/diblob-mcp dev",
     "dev:grpc": "pnpm --filter @speajus/diblob-connect dev",
-    "dev:drizzle": "pnpm --filter @speajus/diblob-drizzle dev",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
@@ -30,6 +30,7 @@
     "release": "pnpm run build && changeset publish"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.5",
     "@changesets/cli": "^2.27.1",
     "vitepress": "^1.6.4"
   },
@@ -41,5 +42,8 @@
     "url": "git+https://github.com/speajus/diblob.git"
   },
   "author": "Justin Spears <speajus@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.9.3"
+  }
 }

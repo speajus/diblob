@@ -5,13 +5,12 @@
  * via WebSocket and SSE for remote visualization.
  */
 
-import { createVisualizerServer } from './src/server/index.js';
 import {
   createSampleContainer,
-  addMetricsService,
   getLoggerBlob,
   getLoggerImpl
 } from './src/examples/sample-container.js';
+import { createVisualizerServer } from './src/server/index.js';
 
 // Create sample container
 const container = createSampleContainer();

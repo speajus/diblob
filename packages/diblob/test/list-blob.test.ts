@@ -2,9 +2,9 @@
  * ListBlob tests - array management with automatic invalidation
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createListBlob, createContainer, createBlob } from '../src';
+import { describe, it } from 'node:test';
+import { createBlob, createContainer, createListBlob } from '../src';
 
 describe('ListBlob - Basic Operations', () => {
   it('should create an empty list blob', () => {

@@ -2,19 +2,14 @@
  * Constructor parameter detection and resolution tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer } from '../src';
 
 describe('Constructor Resolution - Default Parameters', () => {
   it('should resolve class with blob default parameter', () => {
     interface Logger {
       log(msg: string): string;
-    }
-    
-    class MyService {
-      constructor(private logger = createBlob<Logger>()) {}
-      work() { return this.logger.log('working'); }
     }
     
     const logger = createBlob<Logger>();

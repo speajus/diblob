@@ -2,8 +2,8 @@
  * Edge cases and error handling tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer } from '../src';
 
 describe('Edge Cases - Error Handling', () => {
@@ -81,7 +81,7 @@ describe('Edge Cases - Error Handling', () => {
     const service = createBlob<Service>();
     const container = createContainer();
     
-    container.register(service, () => new String('test') as any);
+    container.register(service, () => ({ toString: () => 'test' }));
     
     assert.strictEqual(service.toString(), 'test');
   });

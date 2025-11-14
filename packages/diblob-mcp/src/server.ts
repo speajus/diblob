@@ -13,10 +13,10 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Container } from '@speajus/diblob';
 import type {
+  ContainerIntrospector, 
   McpServer,
   McpServerConfig,
-  McpTransport,
-  ContainerIntrospector
+  McpTransport
 } from './blobs.js';
 
 /**
@@ -50,8 +50,7 @@ export class McpServerImpl implements McpServer {
   private server: Server;
   private running: boolean = false;
 
-  constructor(
-    private config: McpServerConfig,
+  constructor(config: McpServerConfig,
     private transport: McpTransport,
     private introspector: ContainerIntrospector
   ) {
@@ -125,6 +124,7 @@ export class McpServerImpl implements McpServer {
         }
 
         case 'get_blob_details': {
+          // biome-ignore lint/suspicious/noExplicitAny: it's a hack
           const blobId = (args as any).blobId;
           const details = await this.introspector.getBlobDetails(blobId);
           return {
@@ -194,6 +194,7 @@ export class ContainerIntrospectorImpl implements ContainerIntrospector {
     description?: string;
     lifecycle: string;
   }>> {
+    // biome-ignore lint/suspicious/noExplicitAny: it's a hack
     const registrations = (this.container as any).registrations as Map<symbol, any>;
     const blobs: Array<{
       id: string;
@@ -203,6 +204,7 @@ export class ContainerIntrospectorImpl implements ContainerIntrospector {
     }> = [];
 
     for (const [blobId, registration] of registrations.entries()) {
+      // biome-ignore lint/suspicious/noExplicitAny: it's a hack
       const metadata = (this.container as any).blobMetadata?.get(blobId);
       blobs.push({
         id: blobId.toString(),
@@ -222,13 +224,15 @@ export class ContainerIntrospectorImpl implements ContainerIntrospector {
     lifecycle: string;
     dependencies: string[];
   } | null> {
+    // biome-ignore lint/suspicious/noExplicitAny: it's a hack
     const registrations = (this.container as any).registrations as Map<symbol, any>;
 
     for (const [id, registration] of registrations.entries()) {
       if (id.toString() === blobId) {
+        // biome-ignore lint/suspicious/noExplicitAny: it's a hack
         const metadata = (this.container as any).blobMetadata?.get(id);
         const dependencies = registration.deps
-          ?.filter((dep: any) => typeof dep === 'symbol')
+          ?.filter((dep:unknown) => typeof dep === 'symbol')
           .map((dep: symbol) => dep.toString()) || [];
 
         return {
@@ -248,11 +252,13 @@ export class ContainerIntrospectorImpl implements ContainerIntrospector {
     nodes: Array<{ id: string; name?: string }>;
     edges: Array<{ from: string; to: string }>;
   }> {
+    // biome-ignore lint/suspicious/noExplicitAny: it's a hack
     const registrations = (this.container as any).registrations as Map<symbol, any>;
     const nodes: Array<{ id: string; name?: string }> = [];
     const edges: Array<{ from: string; to: string }> = [];
 
     for (const [blobId, registration] of registrations.entries()) {
+      // biome-ignore lint/suspicious/noExplicitAny: it's a hack
       const metadata = (this.container as any).blobMetadata?.get(blobId);
       nodes.push({
         id: blobId.toString(),
@@ -260,7 +266,7 @@ export class ContainerIntrospectorImpl implements ContainerIntrospector {
       });
 
       const dependencies = registration.deps
-        ?.filter((dep: any) => typeof dep === 'symbol')
+        ?.filter((dep: unknown) => typeof dep === 'symbol')
         .map((dep: symbol) => dep.toString()) || [];
 
       for (const depId of dependencies) {

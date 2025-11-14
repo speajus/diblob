@@ -7,16 +7,16 @@
  */
 
 import * as http from 'node:http';
-import { connectNodeAdapter } from '@connectrpc/connect-node';
 import type { DescService } from '@bufbuild/protobuf';
 import type { ServiceImpl } from '@connectrpc/connect';
+import { connectNodeAdapter } from '@connectrpc/connect-node';
 import type { Logger } from '@speajus/diblob-logger';
 import {
-  grpcServiceList,
-  ServiceRegistration,
   type GrpcServer,
   type GrpcServerConfig,
   type GrpcServiceRegistry,
+  grpcServiceList,
+  type ServiceRegistration,
 } from './blobs.js';
 
 /**

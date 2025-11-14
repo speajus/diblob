@@ -1,11 +1,11 @@
 # Example gRPC Server
 
-This example demonstrates how to build a gRPC server using `@speajus/diblob-connect` and `@speajus/diblob-drizzle` with the diblob dependency injection framework.
+This example demonstrates how to build a gRPC server using `@speajus/diblob-connect` with a Drizzle ORM-backed database layer, all wired together with the diblob dependency injection framework.
 
 ## Features
 
 - ✅ gRPC server with dependency injection using `@speajus/diblob-connect`
-- ✅ Database integration with Drizzle ORM using `@speajus/diblob-drizzle`
+- ✅ Database integration with Drizzle ORM using a small application-level module
 - ✅ SQLite database for simplicity (easily swappable with PostgreSQL/MySQL)
 - ✅ Complete CRUD operations (Create, Read, Update, Delete)
 - ✅ Service layer with automatic dependency resolution
@@ -73,6 +73,34 @@ npm run dev
 
 The server will start on `0.0.0.0:50051`.
 
+## Visualizing the Container Graph
+
+This example also exposes the diblob container graph using
+`@speajus/diblob-visualizer`, including the full web UI and SSE endpoints.
+
+By default, the visualizer HTTP server listens on
+`VISUALIZER_HOST:VISUALIZER_PORT`, which default to `0.0.0.0:3001`.
+
+```bash
+# From the repository root (using pnpm workspaces)
+pnpm --filter example-grpc-server dev
+
+# Or from this directory using npm
+npm run dev
+```
+
+Once the server is running, you can open the visualizer UI directly in your
+browser:
+
+- UI: `http://localhost:3001/`
+- SSE stream: `http://localhost:3001/events`
+- Graph JSON: `http://localhost:3001/graph`
+- Health check: `http://localhost:3001/health`
+
+These endpoints are powered by the shared visualizer middleware in
+`@speajus/diblob-visualizer/server`, wired through the `registerVisualizerBlobs`
+helper in this example.
+
 ## Database Seeding
 
 Populate the database with realistic sample data:
@@ -118,7 +146,7 @@ The application uses diblob for dependency injection:
 ```typescript
 import { createContainer } from '@speajus/diblob';
 import { registerGrpcBlobs } from '@speajus/diblob-connect';
-import { registerDrizzleBlobs } from '@speajus/diblob-drizzle';
+import { registerDrizzleBlobs } from './src/drizzle.js';
 
 const container = createContainer();
 
@@ -128,11 +156,8 @@ registerGrpcBlobs(container, {
   port: 50051
 });
 
-// Register database client
-registerDrizzleBlobs(container, {
-  driver: 'better-sqlite3',
-  connection: './data/app.db'
-});
+// Register database client (Drizzle + better-sqlite3)
+registerDrizzleBlobs(container);
 ```
 
 ### 2. Service Layer
@@ -208,12 +233,9 @@ To use PostgreSQL or MySQL instead of SQLite:
    npm install mysql2    # for MySQL
    ```
 
-2. Update the database configuration in `src/index.ts`:
+2. Update the database configuration in your server bootstrap file (for example `src/index.ts`):
    ```typescript
-   registerDrizzleBlobs(container, {
-     driver: 'postgres',
-     connection: 'postgresql://user:password@localhost:5432/mydb'
-   });
+   registerDrizzleBlobs(container, 'postgresql://user:password@localhost:5432/mydb');
    ```
 
 3. Update the schema imports and initialization accordingly.

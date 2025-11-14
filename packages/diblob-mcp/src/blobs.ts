@@ -5,9 +5,9 @@
  * diblob architecture patterns.
  */
 
-import { createBlob } from '@speajus/diblob';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createBlob } from '@speajus/diblob';
 
 /**
  * Configuration for the MCP server

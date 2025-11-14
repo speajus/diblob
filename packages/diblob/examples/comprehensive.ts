@@ -10,7 +10,7 @@ interface Logger {
 }
 
 interface Database {
-  query(sql: string): Promise<any>;
+  query(sql: string): Promise<unknown[]>;
 }
 
 interface UserService {
@@ -30,7 +30,7 @@ class ConsoleLogger implements Logger {
 }
 
 class AsyncDatabase implements Database {
-  async query(sql: string): Promise<any> {
+  async query(sql: string) {
     logger.log(`Executing: ${sql}`);
     // Simulate async operation
     await new Promise(resolve => setTimeout(resolve, 10));
@@ -46,7 +46,7 @@ class UserServiceImpl implements UserService {
   async getUser(id: number) {
     this.log.log(`Fetching user ${id}`);
     const results = await this.db.query(`SELECT * FROM users WHERE id = ${id}`);
-    return results[0];
+    return results[0] as { id: number; name: string };
   }
 }
 

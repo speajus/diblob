@@ -1,8 +1,8 @@
 /**
  * Utilities for introspecting diblob containers to extract dependency graph data
  */
-import type { Container, Blob, BlobMetadata } from '@speajus/diblob';
-import { getBlobId, isBlob, Lifecycle, getBlobMetadata } from '@speajus/diblob';
+import type { BlobMetadata, } from '@speajus/diblob';
+import { getBlobId, getBlobMetadata, isBlob, Lifecycle } from '@speajus/diblob';
 
 export interface BlobNode {
   id: string;
@@ -26,23 +26,33 @@ export interface DependencyGraph {
   edges: BlobEdge[];
 }
 
+interface IntrospectableRegistration {
+	factory?: { name?: string };
+	lifecycle?: Lifecycle;
+	deps?: unknown[];
+}
+
+interface IntrospectableContainer {
+	registrations?: Map<symbol, IntrospectableRegistration>;
+}
+
 /**
  * Extract dependency graph from a container by analyzing registrations
  * This uses reflection on the container's internal state
  */
-export function extractDependencyGraph(container: any): DependencyGraph {
-  const nodes: BlobNode[] = [];
-  const edges: BlobEdge[] = [];
-  const seenBlobIds = new Set<symbol>();
-  const blobIdToProxy = new Map<symbol, any>();
+export function extractDependencyGraph(container: unknown): DependencyGraph {
+	const nodes: BlobNode[] = [];
+	const edges: BlobEdge[] = [];
+	const seenBlobIds = new Set<symbol>();
 
-  // Access the private registrations map via reflection
-  // This is a workaround since Container doesn't expose its registrations
-  const registrations = (container as any).registrations as Map<symbol, any>;
+	// Access the private registrations map via reflection
+	// This is a workaround since Container doesn't expose its registrations
+	const introspectable = container as IntrospectableContainer;
+	const registrations = introspectable.registrations;
 
-  if (!registrations) {
-    return { nodes, edges };
-  }
+	if (!registrations) {
+		return { nodes, edges };
+	}
 
   // Process each registration
   registrations.forEach((registration, blobId) => {
@@ -54,25 +64,15 @@ export function extractDependencyGraph(container: any): DependencyGraph {
       factoryName = registration.factory.name || 'Anonymous';
     }
 
-    // Try to find the blob proxy from dependencies to get metadata
-    let metadata: BlobMetadata | undefined;
-
-    // Check if any dependency is a blob with this ID
-    if (registration.deps && Array.isArray(registration.deps)) {
-      for (const dep of registration.deps) {
-        if (isBlob(dep)) {
-          const depId = getBlobId(dep);
-          blobIdToProxy.set(depId, dep);
-        }
-      }
-    }
+		// Try to find the blob proxy from dependencies to get metadata
+		let metadata: BlobMetadata | undefined;
 
     // Create node for this blob
     nodes.push({
       id: nodeId,
       blobId,
       label: factoryName,
-      lifecycle: registration.lifecycle || 'singleton',
+	      lifecycle: registration.lifecycle ?? Lifecycle.Singleton,
       isRegistered: true,
       factoryName,
       metadata,
@@ -80,9 +80,9 @@ export function extractDependencyGraph(container: any): DependencyGraph {
 
     seenBlobIds.add(blobId);
 
-    // Process dependencies
-    if (registration.deps && Array.isArray(registration.deps)) {
-      registration.deps.forEach((dep: any, index: number) => {
+		// Process dependencies
+		if (registration.deps && Array.isArray(registration.deps)) {
+			registration.deps.forEach((dep, index: number) => {
         if (isBlob(dep)) {
           const depBlobId = getBlobId(dep);
           const depNodeId = depBlobId.toString();
