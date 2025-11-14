@@ -10,6 +10,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Container } from '@speajus/diblob';
+import { createBlob, Lifecycle } from '@speajus/diblob';
 import { extractDependencyGraph, getGraphStats } from '../lib/container-introspection.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -235,3 +236,88 @@ export function createVisualizerServer(container: Container, options: ServerOpti
 }
 
 export { extractDependencyGraph, getGraphStats };
+
+//
+// Diblob integration helpers
+//
+
+export interface VisualizerServer {
+	start(): Promise<void>;
+	stop(): Promise<void>;
+}
+
+export type VisualizerServerConfig = ServerOptions;
+
+export const visualizerServerConfig = createBlob<VisualizerServerConfig>(
+	'visualizerServerConfig',
+	{
+		name: 'Visualizer Server Config',
+		description: 'Configuration for the diblob visualizer HTTP server',
+	},
+);
+
+export const visualizerServer = createBlob<VisualizerServer>('visualizerServer', {
+	name: 'Visualizer Server',
+	description: 'HTTP server exposing container graph for diblob-visualizer',
+});
+
+class VisualizerServerImpl implements VisualizerServer {
+	private innerServer: ReturnType<typeof createVisualizerServer> | null = null;
+	private running = false;
+	private readonly container: Container;
+	private readonly config: VisualizerServerConfig;
+
+	constructor(container: Container, config: VisualizerServerConfig) {
+		this.container = container;
+		this.config = config;
+	}
+
+	async start(): Promise<void> {
+		if (this.running) {
+			return;
+		}
+
+		this.innerServer = createVisualizerServer(this.container, this.config);
+		await this.innerServer.start();
+		this.running = true;
+	}
+
+	async stop(): Promise<void> {
+		if (!this.running || !this.innerServer) {
+			return;
+		}
+
+		await this.innerServer.stop();
+		this.running = false;
+		this.innerServer = null;
+	}
+}
+
+export function registerVisualizerBlobs(
+	container: Container,
+	config: VisualizerServerConfig = {},
+): void {
+	const defaultConfig: Required<VisualizerServerConfig> = {
+		host: '0.0.0.0',
+		port: 3001,
+		cors: true,
+		updateInterval: 1000,
+		serveStatic: true,
+	};
+	const finalConfig: VisualizerServerConfig = { ...defaultConfig, ...config };
+
+	container.register(visualizerServerConfig, () => finalConfig);
+
+	container.register(
+		visualizerServer,
+		VisualizerServerImpl,
+		container,
+		visualizerServerConfig,
+		{
+			lifecycle: Lifecycle.Singleton,
+			initialize: 'start',
+			dispose: 'stop',
+		},
+	);
+}
+

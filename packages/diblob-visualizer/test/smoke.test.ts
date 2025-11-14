@@ -111,7 +111,7 @@ test('visualizer middleware exposes SSE /events endpoint', async () => {
 
   try {
     assert.equal(statusCode, 200);
-    assert.ok(contentType && contentType.startsWith('text/event-stream'));
+    assert.ok( contentType?.startsWith('text/event-stream'));
     assert.ok(body.includes('data:'));
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));

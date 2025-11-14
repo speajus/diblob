@@ -7,8 +7,9 @@
 
 import { reset, seed } from 'drizzle-seed';
 import * as schema from './schema.js';
-import { database, sqlite, registerDrizzleBlobs } from '../drizzle.js';
+import { database, sqlite,  } from '../drizzle.js';
 import { createContainer } from '@speajus/diblob';
+import { registerDrizzleBlobs } from '../register.js';
 
 async function registerSeed( shouldReset = false, ctx = createContainer(),) {
   registerDrizzleBlobs(ctx);
