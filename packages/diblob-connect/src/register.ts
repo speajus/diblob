@@ -7,18 +7,18 @@
 
 import type { Container } from '@speajus/diblob';
 import { Lifecycle } from '@speajus/diblob';
+import { logger as loggerBlob } from '@speajus/diblob-logger';
 import {
-  grpcServerConfig,
-  grpcServer,
-  grpcServiceRegistry,
   type GrpcServerConfig,
-  grpcServiceList
+  grpcServer,
+  grpcServerConfig,
+  grpcServiceList, 
+  grpcServiceRegistry
 } from './blobs.js';
 import {
 	  GrpcServerImpl,
 	  GrpcServiceRegistryImpl
 	} from './server.js';
-import { logger as loggerBlob } from '@speajus/diblob-logger';
 
 /**
  * Default gRPC server configuration

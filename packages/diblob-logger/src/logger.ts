@@ -3,7 +3,7 @@
  */
 
 import winston from 'winston';
-import type { LoggerConfig, Logger } from './blobs.js';
+import type { Logger, LoggerConfig } from './blobs.js';
 
 /**
  * Create a Winston logger from the provided configuration.

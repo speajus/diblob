@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-connect build && pnpm --filter @speajus/diblob-drizzle build && pnpm --filter @speajus/diblob-visualizer build",
+    "build:all": "pnpm --filter @speajus/diblob build && pnpm --filter @speajus/diblob-mcp build && pnpm --filter @speajus/diblob-connect build && pnpm --filter @speajus/diblob-visualizer build",
     "dev": "tsc --watch",
     "example": "pnpm run build && tsx example.ts",
     "test": "pnpm run build && tsx --test test/*.test.ts",

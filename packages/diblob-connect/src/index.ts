@@ -28,22 +28,22 @@
  * ```
  */
 
-// Export registration function
-export { registerGrpcBlobs } from './register.js';
-
-// Export blob declarations
-export {
-  grpcServerConfig,
-  grpcServer,
-  grpcServiceRegistry
-} from './blobs.js';
 
 // Export types
 export type {
-  GrpcServerConfig,
   GrpcServer,
+  GrpcServerConfig,
   GrpcServiceRegistry
 } from './blobs.js';
+
+// Export blob declarations
+export {
+  grpcServer,
+  grpcServerConfig,
+  grpcServiceRegistry
+} from './blobs.js';
+// Export registration function
+export { registerGrpcBlobs } from './register.js';
 
 // Export implementations (for advanced use cases)
 export {

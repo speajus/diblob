@@ -2,8 +2,8 @@
  * Basic container registration and resolution tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer,  } from '../src';
 
 describe('Container - Basic Registration', () => {

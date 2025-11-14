@@ -2,17 +2,17 @@
  * DI Container implementation
  */
 
-	import { getBlobId, blobHandlers, blobInstanceGetters, isBlob, beginConstructorTracking, endConstructorTracking, setBlobContainer, BlobNotReadyError, isTrackingConstructor } from './blob.js';
-	import { blobPropSymbol, Lifecycle } from './types.js';
+	import { BlobNotReadyError, beginConstructorTracking, blobHandlers, blobInstanceGetters, endConstructorTracking, getBlobId, isBlob, isTrackingConstructor, setBlobContainer } from './blob.js';
 import {
   beginTracking,
-  endTracking,
-  trackDependency,
-  getDependents,
-  clearDependencies,
   clearAllDependencies,
+  clearDependencies,
+  endTracking,
+  getDependents,
+  trackDependency,
 	} from './reactive.js';
-	import type { Blob, Factory, FactoryParams, Container as IContainer, RegisterParams, BlobMetadata, Ctor, FactoryFn, RegistrationOptions } from './types.js';
+	import type { Blob, BlobMetadata, Ctor, Factory, FactoryFn, FactoryParams, Container as IContainer, RegisterParams, RegistrationOptions } from './types.js';
+	import { blobPropSymbol, Lifecycle } from './types.js';
 
 interface Registration<T = unknown> {
   factory: Factory<T>;
@@ -45,30 +45,30 @@ export class Container implements IContainer {
     }
   }
 
-  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
+	  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
     const blobId = getBlobId(blob);
 
     // Track which container registered this blob (first registration wins)
     setBlobContainer(blobId, this);
 
-    // Extract lifecycle option if the last dep is a RegistrationOptions object
-    let lifecycle = Lifecycle.Singleton;
-    let dispose: (() => void | Promise<void>) | keyof T | undefined;
-    let initialize: (() => void | Promise<void>) | keyof T | undefined;
+	    // Extract lifecycle option if the last dep is a RegistrationOptions object
+	    let lifecycle = Lifecycle.Singleton;
+	    let dispose: Registration<T>["dispose"];
+	    let initialize: Registration<T>["initialize"];
     let actualDeps = [] as unknown as FactoryParams<TFactory>
 
-    if (deps.length > 0) {
-      const lastDep = deps[deps.length - 1];
-      if (isLifecycleOption(lastDep)) {
-        const options = lastDep as RegistrationOptions<T>;
-        lifecycle = options.lifecycle ?? Lifecycle.Singleton;
-        dispose = options.dispose as any;
-        initialize = options.initialize as any;
-        actualDeps = deps.slice(0, -1) as FactoryParams<TFactory>;
-      }else{
-        actualDeps = deps as FactoryParams<TFactory>;
-      }
-    }
+	    if (deps.length > 0) {
+	      const lastDep = deps[deps.length - 1];
+	      if (isLifecycleOption(lastDep)) {
+	        const options = lastDep as RegistrationOptions<T>;
+	        lifecycle = options.lifecycle ?? Lifecycle.Singleton;
+	        dispose = options.dispose as Registration<T>["dispose"];
+	        initialize = options.initialize as Registration<T>["initialize"];
+	        actualDeps = deps.slice(0, -1) as FactoryParams<TFactory>;
+	      } else {
+	        actualDeps = deps as FactoryParams<TFactory>;
+	      }
+	    }
 
     // If re-registering, invalidate the old instance and its dependents
     if (this.registrations.has(blobId)) {
@@ -154,13 +154,13 @@ export class Container implements IContainer {
       return this.resolve(blob);
     });
 
-    this.registrations.set(blobId, {
-      factory,
-      deps: actualDeps,
-      lifecycle,
-      dispose: dispose as any,
-      initialize: initialize as any,
-    });
+	    this.registrations.set(blobId, {
+	      factory,
+	      deps: actualDeps,
+	      lifecycle,
+	      dispose:(dispose as Registration<unknown>["dispose"]),
+	      initialize:(initialize as Registration<unknown>["initialize"]),
+	    });
   }
 
   resolve<T>(blobOrConstructor: Blob<T> | Ctor<T>): T | Promise<T> {

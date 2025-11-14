@@ -3,7 +3,9 @@
   "references": [
     { "path": "./packages/diblob" },
     { "path": "./packages/diblob-mcp" },
-    { "path": "./packages/diblob-visualizer" }
+    { "path": "./packages/diblob-visualizer" },
+    { "path": "./packages/diblob-connect" },
+    { "path": "./packages/diblob-logger" }
   ]
 }
 

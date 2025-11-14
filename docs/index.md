@@ -44,7 +44,7 @@ features:
 
   - icon: 🗄️
     title: Database Integration
-    details: Integrate Drizzle ORM with dependency injection using diblob-drizzle.
+    details: Integrate Drizzle ORM (and other ORMs) with diblob containers using application-level blobs.
 
   - icon: 🏷️
     title: Metadata Support
@@ -114,13 +114,6 @@ Model Context Protocol server for diblob containers.
 Connect-based gRPC server implementation for diblob containers.
 
 - [Documentation](/grpc/)
-- [Example Application](https://github.com/speajus/diblob/tree/main/examples/example-grpc-server)
-
-### @speajus/diblob-drizzle
-
-Drizzle ORM integration for diblob containers.
-
-- [Documentation](/drizzle/)
 - [Example Application](https://github.com/speajus/diblob/tree/main/examples/example-grpc-server)
 
 ### @speajus/diblob-visualizer

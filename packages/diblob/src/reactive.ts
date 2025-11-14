@@ -53,13 +53,13 @@ export function trackDependency(dependencyId: symbol): void {
   if (!dependencies.has(currentBlobId)) {
     dependencies.set(currentBlobId, new Set());
   }
-  dependencies.get(currentBlobId)!.add(dependencyId);
+  dependencies.get(currentBlobId)?.add(dependencyId);
 
   // Record that dependency has currentBlob as a dependent
   if (!dependents.has(dependencyId)) {
     dependents.set(dependencyId, new Set());
   }
-  dependents.get(dependencyId)!.add(currentBlobId);
+  dependents.get(dependencyId)?.add(currentBlobId);
 }
 
 /**

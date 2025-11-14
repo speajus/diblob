@@ -23,29 +23,29 @@
  * ```
  */
 
-// Export registration function
-export { registerMcpBlobs } from './register.js';
-
-// Export blob declarations
-export {
-  mcpServerConfig,
-  mcpServer,
-  mcpTransport,
-  containerIntrospector,
-} from './blobs.js';
 
 // Export types
 export type {
-  McpServerConfig,
-  McpServer,
-  McpTransport,
   ContainerIntrospector,
+  McpServer,
+  McpServerConfig,
+  McpTransport,
 } from './blobs.js';
+
+// Export blob declarations
+export {
+  containerIntrospector,
+  mcpServer,
+  mcpServerConfig,
+  mcpTransport,
+} from './blobs.js';
+// Export registration function
+export { registerMcpBlobs } from './register.js';
 
 // Export implementations (for advanced use cases)
 export {
+  ContainerIntrospectorImpl,
   McpServerImpl,
   StdioMcpTransport,
-  ContainerIntrospectorImpl,
 } from './server.js';
 

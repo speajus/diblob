@@ -1,6 +1,6 @@
 # New Packages Summary
 
-This document summarizes the two new packages added to the diblob monorepo: `@speajus/diblob-connect` and `@speajus/diblob-drizzle`.
+This document summarizes the new additions to the diblob monorepo: `@speajus/diblob-connect` and a Drizzle ORM database integration example.
 
 ## Created Packages
 
@@ -24,19 +24,16 @@ Follows diblob conventions with separate files for:
 - Concrete implementations
 - Registration functions that accept a container parameter
 
-### 2. @speajus/diblob-drizzle
+### 2. Drizzle ORM integration example
 
-**Location:** `packages/diblob-drizzle/`
+**Location:** `examples/example-grpc-server/`
 
-**Purpose:** Drizzle ORM database client wrapper that integrates with the diblob dependency injection container.
+**Purpose:** Demonstrates how to integrate Drizzle ORM with a diblob container in a real gRPC server.
 
 **Key Files:**
-- `src/blobs.ts` - Interface and blob definitions (DatabaseClient, DatabaseConfig, DatabaseConnectionManager, MigrationRunner)
-- `src/client.ts` - Concrete implementations (DatabaseClientImpl, DatabaseConnectionManagerImpl, MigrationRunnerImpl)
-- `src/register.ts` - Registration function `registerDrizzleBlobs(container, config)`
-- `src/index.ts` - Main export file
-- `package.json` - Package configuration with peer dependency on drizzle-orm
-- `README.md` - Package documentation
+- `src/drizzle.ts` - Database setup (SQLite + Drizzle ORM) and registration helper
+- `src/db/schema.ts` - Drizzle database schema
+- `src/user-service.ts` - Business logic layer using Drizzle via blobs
 
 **Architecture Pattern:**
 Follows diblob conventions with separate files for:
@@ -90,7 +87,7 @@ tsx src/client.ts
    - API reference
    - Usage examples
 
-2. **docs/drizzle/index.md** - Complete documentation for @speajus/diblob-drizzle
+2. **docs/drizzle/index.md** - Database integration guide using Drizzle ORM
    - Installation instructions
    - Quick start guide for PostgreSQL, MySQL, and SQLite
    - Configuration options
@@ -108,11 +105,9 @@ tsx src/client.ts
 
 Updated `package.json` in the repository root with new build scripts:
 - `build:grpc` - Build the diblob-connect package
-- `build:drizzle` - Build the diblob-drizzle package
-- `dev:grpc` - Watch mode for diblob-grpc
-- `dev:drizzle` - Watch mode for diblob-drizzle
+- `dev:grpc` - Watch mode for diblob-connect
 
-The main `build` script now includes both new packages.
+The main `build` script now includes the new gRPC package.
 
 ## Next Steps
 
@@ -141,10 +136,10 @@ The main `build` script now includes both new packages.
 
 ## Package Conventions Followed
 
-Both packages strictly follow the diblob architecture patterns:
+The new gRPC package and the Drizzle example follow the diblob architecture patterns:
 
 ✅ Separate interface/blob definitions into dedicated files (`blobs.ts`)
-✅ Separate concrete implementations into separate files (`server.ts`, `client.ts`)
+✅ Separate concrete implementations into separate files (`server.ts`, `client.ts`, `drizzle.ts`)
 ✅ Provide registration functions that accept a container parameter (`registerGrpcBlobs`, `registerDrizzleBlobs`)
 ✅ Use TypeScript with strict typing
 ✅ Include comprehensive documentation
@@ -159,9 +154,5 @@ Both packages strictly follow the diblob architecture patterns:
 - `@bufbuild/protobuf` - Protobuf-ES runtime
 - `@speajus/diblob` (peer dependency)
 
-### diblob-drizzle Dependencies:
-- `drizzle-orm` (peer dependency)
-- Database drivers are optional and user-installed based on their needs
-
-Both packages require Node.js >= 22.0.0
+Both additions require Node.js >= 22.0.0
 

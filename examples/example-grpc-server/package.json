@@ -1,7 +1,7 @@
 {
   "name": "example-grpc-server",
-  "version": "1.0.0",
-  "description": "Example gRPC server using diblob-connect and diblob-drizzle",
+  "version": "0.0.1",
+  "description": "Example gRPC server using diblob-connect with a Drizzle ORM-backed database",
   "type": "module",
   "private": true,
   "scripts": {
@@ -18,13 +18,13 @@
     "db:seed:reset": "tsx src/db/seed.ts --reset"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.10.0",
     "@connectrpc/connect": "^2.1.0",
     "@connectrpc/connect-node": "*",
-    "@bufbuild/protobuf": "^2.10.0",
     "@speajus/diblob": "workspace:*",
-    "@speajus/diblob-drizzle": "workspace:*",
     "@speajus/diblob-connect": "workspace:*",
     "@speajus/diblob-logger": "workspace:*",
+    "@speajus/diblob-visualizer": "workspace:*",
     "drizzle-orm": "^0.36.0",
     "drizzle-seed": "^0.1.3"
   },

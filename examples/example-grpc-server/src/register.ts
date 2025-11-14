@@ -1,13 +1,53 @@
 import type { Container } from "@speajus/diblob";
 import { grpcServiceRegistry } from "@speajus/diblob-connect";
-import { databaseClient } from "@speajus/diblob-drizzle";
-import { userService, UserServiceImpl } from "./user-service";
 import { UserService } from "./generated/user_pb";
+import { UserServiceImpl, userService } from "./user-service";
+/**
+ * Example gRPC server using diblob-connect with a Drizzle ORM-backed database
+ *
+ * This module demonstrates:
+ * - Setting up a gRPC server with diblob-connect
+ * - Integrating a database using Drizzle ORM
+ * - Using dependency injection for services
+ * - Implementing gRPC service handlers
+ */
 
+import { mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Lifecycle } from '@speajus/diblob';
+import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import * as schema from './db/schema.js';
+import {  database, sqlite } from "./drizzle";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const DEFAULT_DB_PATH = join(__dirname, '../data/app.db');
+const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
+
+
+export function registerDrizzleBlobs(container: Container, dbPath: string = DB_PATH): void {
+            // Initialize database
+    console.log('💾 Initializing database...');
+    if (DB_PATH !== ':memory:') {
+            mkdirSync(dirname(DB_PATH), { recursive: true });
+    }
+
+
+    container.register(sqlite, Database, dbPath,{}, { 
+        lifecycle: Lifecycle.Singleton,
+        dispose: 'close',
+    });
+
+    container.register(database,  drizzle, sqlite, { schema });
+
+}
 export function registerUserService(container: Container): void {
     
     
-  container.register(userService, UserServiceImpl, databaseClient);
+  container.register(userService, UserServiceImpl);
 
   grpcServiceRegistry.registerService(UserService, userService);
   

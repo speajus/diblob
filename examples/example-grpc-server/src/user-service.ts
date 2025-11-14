@@ -2,30 +2,30 @@
  * User service implementation
  * 
  * This service demonstrates dependency injection with diblob,
- * using the database client from diblob-drizzle.
+ * using a Drizzle ORM-backed database client.
  */
 
-import { createBlob } from '@speajus/diblob';
-import { databaseClient, type DatabaseClient } from '@speajus/diblob-drizzle';
-import { eq } from 'drizzle-orm';
-import { users, type User, type NewUser } from './db/schema.js';
-import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse, 
-  DeleteUserResponseSchema, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type CreateUserRequest, type CreateUserResponse, type GetUserResponse, type UserService } from './generated/user_pb.js';
-import type { ServiceImpl } from '@connectrpc/connect';
 import { create } from '@bufbuild/protobuf';
+import type { ServiceImpl } from '@connectrpc/connect';
+import { createBlob } from '@speajus/diblob';
+import { eq } from 'drizzle-orm';
+import { type NewUser, type User, users } from './db/schema.js';
+import { database } from './drizzle.js';
+import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse, 
+  DeleteUserResponseSchema, type GetUserResponse, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type UserService } from './generated/user_pb.js';
 
 /**
  * User service implementation
  */
 export class UserServiceImpl implements ServiceImpl<typeof UserService> {
   constructor(
-    private db: DatabaseClient<BetterSQLite3Database> = databaseClient
+    private db = database
   ) {}
 
   async getUser({id}:{id: number}):Promise<GetUserResponse> {
-    const db = this.db.getDb();
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, id)
+    });
     if (!user){
       throw new Error(`user not found`);
     }
@@ -40,22 +40,20 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
     });
   }
   async createUser({name, email}:CreateUserRequest): Promise<CreateUserResponse> {
-    const db = this.db.getDb();
     const newUser: NewUser = {
       name,
       email,
       createdAt: new Date()
     };
     
-    const [user] = await db.insert(users).values(newUser).returning();
+    const [user] = await this.db.insert(users).values(newUser).returning();
     return create(CreateUserResponseSchema, {user:this.userToProto(user)});
   }
 
   async listUsers({limit = 10, offset = 0}:ListUsersRequest): Promise<ListUsersResponse> {
-    const db = this.db.getDb();
     
-    const userList = await db.select().from(users).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: users.id }).from(users);
+    const userList = await this.db.select().from(users).limit(limit).offset(offset);
+    const [{ count }] = await this.db.select({ count: users.id }).from(users);
     
     return create(ListUsersResponseSchema, {
       users: userList.map(this.userToProto),
@@ -64,9 +62,8 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
   }
 
   async updateUser({id, name, email}:UpdateUserRequest): Promise<UpdateUserResponse>{
-    const db = this.db.getDb();
     
-    const [user] = await db
+    const [user] = await this.db
       .update(users)
       .set({ name, email })
       .where(eq(users.id, id))
@@ -76,9 +73,8 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
   }
 
   async deleteUser({id}:DeleteUserRequest): Promise<DeleteUserResponse> {
-    const db = this.db.getDb();
     
-    const result = await db.delete(users).where(eq(users.id, id));
+    const result = await this.db.delete(users).where(eq(users.id, id));
     return create(DeleteUserResponseSchema, {success:result.changes > 0});
   }
 }

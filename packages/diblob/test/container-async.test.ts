@@ -2,9 +2,10 @@
  * Async resolution tests
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { createBlob, createContainer, Lifecycle } from '../src';
+
     interface DepC {
       getValue(): string;
     }
