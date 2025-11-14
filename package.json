@@ -16,7 +16,7 @@
     "test": "pnpm -r test",
     "test:watch": "pnpm --filter @speajus/diblob test:watch",
     "lint": "biome lint .",
-    "lint:fix": "biome lint --fix . && biome check --write .",
+    "lint:fix": "biome check --write .",
     "dev:visualizer": "pnpm --filter @speajus/diblob-visualizer dev",
     "dev:mcp": "pnpm --filter @speajus/diblob-mcp dev",
     "dev:grpc": "pnpm --filter @speajus/diblob-connect dev",
