@@ -55,9 +55,10 @@ export class MemoryCache implements Cache {
 
 export class UserServiceImpl implements UserService {
   constructor(private logger: Logger, private database: Database, _cache: Cache) {}
+  constructor(private logger: Logger, private database: Database, _cache: Cache) {}
   getUser(id: number) {
     this.logger.log(`Getting user ${id}`);
-    return this.database.query(`SELECT * FROM users WHERE id = ${id}`)[0];
+    return this.database.query(`SELECT * FROM users WHERE id = ${id}`)[0] as User;
   }
 }
 
@@ -77,6 +78,7 @@ export class NotificationServiceImpl implements NotificationService {
   notify(userId: number, message: string) {
     this.logger.log(`Notifying user ${userId}: ${message}`);
     const user = this.userService.getUser(userId);
+    this.emailService.sendEmail(user?.email || 'unknown', message);
     this.emailService.sendEmail(user?.email || 'unknown', message);
   }
 }
@@ -106,40 +108,39 @@ function getBlobs() {
  * Create a sample container with multiple services
  */
 export function createSampleContainer() {
-  const blobs = getBlobs();
+	  // Create container and register
+	  const container = createContainer();
 
-  // Create container and register
-  const container = createContainer();
+	  container.register(logger, ConsoleLogger);
+	  container.register(database, InMemoryDatabase);
+	  container.register(cache, MemoryCache, { lifecycle: Lifecycle.Transient });
+	  container.register(userService, UserServiceImpl, logger, database, cache);
+	  container.register(emailService, EmailServiceImpl, logger);
+	  container.register(
+	    notificationService,
+	    NotificationServiceImpl,
+	    userService,
+	    emailService,
+	    logger,
+	  );
 
-  container.register(blobs.logger, ConsoleLogger);
-  container.register(blobs.database, InMemoryDatabase);
-  container.register(blobs.cache, MemoryCache, { lifecycle: Lifecycle.Transient });
-  container.register(blobs.userService, UserServiceImpl, blobs.logger, blobs.database, blobs.cache);
-  container.register(blobs.emailService, EmailServiceImpl, blobs.logger);
-  container.register(blobs.notificationService, NotificationServiceImpl, blobs.userService, blobs.emailService, blobs.logger);
-
-  return container;
+	  return container;
 }
 
 /**
  * Add metrics service to an existing container
  */
 export function addMetricsService(container: ReturnType<typeof createContainer>) {
-  const blobs = getBlobs();
-  container.register(blobs.metrics, MetricsServiceImpl, blobs.logger);
+	  container.register(metrics, MetricsServiceImpl, logger);
 }
 
-/**
- * Get the logger blob for re-registration demos
- */
 export function getLoggerBlob() {
-  return getBlobs().logger;
+	  return logger;
 }
 
 /**
  * Get the logger implementation for re-registration demos
  */
 export function getLoggerImpl() {
-  return ConsoleLogger;
+	  return ConsoleLogger;
 }
-

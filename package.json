@@ -42,5 +42,8 @@
     "url": "git+https://github.com/speajus/diblob.git"
   },
   "author": "Justin Spears <speajus@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.9.3"
+  }
 }
