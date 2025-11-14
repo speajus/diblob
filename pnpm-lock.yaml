@@ -35,12 +35,12 @@ importers:
       '@speajus/diblob-connect':
         specifier: workspace:*
         version: link:../../packages/diblob-connect
-      '@speajus/diblob-drizzle':
-        specifier: workspace:*
-        version: link:../../packages/diblob-drizzle
       '@speajus/diblob-logger':
         specifier: workspace:*
         version: link:../../packages/diblob-logger
+      '@speajus/diblob-visualizer':
+        specifier: workspace:*
+        version: link:../../packages/diblob-visualizer
       drizzle-orm:
         specifier: ^0.36.0
         version: 0.36.4(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)
@@ -115,25 +115,6 @@ importers:
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.0
-      tsx:
-        specifier: ^4.19.2
-        version: 4.20.6
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-
-  packages/diblob-drizzle:
-    dependencies:
-      '@speajus/diblob':
-        specifier: workspace:*
-        version: link:../diblob
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.0
-      drizzle-orm:
-        specifier: ^0.36.0
-        version: 0.36.4(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)
       tsx:
         specifier: ^4.19.2
         version: 4.20.6

@@ -1,112 +1,132 @@
 <script lang="ts">
   
-  import {
-    addMetricsService,
-    createSampleContainer,
-    getLoggerBlob,
-    getLoggerImpl
-  } from './examples/sample-container.js';
-
-  const _mode = $state<'local' | 'remote'>('local');
-  const _remoteUrl = $state('http://localhost:3001/events');
-
-  // Create sample container for local mode demo
-  const container = createSampleContainer();
-  const _logger = getLoggerBlob();
-  const _ConsoleLogger = getLoggerImpl();
-
-  // Function to add more services dynamically
-  function _addMoreServices() {
-    addMetricsService(container);
-  }
+	import {
+	    addMetricsService,
+	    createSampleContainer,
+	    getLoggerBlob,
+	    getLoggerImpl
+	  } from './examples/sample-container.js';
+	  import DiblobVisualizer from './lib/DiblobVisualizer.svelte';
+	  import RemoteDiblobVisualizer from './lib/RemoteDiblobVisualizer.svelte';
+	
+	  // When running the standalone dev server for this package, we use a
+	  // more fully featured "demo" UI (local sample container + remote mode).
+	  // When the visualizer is embedded via the middleware, we want a
+	  // production-oriented remote view by default with no demo wording.
+	  const isDemo = import.meta.env.MODE === 'demo';
+	
+	  let mode = $state<'local' | 'remote'>(isDemo ? 'local' : 'remote');
+	  // For embedded usage, default to the middleware's SSE endpoint on the
+	  // same origin. The demo keeps using an explicit localhost URL.
+	  let remoteUrl = $state(isDemo ? 'http://localhost:3001/events' : './events');
+	
+	  // Create sample container for local mode demo
+	  const container = createSampleContainer();
+	  const logger = getLoggerBlob();
+	  const ConsoleLogger = getLoggerImpl();
+	
+	  // Function to add more services dynamically
+	  function addMoreServices() {
+	    addMetricsService(container);
+	  }
 </script>
 
-<main>
-  <div class="header">
-    <h1>🎨 Diblob Visualizer Demo</h1>
-    <p>Interactive dependency injection graph visualization</p>
-  </div>
+	<main>
+	  <div class="header">
+	    {#if isDemo}
+	      <h1>🎨 Diblob Visualizer Demo</h1>
+	      <p>Interactive dependency injection graph visualization</p>
+	    {:else}
+	      <h1>🎨 Diblob Visualizer</h1>
+	      <p>Interactive dependency injection graph visualization</p>
+	    {/if}
+	  </div>
 
-  <div class="mode-selector">
-    <button
-      class:active={mode === 'local'}
-      onclick={() => mode = 'local'}
-    >
-      📦 Local Mode
-    </button>
-    <button
-      class:active={mode === 'remote'}
-      onclick={() => mode = 'remote'}
-    >
-      🌐 Remote Mode
-    </button>
-  </div>
+	  {#if isDemo}
+	    <div class="mode-selector">
+	      <button
+	        class:active={mode === 'local'}
+	        onclick={() => mode = 'local'}
+	      >
+	        📦 Local Mode
+	      </button>
+	      <button
+	        class:active={mode === 'remote'}
+	        onclick={() => mode = 'remote'}
+	      >
+	        🌐 Remote Mode
+	      </button>
+	    </div>
 
-  {#if mode === 'remote'}
-    <div class="remote-config">
-      <div class="config-row">
-        <label>
-          Server URL:
-          <input
-            type="text"
-            bind:value={remoteUrl}
-            placeholder="http://localhost:3001/events"
-          />
-        </label>
-      </div>
-      <div class="info-box">
-        ℹ️ Make sure to run the example server: <code>npm run server</code>
-      </div>
-    </div>
-  {:else}
-    <div class="actions">
-      <button onclick={addMoreServices}>
-        ➕ Add Metrics Service
-      </button>
-      <button onclick={() => container.register(logger, ConsoleLogger)}>
-        🔄 Re-register Logger
-      </button>
-    </div>
-  {/if}
+	    {#if mode === 'remote'}
+	      <div class="remote-config">
+	        <div class="config-row">
+	          <label>
+	            Server URL:
+	            <input
+	              type="text"
+	              bind:value={remoteUrl}
+	              placeholder="http://localhost:3001/events"
+	            />
+	          </label>
+	        </div>
+	        <div class="info-box">
+	          ℹ️ Make sure to run the example server: <code>npm run server</code>
+	        </div>
+	      </div>
+	    {:else}
+	      <div class="actions">
+	        <button onclick={addMoreServices}>
+	          ➕ Add Metrics Service
+	        </button>
+	        <button onclick={() => container.register(logger, ConsoleLogger)}>
+	          🔄 Re-register Logger
+	        </button>
+	      </div>
+	    {/if}
 
-  {#if mode === 'local'}
-    <DiblobVisualizer {container} />
-  {:else}
-    <RemoteDiblobVisualizer url={remoteUrl} />
-  {/if}
+	    {#if mode === 'local'}
+	      <DiblobVisualizer {container} />
+	    {:else}
+	      <RemoteDiblobVisualizer url={remoteUrl} />
+	    {/if}
 
-  <div class="info">
-    <h3>About this demo</h3>
-    {#if mode === 'local'}
-      <p>
-        This demo shows a sample dependency injection setup with multiple services.
-        The graph visualizes the relationships between services:
-      </p>
-      <ul>
-        <li><strong>🔒 Blue nodes</strong> are Singleton services (created once)</li>
-        <li><strong>⚡ Orange nodes</strong> are Transient services (created each time)</li>
-        <li><strong>Arrows</strong> show dependencies between services</li>
-      </ul>
-      <p>
-        Try clicking the buttons above to modify the container and see the graph update!
-      </p>
-    {:else}
-      <p>
-        This demo shows how to connect to a remote diblob container server.
-        The visualizer receives real-time updates via Server-Sent Events (SSE).
-      </p>
-      <p>
-        To run the server:
-      </p>
-      <ol>
-        <li>Open a new terminal</li>
-        <li>Run: <code>npm run server</code></li>
-        <li>The server will start on port 3001</li>
-        <li>The visualizer will automatically connect and display the container graph</li>
-      </ol>
-    {/if}
-  </div>
-</main>
+	    <div class="info">
+	      <h3>About this demo</h3>
+	      {#if mode === 'local'}
+	        <p>
+	          This demo shows a sample dependency injection setup with multiple services.
+	          The graph visualizes the relationships between services:
+	        </p>
+	        <ul>
+	          <li><strong>🔒 Blue nodes</strong> are Singleton services (created once)</li>
+	          <li><strong>⚡ Orange nodes</strong> are Transient services (created each time)</li>
+	          <li><strong>Arrows</strong> show dependencies between services</li>
+	        </ul>
+	        <p>
+	          Try clicking the buttons above to modify the container and see the graph update!
+	        </p>
+	      {:else}
+	        <p>
+	          This demo shows how to connect to a remote diblob container server.
+	          The visualizer receives real-time updates via Server-Sent Events (SSE).
+	        </p>
+	        <p>
+	          To run the server:
+	        </p>
+	        <ol>
+	          <li>Open a new terminal</li>
+	          <li>Run: <code>npm run server</code></li>
+	          <li>The server will start on port 3001</li>
+	          <li>The visualizer will automatically connect and display the container graph</li>
+	        </ol>
+	      {/if}
+	    </div>
+	  {:else}
+	    <!-- Embedded / middleware usage: show remote visualizer only, no demo text. -->
+	    <RemoteDiblobVisualizer url={remoteUrl} />
+	  {/if}
+	</main>
 
 <style>
   main {

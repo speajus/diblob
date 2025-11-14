@@ -72,7 +72,7 @@ export function extractDependencyGraph(container: unknown): DependencyGraph {
       id: nodeId,
       blobId,
       label: factoryName,
-      lifecycle: registration.lifecycle || 'singleton',
+	      lifecycle: registration.lifecycle ?? Lifecycle.Singleton,
       isRegistered: true,
       factoryName,
       metadata,

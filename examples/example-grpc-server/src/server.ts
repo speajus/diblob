@@ -8,11 +8,12 @@
  * - Implementing gRPC service handlers
  */
 
-	import {  createContainer } from '@speajus/diblob';
-import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
-import { registerLoggerBlobs } from '@speajus/diblob-logger';
-import { registerUserService } from './register.js';
-import { registerDrizzleBlobs } from './drizzle.js';
+import {  createContainer } from '@speajus/diblob';
+	import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
+	import { registerLoggerBlobs } from '@speajus/diblob-logger';
+	import { registerUserService } from './register.js';
+	import { registerDrizzleBlobs } from './drizzle.js';
+	import { registerVisualizerBlobs, visualizerServer } from './visualizer.js';
 
 
 async function main(container = createContainer()) {
@@ -25,18 +26,28 @@ async function main(container = createContainer()) {
 		defaultMeta: { service: 'example-grpc-server' },
 	});
 
-	// Register gRPC blobs
-	registerGrpcBlobs(container, {
-	  	host: process.env.HOST || '0.0.0.0',
-	  	port: process.env.PORT ? Number(process.env.PORT) : 50051,
-	  });
-      
-	  registerDrizzleBlobs(container);
-	  registerUserService(container);
-	  // Start the server by resolving the server blob (lifecycle will call start)
-	  await container.resolve(grpcServer);
+		// Register gRPC blobs
+		registerGrpcBlobs(container, {
+		  	host: process.env.HOST || '0.0.0.0',
+		  	port: process.env.PORT ? Number(process.env.PORT) : 50051,
+		  });
+		      
+		  registerDrizzleBlobs(container);
+		  registerUserService(container);
 
-	  console.log(`gRPC server running at ${ grpcServer.getAddress()}`);
+		  // Register visualizer server blobs so the container graph is exposed via HTTP
+		  registerVisualizerBlobs(container, {
+		  	host: process.env.VISUALIZER_HOST || '0.0.0.0',
+		  	port: process.env.VISUALIZER_PORT ? Number(process.env.VISUALIZER_PORT) : 3001,
+		  });
+
+		  // Start the servers by resolving their blobs (lifecycle will call start)
+		  await Promise.all([
+		  	container.resolve(grpcServer),
+		  	container.resolve(visualizerServer),
+		  ]);
+		
+		  console.log(`gRPC server running at ${ grpcServer.getAddress()}`);
 	  // Handle graceful shutdown via container.dispose()
 	  process.on('SIGINT', async () => {
 	    console.log('\n\n🛑 Shutting down gracefully...');

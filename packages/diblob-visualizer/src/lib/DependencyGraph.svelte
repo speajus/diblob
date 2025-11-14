@@ -1,9 +1,10 @@
 <script lang="ts">
-  
-  import type { Edge, Node } from '@xyflow/svelte';
   import '@xyflow/svelte/dist/style.css';
-  import type { DependencyGraph } from './container-introspection';
   import { createBlobLabel } from './container-introspection';
+  import type { DependencyGraph } from './container-introspection';
+
+  // biome-ignore lint/correctness/noUnusedImports: used but biome doesn't get it    
+  import { Background, Controls, MiniMap, SvelteFlow, type Edge, type Node } from '@xyflow/svelte';
 
   const { graph }: { graph: DependencyGraph } = $props();
 
@@ -59,14 +60,14 @@
   }
 
   // Use Svelte 5 $state.raw for nodes and edges
-  let _nodes = $state.raw<Node[]>([]);
-  let _edges = $state.raw<Edge[]>([]);
+  let nodes = $state.raw<Node[]>([]);
+  let edges = $state.raw<Edge[]>([]);
 
   // Update when graph changes
   $effect(() => {
     const updated = convertToFlowGraph(graph);
-    _nodes = updated.nodes;
-    _edges = updated.edges;
+    nodes = updated.nodes;
+    edges = updated.edges;
   });
 </script>
 

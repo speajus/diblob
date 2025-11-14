@@ -1,18 +1,27 @@
 /**
- * Diblob Visualizer Server
+ * Diblob Visualizer Server & Middleware
  *
- * Exposes container introspection data via SSE and REST API
+ * Exposes container introspection data via SSE and REST API and can
+ * optionally serve the built visualizer UI (index.html + assets).
  */
 
-import { createServer } from 'node:http';
+import { createReadStream } from 'node:fs';
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { dirname, extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Container } from '@speajus/diblob';
 import { extractDependencyGraph, getGraphStats } from '../lib/container-introspection.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DIST_ROOT = join(__dirname, '../../dist');
 
 export interface ServerOptions {
   port?: number;
   host?: string;
   cors?: boolean;
   updateInterval?: number;
+  /** When true, serve the built visualizer UI from the dist folder. */
+  serveStatic?: boolean;
 }
 
 export interface GraphUpdate {
@@ -22,87 +31,185 @@ export interface GraphUpdate {
   stats: ReturnType<typeof getGraphStats>;
 }
 
-/**
- * Create a server that exposes container data via SSE
- */
-export function createVisualizerServer(container: Container, options: ServerOptions = {}) {
-  const {
-    port = 3001,
-    host = 'localhost',
-    cors = true,
-    updateInterval = 1000
-  } = options;
+export type VisualizerMiddleware = (
+  req: IncomingMessage,
+  res: ServerResponse,
+  next?: () => void,
+) => void;
 
-  // Get current graph data
-  function getGraphData(): GraphUpdate {
-    const graph = extractDependencyGraph(container);
-    const stats = getGraphStats(graph);
-    return {
-      type: 'graph',
-      timestamp: Date.now(),
-      graph,
-      stats
-    };
+function calculateGraphUpdate(container: Container): GraphUpdate {
+  const graph = extractDependencyGraph(container);
+  const stats = getGraphStats(graph);
+  return {
+    type: 'graph',
+    timestamp: Date.now(),
+    graph,
+    stats,
+  };
+}
+
+function resolveAssetPath(pathname: string): string | null {
+  const [rawPath] = pathname.split('?', 1);
+  const safePath = rawPath || '/';
+  const relative = safePath === '/' ? 'index.html' : safePath.replace(/^\/+/, '');
+
+  // Very small safety guard against path traversal
+  if (relative.includes('..')) {
+    return null;
   }
 
-  const server = createServer((req, res) => {
-    // CORS headers
+  return join(DIST_ROOT, relative);
+}
+
+function lookupContentType(filePath: string): string {
+  const ext = extname(filePath).toLowerCase();
+  switch (ext) {
+    case '.html':
+      return 'text/html; charset=utf-8';
+    case '.js':
+      return 'text/javascript; charset=utf-8';
+    case '.css':
+      return 'text/css; charset=utf-8';
+    case '.svg':
+      return 'image/svg+xml';
+    case '.json':
+      return 'application/json; charset=utf-8';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+function serveStaticFile(res: ServerResponse, filePath: string, contentType: string): void {
+  const stream = createReadStream(filePath);
+
+  stream.once('open', () => {
+    if (!res.headersSent) {
+      res.writeHead(200, { 'Content-Type': contentType });
+    }
+  });
+
+  stream.on('error', () => {
+    if (!res.headersSent) {
+      res.writeHead(404);
+    }
+    if (!res.writableEnded) {
+      res.end('Not Found');
+    }
+  });
+
+  stream.pipe(res);
+}
+
+/**
+ * Create a reusable HTTP middleware that:
+ * - Exposes the container graph via SSE (/events), JSON (/graph), and /health
+ * - Optionally serves the built visualizer UI from dist (index.html + assets)
+ */
+export function createVisualizerMiddleware(
+  container: Container,
+  options: ServerOptions = {},
+): VisualizerMiddleware {
+  const {
+    cors = true,
+    updateInterval = 1000,
+    serveStatic = true,
+  } = options;
+
+  return (req, res, next) => {
+    const method = req.method ?? 'GET';
+    const url = req.url ?? '/';
+    const [pathname] = url.split('?', 1);
+
     if (cors) {
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     }
 
-    if (req.method === 'OPTIONS') {
+    if (method === 'OPTIONS') {
       res.writeHead(200);
       res.end();
       return;
     }
 
     // SSE endpoint
-    if (req.url === '/events' && req.method === 'GET') {
+    if (method === 'GET' && pathname === '/events') {
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        ...(cors ? { 'Access-Control-Allow-Origin': '*' } : {})
+        Connection: 'keep-alive',
+        ...(cors ? { 'Access-Control-Allow-Origin': '*' } : {}),
       });
 
-      // Send initial data
-      const initialData = getGraphData();
-      res.write(`data: ${JSON.stringify(initialData)}\n\n`);
+      const initial = calculateGraphUpdate(container);
+      res.write(`data: ${JSON.stringify(initial)}\n\n`);
 
-      // Send updates periodically
-      const interval = setInterval(() => {
-        const data = getGraphData();
-        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      const intervalId = setInterval(() => {
+        const update = calculateGraphUpdate(container);
+        res.write(`data: ${JSON.stringify(update)}\n\n`);
       }, updateInterval);
 
       req.on('close', () => {
-        clearInterval(interval);
+        clearInterval(intervalId);
       });
 
       return;
     }
 
     // REST endpoint for one-time fetch
-    if (req.url === '/graph' && req.method === 'GET') {
-      const data = getGraphData();
+    if (method === 'GET' && pathname === '/graph') {
+      const data = calculateGraphUpdate(container);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(data));
       return;
     }
 
     // Health check
-    if (req.url === '/health' && req.method === 'GET') {
+    if (method === 'GET' && pathname === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ status: 'ok' }));
       return;
     }
 
-    // 404
-    res.writeHead(404);
-    res.end('Not Found');
+    // Static UI assets (index.html, index.js, index.css, vite.svg, ...)
+    if (serveStatic && method === 'GET') {
+      const assetPath = resolveAssetPath(pathname || '/');
+      if (assetPath) {
+        const contentType = lookupContentType(assetPath);
+        serveStaticFile(res, assetPath, contentType);
+        return;
+      }
+    }
+
+    if (next) {
+      next();
+      return;
+    }
+
+    if (!res.writableEnded) {
+      res.writeHead(404);
+      res.end('Not Found');
+    }
+  };
+}
+
+/**
+ * Create a standalone HTTP server using the visualizer middleware.
+ *
+ * This keeps the existing createVisualizerServer API but now also
+ * serves the built visualizer UI by default.
+ */
+export function createVisualizerServer(container: Container, options: ServerOptions = {}) {
+  const {
+    port = 3001,
+    host = 'localhost',
+    ...middlewareOptions
+  } = options;
+
+  const middleware = createVisualizerMiddleware(container, middlewareOptions);
+
+  const server = createServer((req, res) => {
+    middleware(req, res);
   });
 
   return {
@@ -110,7 +217,8 @@ export function createVisualizerServer(container: Container, options: ServerOpti
     start: () => {
       return new Promise<void>((resolve) => {
         server.listen(port, host, () => {
-          console.log(`Diblob Visualizer Server running at:`);
+          console.log('Diblob Visualizer Server running at:');
+          console.log(`  UI:        http://${host}:${port}/`);
           console.log(`  SSE:       http://${host}:${port}/events`);
           console.log(`  Graph API: http://${host}:${port}/graph`);
           console.log(`  Health:    http://${host}:${port}/health`);
@@ -122,8 +230,8 @@ export function createVisualizerServer(container: Container, options: ServerOpti
       return new Promise<void>((resolve) => {
         server.close(() => resolve());
       });
-    }
+    },
   };
 }
 
-
+export { extractDependencyGraph, getGraphStats };

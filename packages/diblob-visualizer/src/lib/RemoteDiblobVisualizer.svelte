@@ -2,6 +2,8 @@
   
 	import { onMount } from 'svelte';
 	import { type DependencyGraph as GraphData, type GraphStats, getGraphStats } from './container-introspection';
+	// biome-ignore lint/correctness/noUnusedImports: used in markup but biome does not detect it
+	import DependencyGraph from './DependencyGraph.svelte';
 
   const {
     url
@@ -9,8 +11,8 @@
     url: string;
   } = $props();
 
-	let _graph = $state<GraphData>({ nodes: [], edges: [] });
-	let _stats = $state<GraphStats>({
+	let graph = $state<GraphData>({ nodes: [], edges: [] });
+	let stats = $state<GraphStats>({
     totalNodes: 0,
     totalEdges: 0,
     singletons: 0,
@@ -18,8 +20,8 @@
     unregistered: 0,
     maxDepth: 0,
   });
-  let _connectionStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
-  let _errorMessage = $state<string>('');
+	  let connectionStatus = $state<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+	  let errorMessage = $state<string>('');
 
   let eventSource: EventSource | null = null;
 
@@ -30,22 +32,22 @@
 
 	function updateFromData(data: RemoteVisualizerPayload) {
     if (data.graph) {
-      _graph = data.graph;
-      _stats = data.stats || getGraphStats(data.graph);
+	      graph = data.graph;
+	      stats = data.stats || getGraphStats(data.graph);
     }
   }
 
   function connect() {
     disconnect();
-    _connectionStatus = 'connecting';
-    _errorMessage = '';
+	    connectionStatus = 'connecting';
+	    errorMessage = '';
 
     try {
       eventSource = new EventSource(url);
 
-      eventSource.onopen = () => {
-        _connectionStatus = 'connected';
-      };
+	      eventSource.onopen = () => {
+	        connectionStatus = 'connected';
+	      };
 
       eventSource.onmessage = (event) => {
         try {
@@ -56,14 +58,14 @@
         }
       };
 
-      eventSource.onerror = (err) => {
-        _connectionStatus = 'error';
-        _errorMessage = 'SSE connection error';
+	      eventSource.onerror = (err) => {
+	        connectionStatus = 'error';
+	        errorMessage = 'SSE connection error';
         console.error('SSE error:', err);
       };
-    } catch (err) {
-      _connectionStatus = 'error';
-      _errorMessage = err instanceof Error ? err.message : 'Failed to connect';
+	    } catch (err) {
+	      connectionStatus = 'error';
+	      errorMessage = err instanceof Error ? err.message : 'Failed to connect';
     }
   }
 
@@ -72,7 +74,7 @@
       eventSource.close();
       eventSource = null;
     }
-    _connectionStatus = 'disconnected';
+	    connectionStatus = 'disconnected';
   }
 
   onMount(() => {
@@ -80,7 +82,7 @@
     return () => disconnect();
   });
 
-  function _handleReconnect() {
+	  function handleReconnect() {
     connect();
   }
 </script>

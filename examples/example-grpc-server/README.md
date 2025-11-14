@@ -73,6 +73,34 @@ npm run dev
 
 The server will start on `0.0.0.0:50051`.
 
+## Visualizing the Container Graph
+
+This example also exposes the diblob container graph using
+`@speajus/diblob-visualizer`, including the full web UI and SSE endpoints.
+
+By default, the visualizer HTTP server listens on
+`VISUALIZER_HOST:VISUALIZER_PORT`, which default to `0.0.0.0:3001`.
+
+```bash
+# From the repository root (using pnpm workspaces)
+pnpm --filter example-grpc-server dev
+
+# Or from this directory using npm
+npm run dev
+```
+
+Once the server is running, you can open the visualizer UI directly in your
+browser:
+
+- UI: `http://localhost:3001/`
+- SSE stream: `http://localhost:3001/events`
+- Graph JSON: `http://localhost:3001/graph`
+- Health check: `http://localhost:3001/health`
+
+These endpoints are powered by the shared visualizer middleware in
+`@speajus/diblob-visualizer/server`, wired through the `registerVisualizerBlobs`
+helper in this example.
+
 ## Database Seeding
 
 Populate the database with realistic sample data:
