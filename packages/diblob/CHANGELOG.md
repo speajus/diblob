@@ -1,5 +1,18 @@
 # @speajus/diblob
 
+## 1.0.0
+
+### Minor Changes
+
+- abc91a9: refactored fixed linted and removed @speajus/diblob-drizzle
+- 4a8e069: Added service example for GRPC
+
+### Patch Changes
+
+- 3b52ef8: Added dispose for container
+- 182cdac: added lifecycle methods
+- d313a61: fix version
+
 ## 0.5.0
 
 ### Minor Changes
