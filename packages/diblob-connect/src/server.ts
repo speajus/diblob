@@ -8,7 +8,7 @@
 
 import * as http from 'node:http';
 import type { DescService } from '@bufbuild/protobuf';
-import type { ServiceImpl } from '@connectrpc/connect';
+import { cors, type ServiceImpl } from '@connectrpc/connect';
 import { connectNodeAdapter } from '@connectrpc/connect-node';
 import type { Logger } from '@speajus/diblob-logger';
 import {
@@ -115,17 +115,37 @@ export class GrpcServerImpl implements GrpcServer {
       throw new Error('Server is already running');
     }
 
-    const handler = connectNodeAdapter({
-      requestPathPrefix: this.config.requestPathPrefix,
-      routes: (router) => {
-        const services = this.serviceRegistry.getServices();
-        for (const { service, implementation } of services) {
-          router.service(service, implementation);
-        }
-      },
-    });
+	    const handler = connectNodeAdapter({
+	      requestPathPrefix: this.config.requestPathPrefix,
+	      routes: (router) => {
+	        const services = this.serviceRegistry.getServices();
+	        for (const { service, implementation } of services) {
+	          router.service(service, implementation);
+	        }
+	      },
+	    });
 
-    const server = http.createServer(handler);
+	    // Wrap the Connect handler with a thin CORS layer so browser-based
+	    // clients (like the Svelte example app) can call the gRPC/Connect
+	    // server directly during development.
+	    const server = http.createServer((req, res) => {
+	      const origin = req.headers.origin ?? '*';
+	
+	      // Basic CORS headers based on Connect's recommended values.
+	      res.setHeader('Access-Control-Allow-Origin', origin);
+	      res.setHeader('Vary', 'Origin');
+	      res.setHeader('Access-Control-Allow-Methods', cors.allowedMethods.join(', '));
+	      res.setHeader('Access-Control-Allow-Headers', cors.allowedHeaders.join(', '));
+	      res.setHeader('Access-Control-Expose-Headers', cors.exposedHeaders.join(', '));
+	
+	      if (req.method === 'OPTIONS') {
+	        res.writeHead(204);
+	        res.end();
+	        return;
+	      }
+	
+	      void handler(req, res);
+	    });
     this.server = server;
 
     await new Promise<void>((resolve, reject) => {

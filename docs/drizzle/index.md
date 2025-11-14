@@ -22,25 +22,64 @@ Both blobs are registered via a helper function `registerDrizzleBlobs(container,
 The helper takes a diblob container and an optional database path, ensures the directory exists, and then registers the low-level database and the Drizzle ORM instance:
 
 ```ts
+import {createBlob } from '@speajus/diblob';
+import type Database from 'better-sqlite3';
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import type * as schema from './db/schema.js';
+
+
+export const sqlite = createBlob<InstanceType<typeof Database>>('sqlite', {
+    name: 'SQLite Database',
+    description: 'SQLite database connection'
+});
+
+export type Schema = typeof schema;
+
+export type DrizzleType = BetterSQLite3Database<Schema>;
+
+export const database = createBlob<DrizzleType>('db', {
+    name: 'Drizzle Database',
+    description: 'Drizzle database connection'
+});
+
+
+```
+
+And the registration function:
+
+```ts
+import type { Container } from "@speajus/diblob";
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Lifecycle } from '@speajus/diblob';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './db/schema.js';
-import { type Container, createBlob, Lifecycle } from '@speajus/diblob';
+import {  database, sqlite } from "./drizzle";
 
-export const sqlite = createBlob<InstanceType<typeof Database>>('sqlite');
-export const database = createBlob<any>('db');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-export function registerDrizzleBlobs(container: Container, dbPath: string) {
-  mkdirSync(dirname(dbPath), { recursive: true });
+const DEFAULT_DB_PATH = join(__dirname, '../data/app.db');
+const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
 
-  container.register(sqlite, Database, dbPath, {}, {
-    lifecycle: Lifecycle.Singleton,
-    dispose: 'close',
-  });
 
-  container.register(database, drizzle, sqlite, { schema });
+export function registerDrizzleBlobs(container: Container, dbPath: string = DB_PATH): void {
+            // Initialize database
+    console.log('💾 Initializing database...');
+    if (DB_PATH !== ':memory:') {
+            mkdirSync(dirname(DB_PATH), { recursive: true });
+    }
+
+
+    container.register(sqlite, Database, dbPath,{}, { 
+        lifecycle: Lifecycle.Singleton,
+        dispose: 'close',
+    });
+
+    container.register(database,  drizzle, sqlite, { schema });
+
 }
 ```
 

@@ -1,12 +1,3 @@
-/**
- * Example gRPC server using diblob-connect with a Drizzle ORM-backed database
- *
- * This module demonstrates:
- * - Setting up a gRPC server with diblob-connect
- * - Integrating a database using Drizzle ORM
- * - Using dependency injection for services
- * - Implementing gRPC service handlers
- */
 
 import {createBlob } from '@speajus/diblob';
 import type Database from 'better-sqlite3';
@@ -19,9 +10,8 @@ export const sqlite = createBlob<InstanceType<typeof Database>>('sqlite', {
     description: 'SQLite database connection'
 });
 
-export type Schema = typeof schema;
 
-export type DrizzleType = BetterSQLite3Database<Schema>;
+export type DrizzleType = BetterSQLite3Database<typeof schema>;
 
 export const database = createBlob<DrizzleType>('db', {
     name: 'Drizzle Database',

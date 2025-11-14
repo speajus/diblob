@@ -5,19 +5,19 @@
 import { createContainer, Lifecycle } from '@speajus/diblob';
 import {
 	  type Cache,
+	  cache,
 	  type Database,
+	  database,
 	  type EmailService,
+	  emailService,
 	  type Logger,
+	  logger,
 	  type MetricsService,
+	  metrics,
 	  type NotificationService,
+	  notificationService,
 	  type User,
 	  type UserService,
-	  cache,
-	  database,
-	  emailService,
-	  logger,
-	  metrics,
-	  notificationService,
 	  userService,
 } from './blob.js';
 

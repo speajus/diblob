@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createContainer } from '@speajus/diblob';
 import {
-  createWinstonLogger,
-  type Logger,
-  type LoggerConfig,
   logger,
   loggerConfig,
   registerLoggerBlobs,
+  createWinstonLogger,
+  type Logger,
+  type LoggerConfig,
 } from '../src/index.js';
 
 // Basic behavior test for createWinstonLogger. We do not peek into Winston's
