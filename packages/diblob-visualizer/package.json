@@ -21,16 +21,16 @@
     "dist",
     "README.md"
   ],
-	  "scripts": {
-	    "dev": "vite --mode demo",
-	    "build": "vite build && tsc -p tsconfig.server.json && tsc -p tsconfig.types.json",
-      "clean": "rm -rf dist tsconfig.tsbuildinfo",
-      "test": "tsx --test test/*.test.ts",
-      "test:watch": "tsx --test --watch test/*.test.ts",
-      "preview": "vite preview",
-      "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
-      "server": "tsx example-server.ts"
-  },
+		  "scripts": {
+		    "dev": "vite --mode demo",
+		    "build": "vite build && tsc -p tsconfig.server.json && tsc -p tsconfig.types.json",
+	      "clean": "rm -rf dist tsconfig.tsbuildinfo",
+	      "test": "pnpm run build && tsx --test test/*.test.ts",
+	      "test:watch": "tsx --test --watch test/*.test.ts",
+	      "preview": "vite preview",
+	      "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+	      "server": "tsx example-server.ts"
+	  },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tsconfig/svelte": "^5.0.5",

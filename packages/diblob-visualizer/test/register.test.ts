@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createContainer } from '@speajus/diblob';
 import {
-  visualizerServerConfig,
-  visualizerServer,
   registerVisualizerBlobs,
+  visualizerServer,
+  visualizerServerConfig,
 } from '../src/server/index.js';
 
 // Verify that registerVisualizerBlobs wires up the config blob with defaults
