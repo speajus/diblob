@@ -15,11 +15,11 @@ import { UserServiceImpl, userService } from "./user-service";
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { Lifecycle } from '@speajus/diblob';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './db/schema.js';
-import { Lifecycle } from '@speajus/diblob';
-import {  sqlite, database } from "./drizzle";
+import {  database, sqlite } from "./drizzle";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

@@ -15,7 +15,7 @@ import {
 	registerVisualizerBlobs,
 	visualizerServer,
 } from '@speajus/diblob-visualizer/server';
-import { registerUserService, registerDrizzleBlobs} from './register.js';
+import { registerDrizzleBlobs, registerUserService } from './register.js';
 
 
 async function main(container = createContainer()) {

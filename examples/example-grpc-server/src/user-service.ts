@@ -10,9 +10,9 @@ import type { ServiceImpl } from '@connectrpc/connect';
 import { createBlob } from '@speajus/diblob';
 import { eq } from 'drizzle-orm';
 import { type NewUser, type User, users } from './db/schema.js';
+import { database } from './drizzle.js';
 import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse, 
   DeleteUserResponseSchema, type GetUserResponse, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type UserService } from './generated/user_pb.js';
-import { database } from './drizzle.js';
 
 /**
  * User service implementation

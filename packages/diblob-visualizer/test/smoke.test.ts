@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
-import { request, createServer } from 'node:http';
+import { createServer, request } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { test } from 'node:test';
-
-import { createVisualizerMiddleware } from '../src/server/index.js';
 import { createSampleContainer } from '../src/examples/sample-container.js';
+import { createVisualizerMiddleware } from '../src/server/index.js';
 
 // Simple sanity check so the suite always runs
 test('diblob-visualizer basic math still works', () => {

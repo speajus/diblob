@@ -8,10 +8,10 @@
  * - Implementing gRPC service handlers
  */
 
+import {createBlob } from '@speajus/diblob';
 import type Database from 'better-sqlite3';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type * as schema from './db/schema.js';
-import {createBlob } from '@speajus/diblob';
 
 
 export const sqlite = createBlob<InstanceType<typeof Database>>('sqlite', {
