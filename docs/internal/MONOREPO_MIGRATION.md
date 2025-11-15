@@ -9,7 +9,7 @@ The diblob project has been successfully migrated to a monorepo structure using 
 ### Directory Structure
 
 **Before:**
-\`\`\`
+```
 diblob/
 ├── src/                    # diblob source
 ├── test/                   # diblob tests
@@ -21,10 +21,10 @@ diblob/
 │   └── node_modules/
 ├── package.json
 └── node_modules/
-\`\`\`
+```
 
 **After:**
-\`\`\`
+```
 diblob/
 ├── packages/
 │   ├── diblob/             # Core DI framework
@@ -44,7 +44,7 @@ diblob/
 ├── package.json            # Workspace root
 ├── tsconfig.json           # Root TypeScript config
 └── node_modules/           # Shared dependencies
-\`\`\`
+```
 
 ### Key Improvements
 
@@ -92,7 +92,7 @@ diblob/
 
 ### Root Level
 
-\`\`\`bash
+```bash
 # Build all packages
 npm run build
 
@@ -111,15 +111,15 @@ npm run docs:dev
 npm run changeset          # Create a changeset
 npm run version-packages   # Update versions
 npm run release            # Build and publish
-\`\`\`
+```
 
 ### Package-Specific
 
-\`\`\`bash
+```bash
 # Run commands in specific workspace
 npm run <script> -w @speajus/diblob
 npm run <script> -w @speajus/diblob-visualizer
-\`\`\`
+```
 
 ## Publishing Workflow
 
@@ -129,9 +129,9 @@ npm run <script> -w @speajus/diblob-visualizer
 Make your code changes in the appropriate package(s).
 
 ### 2. Create Changeset
-\`\`\`bash
+```bash
 npm run changeset
-\`\`\`
+```
 
 This will:
 - Prompt you to select which packages changed
@@ -140,17 +140,17 @@ This will:
 - Create a changeset file in \`.changeset/\`
 
 ### 3. Commit Changes
-\`\`\`bash
+```bash
 git add .
 git commit -m "feat: your feature description"
-\`\`\`
+```
 
 Include the changeset file in your commit.
 
 ### 4. Version Packages (when ready to release)
-\`\`\`bash
+```bash
 npm run version-packages
-\`\`\`
+```
 
 This will:
 - Update package.json versions
@@ -159,9 +159,9 @@ This will:
 - Delete consumed changeset files
 
 ### 5. Publish to npm
-\`\`\`bash
+```bash
 npm run release
-\`\`\`
+```
 
 This will:
 - Build all packages
@@ -172,7 +172,7 @@ This will:
 
 ### Root tsconfig.json
 References both packages for project-wide type checking:
-\`\`\`json
+```json
 {
   "files": [],
   "references": [
@@ -180,11 +180,11 @@ References both packages for project-wide type checking:
     { "path": "./packages/diblob-visualizer" }
   ]
 }
-\`\`\`
+```
 
 ### packages/diblob/tsconfig.json
 Enabled composite mode for project references:
-\`\`\`json
+```json
 {
   "compilerOptions": {
     "composite": true,
@@ -192,17 +192,17 @@ Enabled composite mode for project references:
     // ... other options
   }
 }
-\`\`\`
+```
 
 ### packages/diblob-visualizer/tsconfig.app.json
 References the diblob package:
-\`\`\`json
+```json
 {
   "references": [
     { "path": "../diblob" }
   ]
 }
-\`\`\`
+```
 
 ## Validation Results
 
