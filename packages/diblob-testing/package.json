@@ -1,0 +1,49 @@
+{
+  "name": "@speajus/diblob-testing",
+  "version": "1.0.0",
+  "description": "Testing utilities and fake infrastructure blobs for diblob containers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/speajus/diblob.git"
+  },
+  "bugs": {
+    "url": "https://github.com/speajus/diblob/issues"
+  },
+  "homepage": "https://speajus.github.io/diblob/",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsc --watch",
+    "test": "pnpm run build && tsx test/run-all.ts",
+    "test:watch": "tsx --test --watch test/*.test.ts"
+  },
+  "keywords": [
+    "testing",
+    "mocking",
+    "dependency-injection",
+    "diblob",
+    "fake",
+    "stub"
+  ],
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@speajus/diblob": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

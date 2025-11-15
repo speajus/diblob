@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "test",
+    "node_modules"
+  ],
+  "references": [
+    {
+      "path": "../diblob"
+    }
+  ]
+}
