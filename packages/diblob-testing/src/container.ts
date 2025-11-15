@@ -2,7 +2,7 @@
  * Test container factories and blob override utilities.
  */
 
-import { type Blob, type Container, createContainer, Lifecycle } from '@speajus/diblob';
+import { type Blob, type Container, createContainer, type Factory, Lifecycle } from '@speajus/diblob';
 import { registerTestInfrastructureBlobs } from './register.js';
 import type { TestContainerOptions } from './types.js';
 
@@ -44,15 +44,10 @@ export function createIsolatedTestContainer(options?: TestContainerOptions): Con
     if (!hasOptions) {
       // No options provided, add transient lifecycle
       deps.push({ lifecycle: Lifecycle.Transient });
-    } else {
-      // Options provided, ensure lifecycle is transient unless explicitly set
-      const options = lastDep as { lifecycle?: Lifecycle };
-      if (!options.lifecycle) {
-        options.lifecycle = Lifecycle.Transient;
-      }
     }
+    // If options are provided with an explicit lifecycle, don't override it
 
-    originalRegister(blob, factory, ...deps);
+    originalRegister(blob, factory as Factory<T>, ...deps);
   };
 
   return container;
