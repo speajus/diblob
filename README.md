@@ -8,7 +8,6 @@ A monorepo containing the diblob dependency injection framework and its visualiz
 
 The core dependency injection framework where the proxy (blob) is the key.
 
-- **Version**: 0.2.1
 - **Description**: A dependency injection framework with automatic dependency resolution, reactive dependencies, and full TypeScript support
 - **Documentation**: [https://speajus.github.io/diblob/](https://speajus.github.io/diblob/)
 
@@ -16,7 +15,6 @@ The core dependency injection framework where the proxy (blob) is the key.
 
 Model Context Protocol (MCP) server implementation for diblob containers.
 
-- **Version**: 0.1.0
 - **Description**: MCP server that exposes diblob container functionality through the Model Context Protocol
 - **Features**: Container introspection, dependency graph visualization, MCP tools for AI assistants
 
@@ -24,7 +22,6 @@ Model Context Protocol (MCP) server implementation for diblob containers.
 
 Interactive dependency injection graph visualization for diblob.
 
-- **Version**: 1.0.0
 - **Description**: Svelte-based visualization tool for exploring diblob container dependency graphs
 - **Features**: Real-time graph updates, lifecycle indicators, statistics dashboard
 
@@ -37,14 +34,14 @@ Interactive dependency injection graph visualization for diblob.
 
 ### Installation
 
-\`\`\`bash
+```bash
 # Install all dependencies
 npm install
-\`\`\`
+```
 
 ### Building
 
-\`\`\`bash
+```bash
 # Build all packages
 npm run build
 
@@ -52,21 +49,21 @@ npm run build
 npm run build:diblob
 npm run build:mcp
 npm run build:visualizer
-\`\`\`
+```
 
 ### Testing
 
-\`\`\`bash
+```bash
 # Run tests for diblob
 npm test
 
 # Run tests in watch mode
 npm run test:watch
-\`\`\`
+```
 
 ### Development
 
-\`\`\`bash
+```bash
 # Start visualizer in development mode
 npm run dev:visualizer
 
@@ -75,11 +72,11 @@ npm run dev:mcp
 
 # Start documentation site
 npm run docs:dev
-\`\`\`
+```
 
 ## Monorepo Structure
 
-\`\`\`
+```
 diblob/
 ├── packages/
 │   ├── diblob/              # Core DI framework
@@ -101,7 +98,7 @@ diblob/
 ├── docs/                    # Documentation site
 ├── .changeset/              # Changesets configuration
 └── package.json             # Workspace root
-\`\`\`
+```
 
 ## Publishing
 
@@ -113,9 +110,9 @@ This monorepo uses [Changesets](https://github.com/changesets/changesets) for ve
 
 When you make changes that should be published:
 
-\`\`\`bash
+```bash
 npm run changeset
-\`\`\`
+```
 
 Follow the prompts to:
 1. Select which packages have changed
@@ -126,9 +123,9 @@ Follow the prompts to:
 
 To update package versions based on changesets:
 
-\`\`\`bash
+```bash
 npm run version-packages
-\`\`\`
+```
 
 This will:
 - Update package.json versions
@@ -137,9 +134,9 @@ This will:
 
 ### Publishing to npm
 
-\`\`\`bash
+```bash
 npm run release
-\`\`\`
+```
 
 This will:
 1. Build all packages
@@ -186,3 +183,5 @@ MIT - See LICENSE file in each package for details
 - [npm - @speajus/diblob](https://www.npmjs.com/package/@speajus/diblob)
 - [npm - @speajus/diblob-mcp](https://www.npmjs.com/package/@speajus/diblob-mcp)
 - [npm - @speajus/diblob-visualizer](https://www.npmjs.com/package/@speajus/diblob-visualizer)
+- [npm - @speajus/diblob-svelte](https://www.npmjs.com/package/@speajus/diblob-svelte)
+- [npm - @speajus/diblob-logger](https://www.npmjs.com/package/@speajus/diblob-logger)

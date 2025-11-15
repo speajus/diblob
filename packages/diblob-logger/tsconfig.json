@@ -1,20 +1,10 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "lib": ["ES2022"],
-    "declaration": true,
-    "declarationMap": true,
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "types": ["node"]
   },
   "include": ["src/**/*"],
@@ -23,4 +13,3 @@
     { "path": "../diblob" }
   ]
 }
-
