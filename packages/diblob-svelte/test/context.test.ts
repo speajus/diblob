@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  attachContainerDisposal,
   DIBLOB_CONTAINER_CONTEXT_KEY,
   provideContainerContext,
-  useContainer,
   useBlob,
-  attachContainerDisposal,
+  useContainer,
 } from '../src/context.js';
 
 // Basic smoke test to ensure the Svelte helpers are present and shaped as expected.
