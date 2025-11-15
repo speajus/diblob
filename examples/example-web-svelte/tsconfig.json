@@ -1,14 +1,9 @@
 {
-  "extends": "@tsconfig/svelte/tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
     "lib": ["ES2022", "DOM"],
-    "moduleResolution": "bundler",
-    "types": ["svelte", "vite/client"],
-    "useDefineForClassFields": true,
+    "types": [],
     "noEmit": true,
-    "strict": true,
     "allowJs": true,
     "checkJs": true,
     "moduleDetection": "force"
@@ -17,8 +12,6 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../../packages/diblob" },
-    { "path": "../../packages/diblob-svelte" },
-    { "path": "../../packages/diblob-visualizer" }
+    { "path": "../../packages/diblob-svelte" }
   ]
 }
-

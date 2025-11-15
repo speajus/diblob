@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "pnpm -r build",
+    "build:tsc": "tsc --build",
     "build:diblob": "pnpm --filter @speajus/diblob build",
     "build:mcp": "pnpm --filter @speajus/diblob-mcp build",
     "build:grpc": "pnpm --filter @speajus/diblob-connect build",
@@ -25,6 +26,7 @@
     "docs:preview": "vitepress preview docs",
     "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules && pnpm clean:projects",
     "clean:projects": "pnpm -r run clean",
+    "clean:tsc": "tsc --build --clean",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm run build && changeset publish"

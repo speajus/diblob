@@ -1,11 +1,12 @@
 
-import {createBlob } from '@speajus/diblob';
+import {type Blob, createBlob } from '@speajus/diblob';
 import type Database from 'better-sqlite3';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type * as schema from './db/schema.js';
 
+export type SqliteDatabase = InstanceType<typeof Database>;
 
-export const sqlite = createBlob<InstanceType<typeof Database>>('sqlite', {
+export const sqlite: Blob<SqliteDatabase> = createBlob<SqliteDatabase>('sqlite', {
     name: 'SQLite Database',
     description: 'SQLite database connection'
 });

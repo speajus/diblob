@@ -27,7 +27,7 @@ class PlaceholderAvatarUrlProvider implements AvatarUrlProvider {
 class ConnectUserGateway implements UserGateway {
   private client: Client<typeof UserService>
 
-  constructor(private readonly config: ExampleWebConfig) {
+  constructor( readonly config: ExampleWebConfig) {
     const transport = createConnectTransport({
       baseUrl: config.apiBaseUrl,
     })
