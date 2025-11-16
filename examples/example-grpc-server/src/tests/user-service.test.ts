@@ -42,7 +42,7 @@ describe('UserService Unit Tests', () => {
     const { sqliteDb, db } = createTestDatabase();
     
     try {
-      await withBlobOverride(container, database, db, async (testContainer) => {
+      await withBlobOverride(container, database, db, async (_testContainer) => {
         const service = new UserServiceImpl(database);
         
         const request = create(CreateUserRequestSchema, {
@@ -75,7 +75,7 @@ describe('UserService Unit Tests', () => {
         createdAt: new Date()
       });
       
-      await withBlobOverride(container, database, db, async (testContainer) => {
+      await withBlobOverride(container, database, db, async (_testContainer) => {
         const service = new UserServiceImpl(database);
         
         const request = create(GetUserRequestSchema, { id: 1 });
@@ -96,7 +96,7 @@ describe('UserService Unit Tests', () => {
     const { sqliteDb, db } = createTestDatabase();
     
     try {
-      await withBlobOverride(container, database, db, async (testContainer) => {
+      await withBlobOverride(container, database, db, async (_testContainer) => {
         const service = new UserServiceImpl(database);
         
         const request = create(GetUserRequestSchema, { id: 999 });
@@ -125,7 +125,7 @@ describe('UserService Unit Tests', () => {
         });
       }
       
-      await withBlobOverride(container, database, db, async (testContainer) => {
+      await withBlobOverride(container, database, db, async (_testContainer) => {
         const service = new UserServiceImpl(database);
         
         const request = create(ListUsersRequestSchema, { limit: 3, offset: 1 });
@@ -153,7 +153,7 @@ describe('UserService Unit Tests', () => {
         createdAt: new Date()
       });
 
-      await withBlobOverride(container, database, db, async (testContainer) => {
+      await withBlobOverride(container, database, db, async (_testContainer) => {
         const service = new UserServiceImpl(database);
 
         const request = create(UpdateUserRequestSchema, {
@@ -186,7 +186,7 @@ describe('UserService Unit Tests', () => {
         createdAt: new Date()
       });
 
-      await withBlobOverride(container, database, db, async (testContainer) => {
+      await withBlobOverride(container, database, db, async (_testContainer) => {
         const service = new UserServiceImpl(database);
 
         const request = create(DeleteUserRequestSchema, { id: 1 });
@@ -204,7 +204,7 @@ describe('UserService Unit Tests', () => {
     const { sqliteDb, db } = createTestDatabase();
 
     try {
-      await withBlobOverride(container, database, db, async (testContainer) => {
+      await withBlobOverride(container, database, db, async (_testContainer) => {
         const service = new UserServiceImpl(database);
 
         const request = create(DeleteUserRequestSchema, { id: 999 });

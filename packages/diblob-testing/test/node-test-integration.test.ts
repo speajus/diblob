@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { createBlob } from '@speajus/diblob';
+import { type Container, createBlob } from '@speajus/diblob';
 import { setupEachTestContainer, setupFileScopedTestContainer, testLogger } from '../src/index.js';
 
 describe('node:test Integration', () => {
@@ -102,7 +102,7 @@ describe('node:test Integration', () => {
   describe('Error handling', () => {
     test('getContainer should throw when called outside test context', () => {
       // This simulates calling getContainer when no container is available
-      const currentContainer: any = null;
+      const currentContainer: Container | null = null;
       
       const mockGetContainer = () => {
         if (!currentContainer) {

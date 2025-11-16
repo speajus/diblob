@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { createTestContainer, httpClientStub, httpServerStub, testClock, testLogger, testRandom } from '../src/index.js';
+import { createTestContainer, testClock, testLogger, testRandom } from '../src/index.js';
 
 describe('Test Infrastructure Blobs', () => {
   describe('TestLogger', () => {

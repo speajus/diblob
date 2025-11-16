@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { createBlob, createContainer, Lifecycle } from '@speajus/diblob';
+import { createBlob, Lifecycle } from '@speajus/diblob';
 import { 
   createIsolatedTestContainer, 
   createTestContainer, 
@@ -9,7 +9,6 @@ import {
   testClock,
   testLogger,
   testRandom,
-  withBlobOverride
 } from '../src/index.js';
 
 describe('Test Container Factories', () => {

@@ -157,7 +157,7 @@ describe('Blob Override Utility', () => {
       getValue: () => 'original-a'
     }));
     
-    baseContainer.register(serviceB, (a: ServiceA) => ({
+    baseContainer.register(serviceB, (_a: ServiceA) => ({
       getDependentValue: (a: ServiceA) => `dependent-${a.getValue()}`
     }), serviceA);
     
