@@ -6,13 +6,13 @@
  */
 
 import { create } from '@bufbuild/protobuf';
-import type { ServiceImpl } from '@connectrpc/connect';
+import { Code, ConnectError, type ServiceImpl } from '@connectrpc/connect';
 import { createBlob } from '@speajus/diblob';
 import { eq } from 'drizzle-orm';
 import { type NewUser, type User, users } from './db/schema.js';
 import { database } from './drizzle.js';
-import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse, 
-  DeleteUserResponseSchema, type GetUserResponse, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type UserService } from './generated/user_pb.js';
+import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse,
+  DeleteUserResponseSchema, type GetUserRequest, type GetUserResponse, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type UserService } from './generated/user_pb.js';
 
 /**
  * User service implementation
@@ -22,12 +22,12 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
     private db = database
   ) {}
 
-  async getUser({id}:{id: number}):Promise<GetUserResponse> {
+  async getUser(request: GetUserRequest):Promise<GetUserResponse> {
     const user = await this.db.query.users.findFirst({
-      where: eq(users.id, id)
+      where: eq(users.id, request.id)
     });
     if (!user){
-      throw new Error(`user not found`);
+      throw new ConnectError(`user not found`, Code.NotFound);
     }
     return create(GetUserResponseSchema, {user:this.userToProto(user)});
   }
@@ -39,42 +39,44 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
       createdAt: BigInt(user.createdAt?.getTime())
     });
   }
-  async createUser({name, email}:CreateUserRequest): Promise<CreateUserResponse> {
+  async createUser(request: CreateUserRequest): Promise<CreateUserResponse> {
     const newUser: NewUser = {
-      name,
-      email,
+      name: request.name,
+      email: request.email,
       createdAt: new Date()
     };
-    
+
     const [user] = await this.db.insert(users).values(newUser).returning();
     return create(CreateUserResponseSchema, {user:this.userToProto(user)});
   }
 
-  async listUsers({limit = 10, offset = 0}:ListUsersRequest): Promise<ListUsersResponse> {
-    
+  async listUsers(request: ListUsersRequest): Promise<ListUsersResponse> {
+    const limit = request.limit || 10;
+    const offset = request.offset || 0;
+
     const userList = await this.db.select().from(users).limit(limit).offset(offset);
     const [{ count }] = await this.db.select({ count: users.id }).from(users);
-    
+
     return create(ListUsersResponseSchema, {
       users: userList.map(this.userToProto),
       total: count
     });
   }
 
-  async updateUser({id, name, email}:UpdateUserRequest): Promise<UpdateUserResponse>{
-    
+  async updateUser(request: UpdateUserRequest): Promise<UpdateUserResponse>{
+
     const [user] = await this.db
       .update(users)
-      .set({ name, email })
-      .where(eq(users.id, id))
+      .set({ name: request.name, email: request.email })
+      .where(eq(users.id, request.id))
       .returning();
-    
+
     return create(UpdateUserResponseSchema, {user:this.userToProto(user)});
   }
 
-  async deleteUser({id}:DeleteUserRequest): Promise<DeleteUserResponse> {
-    
-    const result = await this.db.delete(users).where(eq(users.id, id));
+  async deleteUser(request: DeleteUserRequest): Promise<DeleteUserResponse> {
+
+    const result = await this.db.delete(users).where(eq(users.id, request.id));
     return create(DeleteUserResponseSchema, {success:result.changes > 0});
   }
 }

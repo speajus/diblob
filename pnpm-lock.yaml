@@ -58,6 +58,9 @@ importers:
       '@bufbuild/protoc-gen-es':
         specifier: ^2.10.0
         version: 2.10.0(@bufbuild/protobuf@2.10.0)
+      '@speajus/diblob-testing':
+        specifier: workspace:*
+        version: link:../../packages/diblob-testing
       '@types/better-sqlite3':
         specifier: ^7.6.12
         version: 7.6.13
@@ -227,6 +230,22 @@ importers:
         version: 4.20.6
       typescript:
         specifier: ~5.9.3
+        version: 5.9.3
+
+  packages/diblob-testing:
+    dependencies:
+      '@speajus/diblob':
+        specifier: workspace:*
+        version: link:../diblob
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.0
+      tsx:
+        specifier: ^4.19.2
+        version: 4.20.6
+      typescript:
+        specifier: ^5.7.2
         version: 5.9.3
 
   packages/diblob-visualizer:

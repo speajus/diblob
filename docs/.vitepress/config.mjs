@@ -48,6 +48,7 @@ export default defineConfig({
             { text: 'Lifecycle Hooks', link: '/diblob/guide/lifecycle-hooks' },
             { text: 'Constructor Injection', link: '/diblob/guide/constructor-injection' },
             { text: 'Factory Injection', link: '/diblob/guide/factory-injection' },
+            { text: 'Testing', link: '/diblob/guide/testing' },
           ]
         }
       ],
