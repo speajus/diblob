@@ -8,7 +8,7 @@
     "build": "pnpm run proto:generate && pnpm run db:generate && tsc",
     "dev": "tsx src/index.ts",
     "start": "pnpm run build && node dist/index.js",
-    "test": "tsx --test src/tests/**/*.test.ts",
+    "test": "pnpm run proto:generate && tsx --test src/tests/**/*.test.ts",
     "test:server": "pnpm run build && tsx --test src/**/*.test.ts",
     "client": "tsx src/client.ts",
     "proto:generate": "buf generate",
