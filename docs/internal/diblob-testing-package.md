@@ -63,32 +63,136 @@ The package was implemented as a 4-PR Graphite stack:
 3. **Infrastructure blobs** - Fake implementations and registration helpers
 4. **Integration and tests** - node:test helpers and comprehensive test suite
 
-## Usage Patterns
+## Real-World Usage Patterns from Examples
 
-### Basic Testing
+### Pattern 1: Testing with Real In-Memory Databases (example-grpc-server)
+
+The example-grpc-server demonstrates testing with real in-memory SQLite databases instead of mocks:
+
+**Key Benefits:**
+- More accurate testing - catches real database constraints and behavior
+- Type safety - no need to mock complex Drizzle ORM types
+- Simpler test code - no complex mock setup
+
+**Implementation:**
 ```typescript
-import { setupEachTestContainer, testLogger } from '@speajus/diblob-testing';
+// Helper function to create test database with schema
+const createTestDatabase = () => {
+  const sqliteDb = new Database(':memory:');
 
-const { getContainer } = setupEachTestContainer();
+  sqliteDb.exec(`
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      created_at INTEGER NOT NULL
+    )
+  `);
 
-test('should log messages', async () => {
-  const container = getContainer();
-  const logger = await container.resolve(testLogger);
-  // ... test logic
+  const db = drizzle(sqliteDb, { schema });
+  return { sqliteDb, db };
+};
+
+// Use in tests with withBlobOverride
+test('should create a user', async () => {
+  const container = createTestContainer();
+  const { sqliteDb, db } = createTestDatabase();
+
+  try {
+    await withBlobOverride(container, database, db, async () => {
+      const service = new UserServiceImpl(database);
+      const user = await service.createUser({ name: 'Test', email: 'test@example.com' });
+      assert.strictEqual(user.name, 'Test');
+    });
+  } finally {
+    sqliteDb.close();
+  }
 });
 ```
 
-### Blob Overriding
+**Files:**
+- `examples/example-grpc-server/src/tests/user-service.test.ts` - Unit tests with database overrides
+- `examples/example-grpc-server/src/tests/grpc-integration.test.ts` - Integration tests with full setup
+
+### Pattern 2: Integration Tests with Full Container Setup
+
+The example-grpc-server demonstrates testing complete workflows with all dependencies:
+
+**Implementation:**
 ```typescript
-await withBlobOverride(
-  baseContainer,
-  myService,
-  mockImplementation,
-  async (container) => {
-    // Test with mock implementation
+describe('gRPC Service Integration Tests', () => {
+  const { getContainer } = setupEachTestContainer();
+
+  async function createSchema(container) {
+    const db = await container.resolve(sqlite);
+    db.exec(`CREATE TABLE IF NOT EXISTS users (...)`);
   }
-);
+
+  test('should create and retrieve user', async () => {
+    const container = getContainer();
+    registerDrizzleBlobs(container, ':memory:');
+    await createSchema(container);
+    registerGrpcBlobs(container, { host: '0.0.0.0', port: 50053 });
+    registerUserService(container);
+
+    const service = await container.resolve(userService);
+    // Test full workflow...
+  });
+});
 ```
+
+### Pattern 3: Container Lifecycle Testing
+
+Testing that container setup, registration, and disposal work correctly:
+
+```typescript
+test('should properly dispose container and close database', async () => {
+  const container = createContainer();
+  registerDrizzleBlobs(container, ':memory:');
+
+  const sqliteDb = await container.resolve(sqlite);
+  assert.ok(sqliteDb.open, 'Database should be open');
+
+  await container.dispose();
+
+  assert.ok(!sqliteDb.open, 'Database should be closed after dispose');
+});
+```
+
+**Files:**
+- `examples/example-grpc-server/src/tests/container-lifecycle.test.ts` - Container lifecycle tests
+
+### Pattern 4: Test Organization
+
+**Directory structure:**
+```
+examples/example-grpc-server/
+├── src/
+│   ├── tests/                    # All tests in dedicated directory
+│   │   ├── user-service.test.ts  # Unit tests
+│   │   ├── grpc-integration.test.ts  # Integration tests
+│   │   └── container-lifecycle.test.ts  # Lifecycle tests
+│   ├── db/
+│   │   └── schema.ts             # Database schema
+│   ├── drizzle.ts                # Blob definitions
+│   ├── register.ts               # Registration functions
+│   └── user-service.ts           # Implementation
+└── package.json
+```
+
+**Test Results:**
+- 18 tests total across 3 test files
+- All tests passing
+- Covers unit, integration, and lifecycle testing
+
+## Lessons Learned
+
+1. **Real databases > Mocks**: Using real in-memory databases provides better test coverage and catches more bugs
+2. **Helper functions are essential**: Common setup should be extracted to helper functions
+3. **Schema management matters**: Tests need to create database schemas explicitly
+4. **Resource cleanup is critical**: Always use try/finally blocks to clean up resources like database connections
+5. **Container isolation works well**: `setupEachTestContainer()` provides excellent test isolation
+6. **Registration functions are testable**: Separating registration into functions makes them easy to test
 
 ## Future Considerations
 

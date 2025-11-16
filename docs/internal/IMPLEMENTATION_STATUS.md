@@ -44,13 +44,8 @@ This document tracks the implementation status of features from SPEC.md.
 ## ❌ Not Yet Implemented
 
 ### Error Handling
-- ❌ **Async Error Detection** - Spec requires throwing error when async blob is used in sync constructor
-  - Spec example: `new MyDependentImpl()` should throw if `myBlob` is async
-  - Currently doesn't detect this case
 
 ### Advanced Features
-- ❌ **Special Symbol Throwing** - Spec mentions blobs throwing special symbols for async resolution
-  - Not implemented yet
 - ❌ **Property Access Queueing** - Spec mentions queueing property accesses before async resolution
   - Not implemented yet
 

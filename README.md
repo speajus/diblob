@@ -44,7 +44,13 @@ Svelte 5 integration helpers for diblob containers.
 Testing utilities for diblob dependency injection containers.
 
 - **Description**: Comprehensive testing utilities including test container factories, blob override utilities, fake infrastructure implementations, and node:test integration
-- **Features**: Test containers, blob overrides, in-memory logger, controllable clock, deterministic RNG, HTTP stubs
+- **Features**:
+  - Test container factories with infrastructure
+  - Blob override utilities with automatic cleanup
+  - In-memory logger, controllable clock, deterministic RNG, HTTP stubs
+  - Seamless node:test integration
+  - Real-world patterns for testing with in-memory databases
+- **Examples**: See `examples/example-grpc-server/src/tests/` for comprehensive testing patterns
 
 ### [@speajus/diblob-visualizer](./packages/diblob-visualizer)
 
@@ -210,6 +216,59 @@ This will:
 | \`pnpm run changeset\` | Create a new changeset |
 | \`pnpm run version-packages\` | Update versions from changesets |
 | \`pnpm run release\` | Build and publish packages |
+
+## Examples
+
+The monorepo includes comprehensive examples demonstrating real-world usage:
+
+### example-grpc-server
+
+A complete gRPC server implementation using diblob-connect with Drizzle ORM and SQLite.
+
+**Location**: `examples/example-grpc-server/`
+
+**Features**:
+- gRPC service implementation with Connect-ES
+- Database integration with Drizzle ORM
+- Comprehensive test suite using @speajus/diblob-testing
+- Container lifecycle management
+- Graceful shutdown handling
+
+**Testing Patterns**:
+- **Unit tests** (`src/tests/user-service.test.ts`) - Testing with real in-memory SQLite databases
+- **Integration tests** (`src/tests/grpc-integration.test.ts`) - Full workflow testing with all dependencies
+- **Lifecycle tests** (`src/tests/container-lifecycle.test.ts`) - Container setup and disposal testing
+
+**Run the example**:
+```bash
+cd examples/example-grpc-server
+pnpm install
+pnpm run build
+pnpm start
+
+# Run tests
+pnpm test
+```
+
+### example-web-svelte
+
+A Svelte 5 web application demonstrating client-side diblob usage.
+
+**Location**: `examples/example-web-svelte/`
+
+**Features**:
+- Svelte 5 integration with diblob-svelte
+- Connect-ES client for gRPC communication
+- Container context providers
+- Real-time visualizer integration
+
+**Run the example**:
+```bash
+cd examples/example-web-svelte
+pnpm install
+pnpm run build
+pnpm run dev
+```
 
 ## Contributing
 
