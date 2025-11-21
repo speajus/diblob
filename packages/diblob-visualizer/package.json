@@ -8,13 +8,13 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "svelte": "./src/lib/index.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/svelte/index.d.ts",
+      "svelte": "./src/svelte/index.ts",
+      "default": "./dist/svelte/index.js"
     },
     "./server": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
+      "types": "./dist/server/src/server/index.d.ts",
+      "default": "./dist/server/src/server/index.js"
     }
   },
   "files": [

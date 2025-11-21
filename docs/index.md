@@ -124,6 +124,12 @@ Interactive visualization tool for your dependency graphs.
 - [Getting Started](/visualizer/getting-started)
 - [API Reference](/visualizer/api)
 
+### @speajus/diblob-telemetry
+
+OpenTelemetry instrumentation for diblob containers.
+
+- [Documentation](/diblob/telemetry)
+
 ## Features
 
 ### Proxy-Based Keys

@@ -7,6 +7,7 @@
 
 import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError, type ServiceImpl } from '@connectrpc/connect';
+import { trace } from '@opentelemetry/api';
 import { createBlob } from '@speajus/diblob';
 import { eq } from 'drizzle-orm';
 import { type NewUser, type User, users } from './db/schema.js';
@@ -23,13 +24,18 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
   ) {}
 
   async getUser(request: GetUserRequest):Promise<GetUserResponse> {
-    const user = await this.db.query.users.findFirst({
-      where: eq(users.id, request.id)
-    });
+    const span = trace.getTracer('example-grpc-server').startSpan('getUser');
+    try {
+      const user = await this.db.query.users.findFirst({
+        where: eq(users.id, request.id)
+      });
     if (!user){
       throw new ConnectError(`user not found`, Code.NotFound);
     }
-    return create(GetUserResponseSchema, {user:this.userToProto(user)});
+      return create(GetUserResponseSchema, {user:this.userToProto(user)});
+    } finally {
+      span.end();
+    }
   }
   userToProto(user: User) {
     return create(UserSchema, {
@@ -40,44 +46,64 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
     });
   }
   async createUser(request: CreateUserRequest): Promise<CreateUserResponse> {
-    const newUser: NewUser = {
-      name: request.name,
-      email: request.email,
-      createdAt: new Date()
-    };
+    const span = trace.getTracer('example-grpc-server').startSpan('createUser');
+    try {
+      const newUser: NewUser = {
+        name: request.name,
+        email: request.email,
+        createdAt: new Date()
+      };
 
-    const [user] = await this.db.insert(users).values(newUser).returning();
-    return create(CreateUserResponseSchema, {user:this.userToProto(user)});
+      const [user] = await this.db.insert(users).values(newUser).returning();
+      return create(CreateUserResponseSchema, {user:this.userToProto(user)});
+    } finally {
+      span.end();
+    }
   }
 
   async listUsers(request: ListUsersRequest): Promise<ListUsersResponse> {
-    const limit = request.limit || 10;
-    const offset = request.offset || 0;
+    const span = trace.getTracer('example-grpc-server').startSpan('listUsers');
+    try {
+      const limit = request.limit || 10;
+      const offset = request.offset || 0;
 
-    const userList = await this.db.select().from(users).limit(limit).offset(offset);
-    const [{ count }] = await this.db.select({ count: users.id }).from(users);
+      const userList = await this.db.select().from(users).limit(limit).offset(offset);
+      const [{ count }] = await this.db.select({ count: users.id }).from(users);
 
-    return create(ListUsersResponseSchema, {
-      users: userList.map(this.userToProto),
-      total: count
-    });
+      return create(ListUsersResponseSchema, {
+        users: userList.map(this.userToProto),
+        total: count
+      });
+    } finally {
+      span.end();
+    }
   }
 
   async updateUser(request: UpdateUserRequest): Promise<UpdateUserResponse>{
 
-    const [user] = await this.db
-      .update(users)
-      .set({ name: request.name, email: request.email })
-      .where(eq(users.id, request.id))
-      .returning();
+    const span = trace.getTracer('example-grpc-server').startSpan('updateUser');
+    try {
+      const [user] = await this.db
+        .update(users)
+        .set({ name: request.name, email: request.email })
+        .where(eq(users.id, request.id))
+        .returning();
 
-    return create(UpdateUserResponseSchema, {user:this.userToProto(user)});
+      return create(UpdateUserResponseSchema, {user:this.userToProto(user)});
+    } finally {
+      span.end();
+    }
   }
 
   async deleteUser(request: DeleteUserRequest): Promise<DeleteUserResponse> {
 
-    const result = await this.db.delete(users).where(eq(users.id, request.id));
-    return create(DeleteUserResponseSchema, {success:result.changes > 0});
+    const span = trace.getTracer('example-grpc-server').startSpan('deleteUser');
+    try {
+      const result = await this.db.delete(users).where(eq(users.id, request.id));
+      return create(DeleteUserResponseSchema, {success:result.changes > 0});
+    } finally {
+      span.end();
+    }
   }
 }
 

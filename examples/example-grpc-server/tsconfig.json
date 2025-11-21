@@ -4,13 +4,17 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    "types": ["node"]
+    "types": ["node"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../../packages/diblob" },
     { "path": "../../packages/diblob-connect" },
-    { "path": "../../packages/diblob-logger" }
+    { "path": "../../packages/diblob-logger" },
+    { "path": "../../packages/diblob-telemetry" },
+    { "path": "../../packages/diblob-visualizer" }
   ]
 }

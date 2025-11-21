@@ -11,7 +11,7 @@ import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Container } from '@speajus/diblob';
 import { createBlob, Lifecycle } from '@speajus/diblob';
-import { extractDependencyGraph, getGraphStats } from '../lib/container-introspection.js';
+import { extractDependencyGraph, getGraphStats } from '../shared/container-introspection.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST_ROOT = join(__dirname, '../../dist');

@@ -1,7 +1,7 @@
 import type { Container } from "@speajus/diblob";
 import { grpcServiceRegistry } from "@speajus/diblob-connect";
-import { UserService } from "./generated/user_pb";
-import { UserServiceImpl, userService } from "./user-service";
+import { UserService } from "./generated/user_pb.js";
+import { UserServiceImpl, userService } from "./user-service.js";
 /**
  * Example gRPC server using diblob-connect with a Drizzle ORM-backed database
  *
@@ -19,7 +19,7 @@ import { Lifecycle } from '@speajus/diblob';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './db/schema.js';
-import {  database, sqlite } from "./drizzle";
+import {  database, sqlite } from "./drizzle.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,10 +45,14 @@ export function registerDrizzleBlobs(container: Container, dbPath: string = DB_P
 
 }
 export function registerUserService(container: Container): void {
-    
-    
   container.register(userService, UserServiceImpl);
 
-  grpcServiceRegistry.registerService(UserService, userService);
-  
+  // Resolve the concrete implementation and register it with the service registry.
+  // This keeps the container as the single source of construction while satisfying
+  // the registry's expected ServiceImpl type.
+  void (async () => {
+    const impl = await container.resolve(userService);
+    const registry = await container.resolve(grpcServiceRegistry);
+    registry.registerService(UserService, impl);
+  })();
 }

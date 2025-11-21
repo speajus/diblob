@@ -1,7 +1,7 @@
 <script lang="ts">
   import '@xyflow/svelte/dist/style.css';
-  import { createBlobLabel } from './container-introspection';
-  import type { DependencyGraph } from './container-introspection';
+  import { createBlobLabel } from '../shared/container-introspection';
+  import type { DependencyGraph } from '../shared/container-introspection';
 
   // biome-ignore lint/correctness/noUnusedImports: used but biome doesn't get it    
   import { Background, Controls, MiniMap, SvelteFlow, type Edge, type Node } from '@xyflow/svelte';

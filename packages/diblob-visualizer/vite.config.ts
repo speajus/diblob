@@ -18,6 +18,7 @@ export default defineConfig({
       fileName: 'index',
       formats: ['es'],
     },
+    outDir:"dist/svelte",
     // rollupOptions: {
     //   external: ['svelte', '@speajus/diblob', '@xyflow/svelte'],
     //   output: {

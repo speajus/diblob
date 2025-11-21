@@ -5,7 +5,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    "types": ["node"]
+    "types": ["node"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"],
