@@ -4,16 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Interactive dependency injection graph visualization for diblob",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/server/src/server/index.js",
+  "types": "./dist/types/src/server/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/svelte/index.d.ts",
-      "svelte": "./src/svelte/index.ts",
+      "types": "./dist/types/src/lib/index.d.ts",
+      "svelte": "./src/lib/index.ts",
       "default": "./dist/svelte/index.js"
     },
     "./server": {
-      "types": "./dist/server/src/server/index.d.ts",
+      "types": "./dist/types/src/server/index.d.ts",
       "default": "./dist/server/src/server/index.js"
     }
   },
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tsconfig/svelte": "^5.0.5",
-    "@types/node": "^24.6.0",
+    "@types/node": "^24.10.0",
     "svelte": "^5.39.6",
     "svelte-check": "^4.3.2",
     "tsx": "^4.20.6",

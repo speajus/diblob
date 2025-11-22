@@ -17,3 +17,8 @@
 - Updated dependencies [182cdac]
 - Updated dependencies [d313a61]
   - @speajus/diblob@1.0.0
+
+## Unreleased
+
+### Added
+- Optional Loki transport via `winston-loki` when `loggerConfig.loki.host` is set.

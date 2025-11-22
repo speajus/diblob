@@ -14,7 +14,7 @@ import {
 
 export const DEFAULT_CONFIG: ExampleWebConfig = {
   apiBaseUrl: 'http://localhost:50051',
-  visualizerEventsUrl: 'http://localhost:3001/events',
+  visualizerEventsUrl: 'http://localhost:3002/events',
 }
 
 class PlaceholderAvatarUrlProvider implements AvatarUrlProvider {

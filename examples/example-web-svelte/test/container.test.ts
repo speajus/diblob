@@ -11,7 +11,7 @@ test('registerExampleWebBlobs wires up config and user gateway', async () => {
 
   registerExampleWebBlobs(container, {
     apiBaseUrl: 'http://localhost:50051',
-    visualizerEventsUrl: 'http://localhost:3001/events',
+    visualizerEventsUrl: 'http://localhost:3002/events',
   })
 
   const config = await container.resolve(exampleWebConfig)

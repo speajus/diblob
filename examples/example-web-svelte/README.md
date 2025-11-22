@@ -62,7 +62,7 @@ From the **repository root** (`diblob`):
    This starts:
 
    - Connect/HTTP server on `http://localhost:50051`
-   - Visualizer server on `http://localhost:3001` (SSE at `/events`)
+  - Visualizer server on `http://localhost:3002` (SSE at `/events`)
 
 3. In another terminal, start the Svelte dev server:
 

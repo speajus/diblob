@@ -37,7 +37,8 @@
     "@speajus/diblob": "workspace:*"
   },
   "dependencies": {
-    "winston": "^3.18.3"
+    "winston": "^3.18.3",
+    "winston-loki": "^6.1.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -3,6 +3,7 @@
  */
 
 import winston from 'winston';
+import LokiTransport from 'winston-loki';
 import type { Logger, LoggerConfig } from './blobs.js';
 
 /**
@@ -11,20 +12,39 @@ import type { Logger, LoggerConfig } from './blobs.js';
 export function createWinstonLogger(config: LoggerConfig): Logger {
   const { level = 'info', defaultMeta, prettyPrint = true } = config;
 
+  const baseFormat = prettyPrint
+    ? winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.colorize(),
+        winston.format.printf(({ level, message, timestamp, ...meta }) => {
+          const metaPart = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+          return `${timestamp} [${level}]: ${message}${metaPart}`;
+        }),
+      )
+    : winston.format.json();
+
+  const transports: winston.transport[] = [
+    new winston.transports.Console(),
+  ];
+
+  if (config.loki?.host) {
+    transports.push(
+      new LokiTransport({
+        host: config.loki.host,
+        labels: config.loki.labels,
+        level: config.loki.level ?? level,
+        batching: true,
+        interval: config.loki.interval ?? 1000,
+        json: config.loki.json ?? true,
+      }),
+    );
+  }
+
   const logger = winston.createLogger({
     level,
     defaultMeta,
-    format: prettyPrint
-      ? winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.colorize(),
-          winston.format.printf(({ level, message, timestamp, ...meta }) => {
-            const metaPart = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
-            return `${timestamp} [${level}]: ${message}${metaPart}`;
-          }),
-        )
-      : winston.format.json(),
-    transports: [new winston.transports.Console()],
+    format: baseFormat,
+    transports,
   });
 
   // Adapt Winston's Logger to our minimal Logger interface.

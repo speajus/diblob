@@ -44,15 +44,12 @@ export function registerDrizzleBlobs(container: Container, dbPath: string = DB_P
     container.register(database,  drizzle, sqlite, { schema });
 
 }
-export function registerUserService(container: Container): void {
+export async function registerUserService(container: Container): Promise<void> {
   container.register(userService, UserServiceImpl);
 
-  // Resolve the concrete implementation and register it with the service registry.
-  // This keeps the container as the single source of construction while satisfying
-  // the registry's expected ServiceImpl type.
-  void (async () => {
-    const impl = await container.resolve(userService);
-    const registry = await container.resolve(grpcServiceRegistry);
-    registry.registerService(UserService, impl);
-  })();
+  // Resolve the concrete implementation and register it with the service registry
+  // before the gRPC server starts, to avoid missing routes (HTTP 404 / UNIMPLEMENTED).
+  const impl = await container.resolve(userService);
+  const registry = await container.resolve(grpcServiceRegistry);
+  registry.registerService(UserService, impl);
 }

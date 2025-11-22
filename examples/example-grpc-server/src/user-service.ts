@@ -9,6 +9,7 @@ import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError, type ServiceImpl } from '@connectrpc/connect';
 import { trace } from '@opentelemetry/api';
 import { createBlob } from '@speajus/diblob';
+import { logger } from '@speajus/diblob-logger';
 import { eq } from 'drizzle-orm';
 import { type NewUser, type User, users } from './db/schema.js';
 import { database } from './drizzle.js';
@@ -20,7 +21,8 @@ import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSche
  */
 export class UserServiceImpl implements ServiceImpl<typeof UserService> {
   constructor(
-    private db = database
+    private db = database,
+    private log = logger
   ) {}
 
   async getUser(request: GetUserRequest):Promise<GetUserResponse> {
@@ -46,6 +48,7 @@ export class UserServiceImpl implements ServiceImpl<typeof UserService> {
     });
   }
   async createUser(request: CreateUserRequest): Promise<CreateUserResponse> {
+    this.log.info('Creating user', {request});
     const span = trace.getTracer('example-grpc-server').startSpan('createUser');
     try {
       const newUser: NewUser = {

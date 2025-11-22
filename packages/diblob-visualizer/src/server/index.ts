@@ -5,7 +5,7 @@
  * optionally serve the built visualizer UI (index.html + assets).
  */
 
-import { createReadStream } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +14,25 @@ import { createBlob, Lifecycle } from '@speajus/diblob';
 import { extractDependencyGraph, getGraphStats } from '../shared/container-introspection.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DIST_ROOT = join(__dirname, '../../dist');
+
+// We need a dist root that works both when running from source (tsx) and from the
+// built output (dist/server/src/server). Prefer the built UI at dist/svelte.
+const DIST_ROOT = (() => {
+  const candidates = [
+    // Running from source: packages/diblob-visualizer/src/server -> ../../dist/svelte
+    join(__dirname, '../../dist/svelte'),
+    // Running from built output: packages/diblob-visualizer/dist/server/src/server -> ../../../svelte
+    join(__dirname, '../../../svelte'),
+    // Fallback: cwd/dist/svelte (when invoked from package root)
+    join(process.cwd(), 'dist/svelte'),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+
+  return candidates[0];
+})();
 
 export interface ServerOptions {
   port?: number;

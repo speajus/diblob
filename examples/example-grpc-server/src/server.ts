@@ -22,12 +22,24 @@ import { registerDrizzleBlobs, registerUserService } from './register.js';
 async function main(container = createContainer()) {
   console.log('🚀 Starting gRPC server with diblob...\n');
 
-		// Register logger blobs first so server logging goes through Winston
-	registerLoggerBlobs(container, {
-		level: 'info',
-		prettyPrint: true,
-		defaultMeta: { service: 'example-grpc-server' },
-	});
+    // Register logger blobs first so server logging goes through Winston
+    const lokiHost = process.env.LOGGER_LOKI_HOST;
+    registerLoggerBlobs(container, {
+        level: process.env.LOG_LEVEL ?? 'info',
+        prettyPrint: process.env.LOG_PRETTY !== 'false',
+        defaultMeta: { service: 'example-grpc-server' },
+        ...(lokiHost
+            ? {
+                loki: {
+                    host: lokiHost,
+                    labels: {
+                        service: 'example-grpc-server',
+                        env: process.env.DEPLOYMENT_ENVIRONMENT ?? 'development',
+                    },
+                },
+            }
+            : {}),
+    });
 
     // Register telemetry (tracing + metrics). Defaults to console exporter unless
     // TELEMETRY_EXPORTER=otlp-http is provided (e.g., Jaeger, Grafana Alloy).
@@ -49,19 +61,20 @@ async function main(container = createContainer()) {
     await container.resolve(telemetryContext);
 
 		// Register gRPC blobs
-	registerGrpcBlobs(container, {
-		host: process.env.HOST || '0.0.0.0',
-		port: process.env.PORT ? Number(process.env.PORT) : 50051,
-	});
+    registerGrpcBlobs(container, {
+      host: process.env.HOST || '0.0.0.0',
+      port: process.env.PORT ? Number(process.env.PORT) : 50051,
+    });
 
-	registerDrizzleBlobs(container);
-	
-	registerUserService(container);
+    registerDrizzleBlobs(container);
+    
+    // Ensure service is registered before starting servers to avoid 404/UNIMPLEMENTED.
+    await registerUserService(container);
 
 	// Register visualizer server blobs so the container graph is exposed via HTTP
 	registerVisualizerBlobs(container, {
 		host: process.env.VISUALIZER_HOST || '0.0.0.0',
-		port: process.env.VISUALIZER_PORT ? Number(process.env.VISUALIZER_PORT) : 3001,
+			port: process.env.VISUALIZER_PORT ? Number(process.env.VISUALIZER_PORT) : 3002,
 	});
 
 	// Start the servers by resolving their blobs (lifecycle will call start)

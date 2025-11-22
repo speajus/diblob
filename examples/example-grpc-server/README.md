@@ -79,7 +79,7 @@ This example also exposes the diblob container graph using
 `@speajus/diblob-visualizer`, including the full web UI and SSE endpoints.
 
 By default, the visualizer HTTP server listens on
-`VISUALIZER_HOST:VISUALIZER_PORT`, which default to `0.0.0.0:3001`.
+`VISUALIZER_HOST:VISUALIZER_PORT`, which default to `0.0.0.0:3002`.
 
 ```bash
 # From the repository root (using pnpm workspaces)
@@ -92,10 +92,10 @@ pnpm run dev
 Once the server is running, you can open the visualizer UI directly in your
 browser:
 
-- UI: `http://localhost:3001/`
-- SSE stream: `http://localhost:3001/events`
-- Graph JSON: `http://localhost:3001/graph`
-- Health check: `http://localhost:3001/health`
+- UI: `http://localhost:3002/`
+- SSE stream: `http://localhost:3002/events`
+- Graph JSON: `http://localhost:3002/graph`
+- Health check: `http://localhost:3002/health`
 
 These endpoints are powered by the shared visualizer middleware in
 `@speajus/diblob-visualizer/server`, wired through the `registerVisualizerBlobs`

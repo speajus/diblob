@@ -4,8 +4,7 @@ OpenTelemetry instrumentation for diblob containers.
 
 ## Quick start
 
-<augment_code_snippet mode="EXCERPT">
-````ts
+```ts
 import { createContainer } from '@speajus/diblob';
 import { registerTelemetryBlobs, telemetryContext } from '@speajus/diblob-telemetry';
 
@@ -18,5 +17,4 @@ registerTelemetryBlobs(container, {
 });
 
 await container.resolve(telemetryContext);
-````
-</augment_code_snippet>
+```
