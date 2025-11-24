@@ -73,6 +73,21 @@ pnpm run dev
 
 The server will start on `0.0.0.0:50051`.
 
+### Discovering configuration with `--help`
+
+This example uses `@speajus/diblob-config` and a Zod schema to define a
+typed `ExampleGrpcServerConfig`. You can see all available configuration
+options, their environment variables, CLI flags, types, defaults, and
+descriptions by running the server with `--help`:
+
+```bash
+pnpm --filter example-grpc-server dev -- --help
+```
+
+This calls into `@speajus/diblob-config/node` to generate help text from
+the schema (including `.describe()` metadata) and exits without starting
+the server.
+
 ## Visualizing the Container Graph
 
 This example also exposes the diblob container graph using
@@ -167,7 +182,49 @@ registerGrpcBlobs(container, {
 registerDrizzleBlobs(container);
 ```
 
-### 2. Telemetry (Jaeger or Grafana Alloy via OTLP HTTP)
+### 1.5 Typed configuration via `@speajus/diblob-config`
+
+The real server entrypoint uses `@speajus/diblob-config` to build a typed
+`ExampleGrpcServerConfig` from environment variables and defaults. The config
+is exposed as a blob and then used to wire gRPC, Drizzle, telemetry, and the
+visualizer:
+
+```ts
+import { createContainer } from '@speajus/diblob';
+import { registerGrpcBlobs } from '@speajus/diblob-connect';
+import { registerVisualizerBlobs } from '@speajus/diblob-visualizer/server';
+import { registerDrizzleBlobs } from './src/register.js';
+import {
+  exampleGrpcServerConfig,
+  registerExampleGrpcServerConfig,
+} from './src/config.js';
+
+const container = createContainer();
+
+registerExampleGrpcServerConfig(container);
+const config = await container.resolve(exampleGrpcServerConfig);
+
+registerGrpcBlobs(container, {
+  host: config.host,
+  port: config.port,
+});
+
+registerDrizzleBlobs(container, config.dbPath);
+
+registerVisualizerBlobs(container, {
+  host: config.visualizerHost,
+  port: config.visualizerPort,
+});
+```
+
+Environment variables such as `EXAMPLE_GRPC_SERVER_HOST`,
+`EXAMPLE_GRPC_SERVER_PORT`, `EXAMPLE_GRPC_SERVER_DB_PATH`,
+`EXAMPLE_GRPC_SERVER_VISUALIZER_HOST`, and
+`EXAMPLE_GRPC_SERVER_VISUALIZER_PORT`, as well as the telemetry and
+logging env vars documented below, all flow into this typed config via
+`loadNodeConfig` from `@speajus/diblob-config/node`.
+
+  ### 2. Telemetry (Jaeger or Grafana Alloy via OTLP HTTP)
 
 `@speajus/diblob-telemetry` config (env-driven):
 

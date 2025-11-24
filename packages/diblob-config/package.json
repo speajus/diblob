@@ -1,0 +1,61 @@
+{
+  "name": "@speajus/diblob-config",
+  "version": "1.0.0",
+  "description": "Typed configuration loading and container integration helpers for diblob",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/speajus/diblob.git"
+  },
+  "bugs": {
+    "url": "https://github.com/speajus/diblob/issues"
+  },
+  "homepage": "https://speajus.github.io/diblob/",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsc --watch",
+    "test": "pnpm run build && tsx --test test/*.test.ts",
+    "test:watch": "tsx --test --watch test/*.test.ts"
+  },
+  "keywords": [
+    "configuration",
+    "env",
+    "cli",
+    "validation",
+    "diblob"
+  ],
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@speajus/diblob": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "zod": "^4.1.13"
+  }
+}

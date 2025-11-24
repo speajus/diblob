@@ -7,12 +7,13 @@
 
 import { createContainer } from '@speajus/diblob';
 import { reset, seed } from 'drizzle-seed';
-import { database, sqlite,  } from '../drizzle.js';
+import { database, sqlite } from '../drizzle.js';
 import { registerDrizzleBlobs } from '../register.js';
 import * as schema from './schema.js';
 
-async function registerSeed( shouldReset = false, ctx = createContainer(),) {
-  registerDrizzleBlobs(ctx);
+async function registerSeed(shouldReset = false, ctx = createContainer()) {
+	  const dbPath = './data/app.db';
+	  registerDrizzleBlobs(ctx, dbPath);
   console.log('🌱 Starting database seeding...\n');
   
   if (shouldReset) {

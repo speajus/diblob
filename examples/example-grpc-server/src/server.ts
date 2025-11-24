@@ -8,82 +8,110 @@
  * - Implementing gRPC service handlers
  */
 
-import {  createContainer } from '@speajus/diblob';
+import { createContainer } from '@speajus/diblob';
+	import { printNodeConfigHelpIfRequested } from '@speajus/diblob-config/node';
 import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
-import { registerTelemetryBlobs, registerTelemetryLoggerBlobs, telemetryContext } from '@speajus/diblob-telemetry';
+import {
+	registerTelemetryBlobs,
+	registerTelemetryLoggerBlobs,
+	telemetryContext,
+} from '@speajus/diblob-telemetry';
 import {
 	registerVisualizerBlobs,
 	visualizerServer,
 } from '@speajus/diblob-visualizer/server';
+	import {
+		EXAMPLE_GRPC_CLI_PREFIX,
+		EXAMPLE_GRPC_ENV_PREFIX,
+		ExampleGrpcServerConfigSchema,
+		exampleGrpcServerConfig,
+		registerExampleGrpcServerConfig,
+	} from './config.js';
 import { registerDrizzleBlobs, registerUserService } from './register.js';
 
-
 async function main(container = createContainer()) {
-  console.log('🚀 Starting gRPC server with diblob...\n');
+		if (
+			printNodeConfigHelpIfRequested({
+				schema: ExampleGrpcServerConfigSchema,
+				envPrefix: EXAMPLE_GRPC_ENV_PREFIX,
+				cliPrefix: EXAMPLE_GRPC_CLI_PREFIX,
+				programName: 'example-grpc-server',
+			})
+		) {
+			return;
+		}
 
-    // Register logger blobs via telemetry helper so Loki wiring lives in telemetry
-    const lokiHost = process.env.LOGGER_LOKI_HOST;
-    registerTelemetryLoggerBlobs(
-      container,
-      {
-        level: process.env.LOG_LEVEL ?? 'info',
-        prettyPrint: process.env.LOG_PRETTY !== 'false',
-        defaultMeta: { service: 'example-grpc-server' },
-      },
-      lokiHost
-        ? {
-            host: lokiHost,
-            labels: {
-              service: 'example-grpc-server',
-              env: process.env.DEPLOYMENT_ENVIRONMENT ?? 'development',
-            },
-          }
-        : undefined,
-    );
+		console.log('🚀 Starting gRPC server with diblob...\n');
 
-    // Register telemetry (tracing + metrics). Defaults to console exporter unless
-    // TELEMETRY_EXPORTER=otlp-http is provided (e.g., Jaeger, Grafana Alloy).
-    const traceSampleRatio = Number(process.env.TELEMETRY_SAMPLE_RATIO ?? '1');
-    registerTelemetryBlobs(container, {
-      serviceName: 'example-grpc-server',
-      serviceVersion: process.env.SERVICE_VERSION,
-      deploymentEnvironment: process.env.DEPLOYMENT_ENVIRONMENT,
-      exporter:
-        (process.env.TELEMETRY_EXPORTER as 'otlp-http' | 'console' | 'none' | undefined)
-          ?? 'console',
-      exporterEndpoint: process.env.TELEMETRY_ENDPOINT,
-      traceSampleRatio: Number.isFinite(traceSampleRatio) ? traceSampleRatio : 1,
-      enableTraces: process.env.TELEMETRY_TRACES !== 'false',
-      enableMetrics: process.env.TELEMETRY_METRICS !== 'false',
-    });
+	// Register typed configuration for the example server
+	registerExampleGrpcServerConfig(container);
+	const config = await container.resolve(exampleGrpcServerConfig);
 
-    // Ensure telemetry context is initialized early so spans/meters are ready
-    await container.resolve(telemetryContext);
+	// Register logger blobs via telemetry helper so Loki wiring lives in telemetry
+	const lokiOptions = config.loggerLokiHost
+		? {
+				host: config.loggerLokiHost,
+				labels: {
+						service: 'example-grpc-server',
+						env: config.deploymentEnvironment,
+					},
+			}
+		: undefined;
 
-		// Register gRPC blobs
-    registerGrpcBlobs(container, {
-      host: process.env.HOST || '0.0.0.0',
-      port: process.env.PORT ? Number(process.env.PORT) : 50051,
-    });
+	registerTelemetryLoggerBlobs(
+		container,
+		{
+			level: config.logLevel,
+			prettyPrint: config.logPretty,
+			defaultMeta: { service: 'example-grpc-server' },
+		},
+		lokiOptions,
+	);
 
-    registerDrizzleBlobs(container);
-    
-    // Ensure service is registered before starting servers to avoid 404/UNIMPLEMENTED.
-    await registerUserService(container);
+	// Register telemetry (tracing + metrics) using typed configuration.
+	registerTelemetryBlobs(container, {
+		serviceName: 'example-grpc-server',
+		serviceVersion: config.serviceVersion,
+		deploymentEnvironment: config.deploymentEnvironment,
+		// TELEMETRY_EXPORTER=otlp-http|console|none
+		exporter: config.telemetryExporter,
+		exporterEndpoint: config.telemetryEndpoint,
+		traceSampleRatio: config.telemetrySampleRatio,
+		enableTraces: config.telemetryTraces,
+		enableMetrics: config.telemetryMetrics,
+	});
+
+	// Ensure telemetry context is initialized early so spans/meters are ready
+	await container.resolve(telemetryContext);
+
+	// Register gRPC blobs using typed configuration
+	registerGrpcBlobs(container, {
+		host: config.host,
+		port: config.port,
+	});
+
+	registerDrizzleBlobs(container, config.dbPath);
+
+	// Ensure service is registered before starting servers to avoid 404/UNIMPLEMENTED.
+	await registerUserService(container);
 
 	// Register visualizer server blobs so the container graph is exposed via HTTP
 	registerVisualizerBlobs(container, {
-		host: process.env.VISUALIZER_HOST || '0.0.0.0',
-			port: process.env.VISUALIZER_PORT ? Number(process.env.VISUALIZER_PORT) : 3002,
+		host: config.visualizerHost,
+		port: config.visualizerPort,
 	});
 
 	// Start the servers by resolving their blobs (lifecycle will call start)
-	await Promise.all([
+	const [serverInstance] = await Promise.all([
 		container.resolve(grpcServer),
 		container.resolve(visualizerServer),
 	]);
 
-	console.log(`gRPC server running at ${grpcServer.getAddress()}`);
+	console.log(
+		`gRPC server running at ${
+			serverInstance.getAddress() ?? `${config.host}:${config.port}`
+		}`,
+	);
 	// Handle graceful shutdown via container.dispose()
 	process.on('SIGINT', async () => {
 		console.log('\n\n🛑 Shutting down gracefully...');
