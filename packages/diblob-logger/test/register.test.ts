@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createContainer } from '@speajus/diblob';
 import {
-  type CreateWinstonLoggerOptions,
   createWinstonLogger,
   type Logger,
   type LoggerConfig,

@@ -1,3 +1,4 @@
+import type { Meter, Tracer } from '@opentelemetry/api';
 import { createBlob } from '@speajus/diblob';
 
 export interface TelemetryConfig {
@@ -28,8 +29,8 @@ export const telemetryLokiConfig = createBlob<TelemetryLokiConfig>('telemetryLok
 });
 
 export interface TelemetryContext {
-  tracer: import('@opentelemetry/api').Tracer;
-  meter: import('@opentelemetry/api').Meter;
+  tracer: Tracer;
+  meter: Meter;
   shutdown: () => Promise<void>;
 }
 
