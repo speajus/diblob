@@ -23,6 +23,7 @@
     "@connectrpc/connect": "^2.1.0",
     "@connectrpc/connect-node": "*",
     "@speajus/diblob": "workspace:*",
+    "@speajus/diblob-config": "workspace:^",
     "@speajus/diblob-connect": "workspace:*",
     "@speajus/diblob-logger": "workspace:*",
     "@speajus/diblob-telemetry": "workspace:^",

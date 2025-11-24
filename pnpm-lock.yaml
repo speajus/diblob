@@ -57,6 +57,9 @@ importers:
       '@speajus/diblob':
         specifier: workspace:*
         version: link:../../packages/diblob
+      '@speajus/diblob-config':
+        specifier: workspace:^
+        version: link:../../packages/diblob-config
       '@speajus/diblob-connect':
         specifier: workspace:*
         version: link:../../packages/diblob-connect
