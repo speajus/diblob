@@ -8,11 +8,11 @@
 import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError, type ServiceImpl } from '@connectrpc/connect';
 import { trace } from '@opentelemetry/api';
-import { createBlob } from '@speajus/diblob';
-import { logger } from '@speajus/diblob-logger';
+import { type Blob, createBlob } from '@speajus/diblob';
+import { type Logger, logger } from '@speajus/diblob-logger';
 import { eq } from 'drizzle-orm';
 import { type NewUser, type User, users } from './db/schema.js';
-import { database } from './drizzle.js';
+import { type DrizzleType, database } from './drizzle.js';
 import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSchema, type DeleteUserRequest, type DeleteUserResponse,
   DeleteUserResponseSchema, type GetUserRequest, type GetUserResponse, GetUserResponseSchema, type ListUsersRequest,type ListUsersResponse, ListUsersResponseSchema, type UpdateUserRequest,type UpdateUserResponse, UpdateUserResponseSchema, UserSchema, type UserService } from './generated/user_pb.js';
 
@@ -20,10 +20,18 @@ import { type CreateUserRequest, type CreateUserResponse, CreateUserResponseSche
  * User service implementation
  */
 export class UserServiceImpl implements ServiceImpl<typeof UserService> {
+  private db: DrizzleType;
+  private log: Logger;
+
   constructor(
-    private db = database,
-    private log = logger
-  ) {}
+    db: Blob<DrizzleType> | DrizzleType = database,
+    log: Blob<Logger> | Logger = logger
+  ) {
+    // If passed a blob, access it to get the resolved value
+    // If passed a direct value, use it as-is
+    this.db = db as DrizzleType;
+    this.log = log as Logger;
+  }
 
   async getUser(request: GetUserRequest):Promise<GetUserResponse> {
     const span = trace.getTracer('example-grpc-server').startSpan('getUser');

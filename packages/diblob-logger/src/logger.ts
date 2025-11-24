@@ -3,14 +3,14 @@
  */
 
 import winston from 'winston';
-import { type Logger, type LoggerConfig, loggerTransports } from './blobs.js';
+import type { Logger, LoggerConfig } from './blobs.js';
 
 /**
  * Create a Winston logger from the provided configuration.
  */
 export function createWinstonLogger(
   config: LoggerConfig,
-  transports = loggerTransports,
+  transports: winston.transport[] = [],
 ): Logger {
   const { level = 'info', defaultMeta, prettyPrint = true } = config;
 

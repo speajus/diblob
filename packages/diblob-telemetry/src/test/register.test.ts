@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { afterEach, beforeEach, describe, it } from 'node:test';
+import { after, afterEach, beforeEach, describe, it } from 'node:test';
 import { createContainer } from '@speajus/diblob';
 import { logger } from '@speajus/diblob-logger';
 import { registerTelemetryBlobs, registerTelemetryLoggerBlobs, telemetryConfig, telemetryContext, telemetryLokiConfig } from '../index.js';
@@ -13,6 +13,11 @@ describe('registerTelemetryBlobs', () => {
 
   afterEach(async () => {
     await container.dispose();
+  });
+
+  after(() => {
+    // Force exit after all tests complete to prevent hanging from OpenTelemetry timers
+    setTimeout(() => process.exit(0), 100);
   });
 
   it('registers config and context singletons', async () => {

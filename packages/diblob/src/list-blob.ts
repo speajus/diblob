@@ -49,9 +49,11 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
    * Get the current array from the container
    */
   const getCurrentArray = (): Array<T> => {
-    const instanceGetter = blobInstanceGetters.get(blobId);
+    let instanceGetter = blobInstanceGetters.get(blobId);
     if (!instanceGetter) {
-      throw new Error('Array blob must be registered with a container before use. Call container.register(list, () => []) first.');
+      instanceGetter = () => [];
+      blobInstanceGetters.set(blobId,  instanceGetter);
+     // throw new Error('Array blob must be registered with a container before use. Call container.register(list, () => []) first.');
     }
     const current = instanceGetter();
     if (current instanceof Promise) {

@@ -1,5 +1,6 @@
 import type { Container } from "@speajus/diblob";
 import { grpcServiceRegistry } from "@speajus/diblob-connect";
+import { registerLoggerBlobs } from "@speajus/diblob-logger";
 import { UserService } from "./generated/user_pb.js";
 import { UserServiceImpl, userService } from "./user-service.js";
 /**
@@ -45,6 +46,11 @@ export function registerDrizzleBlobs(container: Container, dbPath: string = DB_P
 
 }
 export async function registerUserService(container: Container): Promise<void> {
+  // Ensure logger is registered (UserServiceImpl depends on it)
+  // This is idempotent - if already registered, it will be re-registered
+  registerLoggerBlobs(container);
+
+  // Register the user service with its dependencies
   container.register(userService, UserServiceImpl);
 
   // Resolve the concrete implementation and register it with the service registry
