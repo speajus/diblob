@@ -1,7 +1,7 @@
 import { DiagConsoleLogger, DiagLogLevel, diag, metrics } from '@opentelemetry/api';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { AggregationTemporality, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor, ParentBasedSampler, TraceIdRatioBasedSampler } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
@@ -80,30 +80,31 @@ export function registerTelemetryLoggerBlobs(
 function createTelemetryContext(config: TelemetryConfig): TelemetryContext {
   diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 
-  const resource = new Resource({
+  const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: config.serviceName ?? 'diblob-service',
     [ATTR_SERVICE_VERSION]: config.serviceVersion ?? '0.0.0',
     [ATTR_DEPLOYMENT_ENVIRONMENT]: config.deploymentEnvironment ?? 'development',
   });
 
-  const tracerProvider = new NodeTracerProvider({
-    resource,
-    sampler: new ParentBasedSampler({
-      root: new TraceIdRatioBasedSampler(config.traceSampleRatio ?? 1.0),
-    }),
-  });
-
+  // Configure span processors
+  const spanProcessors = [];
   if (config.enableTraces !== false) {
     const traceExporter = config.exporter === 'otlp-http'
       ? new OTLPTraceExporter(config.exporterEndpoint ? { url: config.exporterEndpoint } : undefined)
       : undefined;
 
     if (traceExporter) {
-      tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
+      spanProcessors.push(new BatchSpanProcessor(traceExporter));
     }
-
-    // Always have at least the in-memory tracer; console spans remain via diag for debugging.
   }
+
+  const tracerProvider = new NodeTracerProvider({
+    resource,
+    sampler: new ParentBasedSampler({
+      root: new TraceIdRatioBasedSampler(config.traceSampleRatio ?? 1.0),
+    }),
+    spanProcessors,
+  });
 
   tracerProvider.register();
   const tracer = tracerProvider.getTracer('diblob-telemetry');
@@ -112,17 +113,18 @@ function createTelemetryContext(config: TelemetryConfig): TelemetryContext {
   const shutdownFns: Array<() => Promise<void>> = [() => tracerProvider.shutdown()];
 
   if (config.enableMetrics !== false) {
-    const meterProvider = new MeterProvider({ resource });
-
+    // Configure metric readers
+    const readers = [];
     if (config.exporter === 'otlp-http') {
       const metricExporter = new OTLPMetricExporter(
         config.exporterEndpoint
           ? { url: config.exporterEndpoint, temporalityPreference: AggregationTemporality.DELTA }
           : { temporalityPreference: AggregationTemporality.DELTA },
       );
-      const reader = new PeriodicExportingMetricReader({ exporter: metricExporter });
-      meterProvider.addMetricReader(reader);
+      readers.push(new PeriodicExportingMetricReader({ exporter: metricExporter }));
     }
+
+    const meterProvider = new MeterProvider({ resource, readers });
 
     meter = meterProvider.getMeter('diblob-telemetry');
     shutdownFns.push(() => meterProvider.shutdown());
