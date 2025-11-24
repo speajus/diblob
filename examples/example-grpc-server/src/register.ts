@@ -20,30 +20,24 @@ import { Lifecycle } from '@speajus/diblob';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './db/schema.js';
-import {  database, sqlite } from "./drizzle.js";
+import { database, sqlite } from './drizzle.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const DEFAULT_DB_PATH = join(__dirname, '../data/app.db');
-const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
+export function registerDrizzleBlobs(container: Container, dbPath: string): void {
+  // Initialize database
+  console.log('💾 Initializing database...');
+  if (dbPath !== ':memory:') {
+    mkdirSync(dirname(dbPath), { recursive: true });
+  }
 
+  container.register(sqlite, Database, dbPath, {}, {
+    lifecycle: Lifecycle.Singleton,
+    dispose: 'close',
+  });
 
-export function registerDrizzleBlobs(container: Container, dbPath: string = DB_PATH): void {
-            // Initialize database
-    console.log('💾 Initializing database...');
-    if (DB_PATH !== ':memory:') {
-            mkdirSync(dirname(DB_PATH), { recursive: true });
-    }
-
-
-    container.register(sqlite, Database, dbPath,{}, { 
-        lifecycle: Lifecycle.Singleton,
-        dispose: 'close',
-    });
-
-    container.register(database,  drizzle, sqlite, { schema });
-
+  container.register(database, drizzle, sqlite, { schema });
 }
 export async function registerUserService(container: Container): Promise<void> {
   // Ensure logger is registered (UserServiceImpl depends on it)

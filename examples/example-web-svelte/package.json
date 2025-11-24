@@ -16,7 +16,8 @@
     "@connectrpc/connect-web": "^2.1.0",
     "@speajus/diblob": "workspace:*",
     "@speajus/diblob-svelte": "workspace:*",
-    "@speajus/diblob-visualizer": "workspace:*"
+    "@speajus/diblob-visualizer": "workspace:*",
+    "@speajus/diblob-config": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",

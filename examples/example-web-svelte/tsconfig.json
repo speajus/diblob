@@ -12,6 +12,8 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../../packages/diblob" },
-    { "path": "../../packages/diblob-svelte" }
+    { "path": "../../packages/diblob-svelte" },
+    { "path": "../../packages/diblob-config" },
+    { "path": "../../packages/diblob-visualizer" }
   ]
 }

@@ -1,16 +1,17 @@
 import { type Client, createClient } from '@connectrpc/connect'
 import { createConnectTransport } from '@connectrpc/connect-web'
 import { type Container, Lifecycle } from '@speajus/diblob'
+import { registerStaticConfigBlob } from '@speajus/diblob-config'
 
 import { UserService } from '../grpc/user_pb.js'
 import {
-  type AvatarUrlProvider,
-  avatarUrlProvider,
-  type ExampleWebConfig,
-  exampleWebConfig,
-  type UserGateway,
-  userGateway,
-} from './blobs'
+	type AvatarUrlProvider,
+	avatarUrlProvider,
+	type ExampleWebConfig,
+	exampleWebConfig,
+	type UserGateway,
+	userGateway,
+	} from './blobs'
 
 export const DEFAULT_CONFIG: ExampleWebConfig = {
   apiBaseUrl: 'http://localhost:50051',
@@ -61,9 +62,7 @@ export function registerExampleWebBlobs(
     ...overrides,
   }
 
-  container.register(exampleWebConfig, () => config, {
-    lifecycle: Lifecycle.Singleton,
-  })
+	  registerStaticConfigBlob(container, exampleWebConfig, config)
 
   container.register(avatarUrlProvider, PlaceholderAvatarUrlProvider, {
     lifecycle: Lifecycle.Singleton,
