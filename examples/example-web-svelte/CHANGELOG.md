@@ -1,5 +1,18 @@
 # example-web-svelte
 
+## 0.0.3
+
+### Patch Changes
+
+- 088e6d3: Added config package
+- 121a43b: added telemetry
+- Updated dependencies [088e6d3]
+- Updated dependencies [121a43b]
+  - @speajus/diblob-config@1.0.1
+  - @speajus/diblob-visualizer@1.0.1
+  - @speajus/diblob-svelte@1.0.1
+  - @speajus/diblob@1.0.1
+
 ## 0.0.2
 
 ### Patch Changes

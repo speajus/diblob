@@ -1,5 +1,20 @@
 # example-grpc-server
 
+## 0.1.1
+
+### Patch Changes
+
+- 088e6d3: Added config package
+- 121a43b: added telemetry
+- Updated dependencies [088e6d3]
+- Updated dependencies [121a43b]
+  - @speajus/diblob-config@1.0.1
+  - @speajus/diblob-visualizer@1.0.1
+  - @speajus/diblob-telemetry@1.0.1
+  - @speajus/diblob-connect@1.0.1
+  - @speajus/diblob-logger@1.0.1
+  - @speajus/diblob@1.0.1
+
 ## 0.1.0
 
 ### Minor Changes
