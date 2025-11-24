@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createContainer } from '@speajus/diblob';
 import {
+  type CreateWinstonLoggerOptions,
   createWinstonLogger,
   type Logger,
   type LoggerConfig,
@@ -80,4 +81,3 @@ test('registerLoggerBlobs merges provided config with defaults', async () => {
 
   log.warn('warn with merged config', { scope: 'merge-test' });
 });
-

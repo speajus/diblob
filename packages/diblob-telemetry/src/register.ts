@@ -5,10 +5,16 @@ import { Resource } from '@opentelemetry/resources';
 import { AggregationTemporality, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor, ParentBasedSampler, TraceIdRatioBasedSampler } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+import {ATTR_DEPLOYMENT_ENVIRONMENT} from '@opentelemetry/semantic-conventions/incubating';
+
+
 import type { Container } from '@speajus/diblob';
 import { Lifecycle } from '@speajus/diblob';
-import { type TelemetryConfig, type TelemetryContext, telemetryConfig, telemetryContext } from './blobs';
+import type { LoggerConfig } from '@speajus/diblob-logger';
+import { loggerTransports, registerLoggerBlobs } from '@speajus/diblob-logger';
+import LokiTransport from 'winston-loki';
+import { type TelemetryConfig, type TelemetryContext, type TelemetryLokiConfig, telemetryConfig, telemetryContext, telemetryLokiConfig } from './blobs';
 
 const DEFAULT_CONFIG: TelemetryConfig = {
   serviceName: 'diblob-service',
@@ -35,13 +41,49 @@ export function registerTelemetryBlobs(
   );
 }
 
+const DEFAULT_TELEMETRY_LOGGER_CONFIG: LoggerConfig = {
+  level: 'info',
+  prettyPrint: true,
+};
+
+const DEFAULT_TELEMETRY_LOKI_CONFIG: TelemetryLokiConfig = {};
+
+export function registerTelemetryLoggerBlobs(
+  container: Container,
+  loggerCfg: Partial<LoggerConfig> = {},
+  lokiCfg?: TelemetryLokiConfig,
+): void {
+  const mergedLoggerCfg: LoggerConfig = { ...DEFAULT_TELEMETRY_LOGGER_CONFIG, ...loggerCfg };
+  const mergedLokiCfg: TelemetryLokiConfig = { ...DEFAULT_TELEMETRY_LOKI_CONFIG, ...lokiCfg };
+
+  // Base logger config blob from diblob-logger (registers loggerConfig, loggerTransports, logger)
+  registerLoggerBlobs(container, mergedLoggerCfg);
+
+  // Loki config blob lives here (telemetry), not in diblob-logger
+  container.register(telemetryLokiConfig, () => mergedLokiCfg, { lifecycle: Lifecycle.Singleton });
+
+  // Push Loki transport to the transports list when enabled
+  if (mergedLokiCfg?.host && (mergedLokiCfg.enabled ?? true)) {
+    loggerTransports.push(
+      new LokiTransport({
+        host: mergedLokiCfg.host,
+        labels: mergedLokiCfg.labels,
+        level: mergedLokiCfg.level ?? mergedLoggerCfg.level ?? 'info',
+        batching: mergedLokiCfg.batching ?? true,
+        interval: mergedLokiCfg.interval ?? 1000,
+        json: mergedLokiCfg.json ?? true,
+      }),
+    );
+  }
+}
+
 function createTelemetryContext(config: TelemetryConfig): TelemetryContext {
   diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 
   const resource = new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: config.serviceName ?? 'diblob-service',
-    [SemanticResourceAttributes.SERVICE_VERSION]: config.serviceVersion ?? '0.0.0',
-    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: config.deploymentEnvironment ?? 'development',
+    [ATTR_SERVICE_NAME]: config.serviceName ?? 'diblob-service',
+    [ATTR_SERVICE_VERSION]: config.serviceVersion ?? '0.0.0',
+    [ATTR_DEPLOYMENT_ENVIRONMENT]: config.deploymentEnvironment ?? 'development',
   });
 
   const tracerProvider = new NodeTracerProvider({

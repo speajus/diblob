@@ -12,6 +12,21 @@ export interface TelemetryConfig {
   enablePaths?: boolean;
 }
 
+export interface TelemetryLokiConfig {
+  /** If provided, Loki transport will be added to the logger. */
+  host?: string;
+  labels?: Record<string, string>;
+  level?: string;
+  interval?: number;
+  json?: boolean;
+  batching?: boolean;
+  enabled?: boolean;
+}
+
+export const telemetryLokiConfig = createBlob<TelemetryLokiConfig>('telemetryLokiConfig', {
+  name: 'Telemetry Loki Configuration',
+});
+
 export interface TelemetryContext {
   tracer: import('@opentelemetry/api').Tracer;
   meter: import('@opentelemetry/api').Meter;

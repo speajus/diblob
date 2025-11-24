@@ -3,7 +3,8 @@
  */
 
 import type { Container } from '@speajus/diblob';
-import { type LoggerConfig, logger, loggerConfig } from './blobs.js';
+import winston from 'winston';
+import { type LoggerConfig, logger, loggerConfig, loggerTransports } from './blobs.js';
 import { createWinstonLogger } from './logger.js';
 
 const DEFAULT_LOGGER_CONFIG: LoggerConfig = {
@@ -26,7 +27,15 @@ export function registerLoggerBlobs(
   // Configuration blob
   container.register(loggerConfig, () => finalConfig);
 
+  // Transports list blob - initialized with console transport
+  container.register(loggerTransports, () => [new winston.transports.Console()]);
+
   // Logger blob backed by Winston
-  container.register(logger, (cfg: LoggerConfig) => createWinstonLogger(cfg), loggerConfig);
+  container.register(
+    logger,
+    createWinstonLogger,
+    loggerConfig,
+    loggerTransports,
+  );
 }
 

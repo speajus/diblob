@@ -3,13 +3,15 @@
  */
 
 import winston from 'winston';
-import LokiTransport from 'winston-loki';
-import type { Logger, LoggerConfig } from './blobs.js';
+import { type Logger, type LoggerConfig, loggerTransports } from './blobs.js';
 
 /**
  * Create a Winston logger from the provided configuration.
  */
-export function createWinstonLogger(config: LoggerConfig): Logger {
+export function createWinstonLogger(
+  config: LoggerConfig,
+  transports = loggerTransports,
+): Logger {
   const { level = 'info', defaultMeta, prettyPrint = true } = config;
 
   const baseFormat = prettyPrint
@@ -22,23 +24,6 @@ export function createWinstonLogger(config: LoggerConfig): Logger {
         }),
       )
     : winston.format.json();
-
-  const transports: winston.transport[] = [
-    new winston.transports.Console(),
-  ];
-
-  if (config.loki?.host) {
-    transports.push(
-      new LokiTransport({
-        host: config.loki.host,
-        labels: config.loki.labels,
-        level: config.loki.level ?? level,
-        batching: true,
-        interval: config.loki.interval ?? 1000,
-        json: config.loki.json ?? true,
-      }),
-    );
-  }
 
   const logger = winston.createLogger({
     level,

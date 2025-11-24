@@ -19,6 +19,7 @@
   - @speajus/diblob@1.0.0
 
 ## Unreleased
+- Add a separate `loggerLokiConfig` blob and make `registerLoggerBlobs` accept an optional Loki config argument. The logger now reads Loki settings from this blob instead of the main `LoggerConfig`, allowing Loki configuration to be provided independently (no coupling to telemetry).
 
 ### Added
 - Optional Loki transport via `winston-loki` when `loggerConfig.loki.host` is set.

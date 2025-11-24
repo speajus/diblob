@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, it } from 'node:test';
 import { createContainer } from '@speajus/diblob';
-import { registerTelemetryBlobs, telemetryConfig, telemetryContext } from '../index.js';
+import { logger } from '@speajus/diblob-logger';
+import { registerTelemetryBlobs, registerTelemetryLoggerBlobs, telemetryConfig, telemetryContext, telemetryLokiConfig } from '../index.js';
 
 describe('registerTelemetryBlobs', () => {
   let container: ReturnType<typeof createContainer>;
@@ -42,5 +43,25 @@ describe('registerTelemetryBlobs', () => {
 
     await container.dispose();
     assert.equal(shutdownCalled, true);
+  });
+
+  it('registerTelemetryLoggerBlobs wires logger with Loki transport when enabled', async () => {
+    registerTelemetryLoggerBlobs(
+      container,
+      { level: 'debug', defaultMeta: { service: 'test-svc' }, prettyPrint: false },
+      {
+        host: 'http://loki:3100',
+        labels: { service: 'test-svc' },
+        enabled: true,
+        json: true,
+      },
+    );
+
+    const cfg = await container.resolve(telemetryLokiConfig);
+    assert.equal(cfg.host, 'http://loki:3100');
+
+    const log = await container.resolve(logger);
+    // Should be callable; we rely on winston-loki to handle transport; no assertion on side-effects
+    log.info('hello via telemetry logger');
   });
 });

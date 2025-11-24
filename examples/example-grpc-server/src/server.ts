@@ -10,8 +10,7 @@
 
 import {  createContainer } from '@speajus/diblob';
 import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
-import { registerLoggerBlobs } from '@speajus/diblob-logger';
-import { registerTelemetryBlobs, telemetryContext } from '@speajus/diblob-telemetry';
+import { registerTelemetryBlobs, registerTelemetryLoggerBlobs, telemetryContext } from '@speajus/diblob-telemetry';
 import {
 	registerVisualizerBlobs,
 	visualizerServer,
@@ -22,24 +21,25 @@ import { registerDrizzleBlobs, registerUserService } from './register.js';
 async function main(container = createContainer()) {
   console.log('🚀 Starting gRPC server with diblob...\n');
 
-    // Register logger blobs first so server logging goes through Winston
+    // Register logger blobs via telemetry helper so Loki wiring lives in telemetry
     const lokiHost = process.env.LOGGER_LOKI_HOST;
-    registerLoggerBlobs(container, {
+    registerTelemetryLoggerBlobs(
+      container,
+      {
         level: process.env.LOG_LEVEL ?? 'info',
         prettyPrint: process.env.LOG_PRETTY !== 'false',
         defaultMeta: { service: 'example-grpc-server' },
-        ...(lokiHost
-            ? {
-                loki: {
-                    host: lokiHost,
-                    labels: {
-                        service: 'example-grpc-server',
-                        env: process.env.DEPLOYMENT_ENVIRONMENT ?? 'development',
-                    },
-                },
-            }
-            : {}),
-    });
+      },
+      lokiHost
+        ? {
+            host: lokiHost,
+            labels: {
+              service: 'example-grpc-server',
+              env: process.env.DEPLOYMENT_ENVIRONMENT ?? 'development',
+            },
+          }
+        : undefined,
+    );
 
     // Register telemetry (tracing + metrics). Defaults to console exporter unless
     // TELEMETRY_EXPORTER=otlp-http is provided (e.g., Jaeger, Grafana Alloy).
