@@ -47,7 +47,7 @@ describe('Container Lifecycle Tests', () => {
     const container = createContainer();
     registerDrizzleBlobs(container, ':memory:');
     registerGrpcBlobs(container, { host: '0.0.0.0', port: 50051 });
-    registerUserService(container);
+    await registerUserService(container);
 
     // Verify user service is registered
     const service = await container.resolve(userService);
@@ -79,7 +79,7 @@ describe('Container Lifecycle Tests', () => {
     const container = createContainer();
     registerDrizzleBlobs(container, ':memory:');
     registerGrpcBlobs(container, { host: '0.0.0.0', port: 50052 });
-    registerUserService(container);
+    await registerUserService(container);
 
     // Resolve multiple blobs
     const db = await container.resolve(database);

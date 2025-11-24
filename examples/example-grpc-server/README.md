@@ -52,23 +52,23 @@ From the repository root:
 
 ```bash
 # Install dependencies for all packages
-npm install
+pnpm install
 
 # Build the diblob packages
-npm run build
+pnpm run build
 
 # Navigate to the example
 cd examples/example-grpc-server
 
 # Install example dependencies
-npm install
+pnpm install
 ```
 
 ## Running the Server
 
 ```bash
 # Start the server
-npm run dev
+pnpm run dev
 ```
 
 The server will start on `0.0.0.0:50051`.
@@ -79,23 +79,23 @@ This example also exposes the diblob container graph using
 `@speajus/diblob-visualizer`, including the full web UI and SSE endpoints.
 
 By default, the visualizer HTTP server listens on
-`VISUALIZER_HOST:VISUALIZER_PORT`, which default to `0.0.0.0:3001`.
+`VISUALIZER_HOST:VISUALIZER_PORT`, which default to `0.0.0.0:3002`.
 
 ```bash
 # From the repository root (using pnpm workspaces)
 pnpm --filter example-grpc-server dev
 
-# Or from this directory using npm
-npm run dev
+# Or from this directory
+pnpm run dev
 ```
 
 Once the server is running, you can open the visualizer UI directly in your
 browser:
 
-- UI: `http://localhost:3001/`
-- SSE stream: `http://localhost:3001/events`
-- Graph JSON: `http://localhost:3001/graph`
-- Health check: `http://localhost:3001/health`
+- UI: `http://localhost:3002/`
+- SSE stream: `http://localhost:3002/events`
+- Graph JSON: `http://localhost:3002/graph`
+- Health check: `http://localhost:3002/health`
 
 These endpoints are powered by the shared visualizer middleware in
 `@speajus/diblob-visualizer/server`, wired through the `registerVisualizerBlobs`
@@ -107,10 +107,10 @@ Populate the database with realistic sample data:
 
 ```bash
 # Add seed data to the database
-npm run db:seed
+pnpm run db:seed
 
 # Reset database and add fresh seed data
-npm run db:seed:reset
+pnpm run db:seed:reset
 ```
 
 See [SEEDING.md](./SEEDING.md) for detailed documentation on database seeding.
@@ -147,18 +147,91 @@ The application uses diblob for dependency injection:
 import { createContainer } from '@speajus/diblob';
 import { registerGrpcBlobs } from '@speajus/diblob-connect';
 import { registerDrizzleBlobs } from './src/drizzle.js';
+import { registerTelemetryBlobs } from '@speajus/diblob-telemetry';
 
 const container = createContainer();
+
+// Register telemetry (OTLP or console)
+registerTelemetryBlobs(container, {
+  serviceName: 'example-grpc-server',
+  exporter: 'console',
+});
 
 // Register gRPC server
 registerGrpcBlobs(container, {
   host: '0.0.0.0',
-  port: 50051
+  port: 50051,
 });
 
 // Register database client (Drizzle + better-sqlite3)
 registerDrizzleBlobs(container);
 ```
+
+### 2. Telemetry (Jaeger or Grafana Alloy via OTLP HTTP)
+
+`@speajus/diblob-telemetry` config (env-driven):
+
+| Env | Default | Notes |
+| --- | --- | --- |
+| `TELEMETRY_EXPORTER` | `console` | set to `otlp-http` to send to Jaeger/Alloy |
+| `TELEMETRY_ENDPOINT` | unset | OTLP HTTP endpoint (e.g., `http://localhost:4318`) |
+| `TELEMETRY_SAMPLE_RATIO` | `1` | 0..1 sampling for traces |
+| `TELEMETRY_TRACES` | `true` | set to `false` to disable traces |
+| `TELEMETRY_METRICS` | `true` | set to `false` to disable metrics |
+| `SERVICE_VERSION` | unset | optional version tag |
+| `DEPLOYMENT_ENVIRONMENT` | `development` | env tag |
+
+#### Quick start: Jaeger all-in-one (OTLP HTTP 4318)
+
+```bash
+docker run --rm -it -p 16686:16686 -p 4318:4318 \
+  jaegertracing/all-in-one:1.60 --collector.otlp.enabled=true
+
+# In another shell, run the server with OTLP export
+TELEMETRY_EXPORTER=otlp-http TELEMETRY_ENDPOINT=http://localhost:4318 pnpm --filter example-grpc-server dev
+
+# Open Jaeger UI
+open http://localhost:16686
+```
+
+Traces will appear under service `example-grpc-server` (sampled per `TELEMETRY_SAMPLE_RATIO`).
+
+#### Quick start: Grafana Alloy (OTLP HTTP in, Tempo/Loki/Prom out)
+
+Minimal Alloy config snippet (`alloy-config.alloy`):
+
+```
+otelcol.receiver.otlp "default" {
+  protocols.http {}
+}
+
+otelcol.exporter.otlp "tempo" {
+  endpoint = "http://tempo:4317"
+}
+
+otelcol.exporter.prometheus "prom" {
+  add_metadata = true
+  forward_to = []
+}
+
+otelcol.service "default" {
+  pipelines = [
+    { receivers = [otelcol.receiver.otlp.default], exporters = [otelcol.exporter.otlp.tempo] },
+  ]
+}
+```
+
+Run Alloy:
+
+```bash
+docker run --rm -it -p 4318:4318 -p 12345:12345 \
+  -v "$PWD/alloy-config.alloy:/etc/alloy/config.alloy" \
+  grafana/alloy:latest --config.file=/etc/alloy/config.alloy
+
+TELEMETRY_EXPORTER=otlp-http TELEMETRY_ENDPOINT=http://localhost:4318 pnpm --filter example-grpc-server dev
+```
+
+Point Grafana Tempo UI/Prometheus at Alloy’s outputs to explore traces/metrics.
 
 ### 2. Service Layer
 

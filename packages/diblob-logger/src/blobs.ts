@@ -5,7 +5,8 @@
  * applications can configure logging via diblob.
  */
 
-import { createBlob } from '@speajus/diblob';
+import { createBlob, createListBlob } from '@speajus/diblob';
+import type winston from 'winston';
 
 /**
  * Configuration for the application logger.
@@ -40,5 +41,10 @@ export const loggerConfig = createBlob<LoggerConfig>('loggerConfig', {
 export const logger = createBlob<Logger>('logger', {
   name: 'Logger',
   description: 'Winston-based application logger',
+});
+
+export const loggerTransports = createListBlob<winston.transport>('loggerTransports', {
+  name: 'Logger Transports',
+  description: 'Winston transports for the logger (console, Loki, etc.)',
 });
 

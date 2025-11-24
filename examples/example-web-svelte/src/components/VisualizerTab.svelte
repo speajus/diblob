@@ -13,7 +13,7 @@
     | Promise<ExampleWebConfig>
 
   let activeView = $state<'client' | 'server'>('client')
-  let serverEventsUrl = $state('http://localhost:3001/events')
+let serverEventsUrl = $state('http://localhost:3002/events')
 
   $effect(async () => {
     const config = await configRef

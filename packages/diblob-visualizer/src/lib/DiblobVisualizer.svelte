@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Container } from '@speajus/diblob';
   import { onMount } from 'svelte';
-  import { extractDependencyGraph, type DependencyGraph as GraphData, getGraphStats } from './container-introspection';
+  import { extractDependencyGraph, type DependencyGraph as GraphData, getGraphStats } from '../shared/container-introspection';
   // biome-ignore lint/correctness/noUnusedImports: used but biome doesn't get it    
   import DependencyGraph from './DependencyGraph.svelte';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   
 	import { onMount } from 'svelte';
-	import { type DependencyGraph as GraphData, type GraphStats, getGraphStats } from './container-introspection';
+	import { type DependencyGraph as GraphData, type GraphStats, getGraphStats } from '../shared/container-introspection';
 	// biome-ignore lint/correctness/noUnusedImports: used in markup but biome does not detect it
 	import DependencyGraph from './DependencyGraph.svelte';
 

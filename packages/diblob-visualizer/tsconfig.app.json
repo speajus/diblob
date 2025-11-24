@@ -10,13 +10,13 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist",
+    "outDir": "./dist/app",
     "allowJs": true,
     "checkJs": true,
     "moduleDetection": "force"
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
-  "exclude": ["src/server/**"],
+  "exclude": ["src/examples/**", "src/main.ts"],
   "references": [
     { "path": "../diblob" }
   ]

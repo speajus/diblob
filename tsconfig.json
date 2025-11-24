@@ -5,6 +5,7 @@
     { "path": "./packages/diblob-mcp" },
     { "path": "./packages/diblob-connect" },
     { "path": "./packages/diblob-logger" },
-    { "path": "./packages/diblob-svelte" }
+    { "path": "./packages/diblob-svelte" },
+    { "path": "./packages/diblob-telemetry" }
   ]
 }

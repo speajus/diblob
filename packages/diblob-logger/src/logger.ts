@@ -8,23 +8,28 @@ import type { Logger, LoggerConfig } from './blobs.js';
 /**
  * Create a Winston logger from the provided configuration.
  */
-export function createWinstonLogger(config: LoggerConfig): Logger {
+export function createWinstonLogger(
+  config: LoggerConfig,
+  transports: winston.transport[] = [],
+): Logger {
   const { level = 'info', defaultMeta, prettyPrint = true } = config;
+
+  const baseFormat = prettyPrint
+    ? winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.colorize(),
+        winston.format.printf(({ level, message, timestamp, ...meta }) => {
+          const metaPart = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+          return `${timestamp} [${level}]: ${message}${metaPart}`;
+        }),
+      )
+    : winston.format.json();
 
   const logger = winston.createLogger({
     level,
     defaultMeta,
-    format: prettyPrint
-      ? winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.colorize(),
-          winston.format.printf(({ level, message, timestamp, ...meta }) => {
-            const metaPart = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
-            return `${timestamp} [${level}]: ${message}${metaPart}`;
-          }),
-        )
-      : winston.format.json(),
-    transports: [new winston.transports.Console()],
+    format: baseFormat,
+    transports,
   });
 
   // Adapt Winston's Logger to our minimal Logger interface.

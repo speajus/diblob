@@ -48,7 +48,7 @@ describe('gRPC Service Integration Tests', () => {
     registerDrizzleBlobs(container, ':memory:');
     await createSchema(container);
     registerGrpcBlobs(container, { host: '0.0.0.0', port: 50053 });
-    registerUserService(container);
+    await registerUserService(container);
 
     const client = await createUserServiceClient(container);
 
@@ -78,7 +78,7 @@ describe('gRPC Service Integration Tests', () => {
     registerDrizzleBlobs(container, ':memory:');
     await createSchema(container);
     registerGrpcBlobs(container, { host: '0.0.0.0', port: 50054 });
-    registerUserService(container);
+    await registerUserService(container);
 
     const client = await createUserServiceClient(container);
 
@@ -117,7 +117,7 @@ describe('gRPC Service Integration Tests', () => {
     registerDrizzleBlobs(container, ':memory:');
     await createSchema(container);
     registerGrpcBlobs(container, { host: '0.0.0.0', port: 50055 });
-    registerUserService(container);
+    await registerUserService(container);
 
     const client = await createUserServiceClient(container);
 
@@ -149,7 +149,7 @@ describe('gRPC Service Integration Tests', () => {
     registerDrizzleBlobs(container, ':memory:');
     await createSchema(container);
     registerGrpcBlobs(container, { host: '0.0.0.0', port: 50056 });
-    registerUserService(container);
+    await registerUserService(container);
 
     const client = await createUserServiceClient(container);
 

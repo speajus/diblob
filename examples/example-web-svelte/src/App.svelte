@@ -15,7 +15,7 @@
     apiBaseUrl:
       import.meta.env.VITE_USER_SERVICE_URL ?? 'http://localhost:50051',
     visualizerEventsUrl:
-      import.meta.env.VITE_VISUALIZER_EVENTS_URL ?? 'http://localhost:3001/events',
+      import.meta.env.VITE_VISUALIZER_EVENTS_URL ?? 'http://localhost:3002/events',
   })
 
   provideContainerContext(container)

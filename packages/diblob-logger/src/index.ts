@@ -5,7 +5,7 @@
  */
 
 export type { Logger, LoggerConfig } from './blobs.js';
-export { logger, loggerConfig } from './blobs.js';
+export { logger, loggerConfig, loggerTransports } from './blobs.js';
 export { createWinstonLogger } from './logger.js';
 export { registerLoggerBlobs } from './register.js';
 

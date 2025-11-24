@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import { create } from '@bufbuild/protobuf';
-import { createTestContainer, withBlobOverride } from '@speajus/diblob-testing';
+import { createTestContainer, testLogger, withBlobOverride } from '@speajus/diblob-testing';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../db/schema.js';
@@ -40,18 +40,22 @@ describe('UserService Unit Tests', () => {
   test('should create a user successfully', async () => {
     const container = createTestContainer();
     const { sqliteDb, db } = createTestDatabase();
-    
+
     try {
-      await withBlobOverride(container, database, db, async (_testContainer) => {
-        const service = new UserServiceImpl(database);
-        
+      await withBlobOverride(container, database, db, async (testContainer) => {
+        // Get the test logger from the container
+        const log = await testContainer.resolve(testLogger);
+
+        // Create service with the resolved database and logger values
+        const service = new UserServiceImpl(db, log);
+
         const request = create(CreateUserRequestSchema, {
           name: 'John Doe',
           email: 'john@example.com'
         });
-        
+
         const response = await service.createUser(request);
-        
+
         assert.ok(response.user);
         assert.strictEqual(response.user.name, 'John Doe');
         assert.strictEqual(response.user.email, 'john@example.com');
@@ -66,7 +70,7 @@ describe('UserService Unit Tests', () => {
   test('should get a user by id', async () => {
     const container = createTestContainer();
     const { sqliteDb, db } = createTestDatabase();
-    
+
     try {
       // Pre-populate database
       await db.insert(users).values({
@@ -74,13 +78,14 @@ describe('UserService Unit Tests', () => {
         email: 'jane@example.com',
         createdAt: new Date()
       });
-      
-      await withBlobOverride(container, database, db, async (_testContainer) => {
-        const service = new UserServiceImpl(database);
-        
+
+      await withBlobOverride(container, database, db, async (testContainer) => {
+        const log = await testContainer.resolve(testLogger);
+        const service = new UserServiceImpl(db, log);
+
         const request = create(GetUserRequestSchema, { id: 1 });
         const response = await service.getUser(request);
-        
+
         assert.ok(response.user);
         assert.strictEqual(response.user.name, 'Jane Doe');
         assert.strictEqual(response.user.email, 'jane@example.com');
@@ -94,13 +99,14 @@ describe('UserService Unit Tests', () => {
   test('should throw error when user not found', async () => {
     const container = createTestContainer();
     const { sqliteDb, db } = createTestDatabase();
-    
+
     try {
-      await withBlobOverride(container, database, db, async (_testContainer) => {
-        const service = new UserServiceImpl(database);
-        
+      await withBlobOverride(container, database, db, async (testContainer) => {
+        const log = await testContainer.resolve(testLogger);
+        const service = new UserServiceImpl(db, log);
+
         const request = create(GetUserRequestSchema, { id: 999 });
-        
+
         await assert.rejects(
           () => service.getUser(request),
           /user not found/
@@ -114,7 +120,7 @@ describe('UserService Unit Tests', () => {
   test('should list users with pagination', async () => {
     const container = createTestContainer();
     const { sqliteDb, db } = createTestDatabase();
-    
+
     try {
       // Pre-populate with multiple users
       for (let i = 1; i <= 5; i++) {
@@ -124,13 +130,14 @@ describe('UserService Unit Tests', () => {
           createdAt: new Date()
         });
       }
-      
-      await withBlobOverride(container, database, db, async (_testContainer) => {
-        const service = new UserServiceImpl(database);
-        
+
+      await withBlobOverride(container, database, db, async (testContainer) => {
+        const log = await testContainer.resolve(testLogger);
+        const service = new UserServiceImpl(db, log);
+
         const request = create(ListUsersRequestSchema, { limit: 3, offset: 1 });
         const response = await service.listUsers(request);
-        
+
         assert.strictEqual(response.users.length, 3);
         assert.strictEqual(response.users[0].name, 'User 2');
         assert.strictEqual(response.users[1].name, 'User 3');
@@ -153,8 +160,9 @@ describe('UserService Unit Tests', () => {
         createdAt: new Date()
       });
 
-      await withBlobOverride(container, database, db, async (_testContainer) => {
-        const service = new UserServiceImpl(database);
+      await withBlobOverride(container, database, db, async (testContainer) => {
+        const log = await testContainer.resolve(testLogger);
+        const service = new UserServiceImpl(db, log);
 
         const request = create(UpdateUserRequestSchema, {
           id: 1,
@@ -186,8 +194,9 @@ describe('UserService Unit Tests', () => {
         createdAt: new Date()
       });
 
-      await withBlobOverride(container, database, db, async (_testContainer) => {
-        const service = new UserServiceImpl(database);
+      await withBlobOverride(container, database, db, async (testContainer) => {
+        const log = await testContainer.resolve(testLogger);
+        const service = new UserServiceImpl(db, log);
 
         const request = create(DeleteUserRequestSchema, { id: 1 });
         const response = await service.deleteUser(request);
@@ -204,8 +213,9 @@ describe('UserService Unit Tests', () => {
     const { sqliteDb, db } = createTestDatabase();
 
     try {
-      await withBlobOverride(container, database, db, async (_testContainer) => {
-        const service = new UserServiceImpl(database);
+      await withBlobOverride(container, database, db, async (testContainer) => {
+        const log = await testContainer.resolve(testLogger);
+        const service = new UserServiceImpl(db, log);
 
         const request = create(DeleteUserRequestSchema, { id: 999 });
         const response = await service.deleteUser(request);

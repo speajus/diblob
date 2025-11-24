@@ -1,13 +1,21 @@
 {
   "extends": "./tsconfig.node.json",
   "compilerOptions": {
+    "composite": true,
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./dist"
+    "outDir": "./dist/types",
+    "lib": ["DOM"]
   },
   "include": [
-	    "src/server/index.ts"
+	    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/main.ts",
+    "**/*.svelte",
+    "src/lib/index.ts",
+    "src/examples/**"
   ]
 }
 
