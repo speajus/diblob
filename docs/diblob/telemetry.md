@@ -10,8 +10,7 @@ pnpm add @speajus/diblob-telemetry
 
 ## Quick start
 
-<augment_code_snippet mode="EXCERPT" path="docs/diblob/telemetry.md">
-````ts
+```ts
 import { createContainer } from '@speajus/diblob';
 import { registerTelemetryBlobs, telemetryContext } from '@speajus/diblob-telemetry';
 
@@ -24,8 +23,7 @@ registerTelemetryBlobs(container, {
 });
 
 await container.resolve(telemetryContext);
-````
-</augment_code_snippet>
+```
 
 ## Configuration
 
@@ -38,6 +36,70 @@ await container.resolve(telemetryContext);
 - `enableTraces` (boolean, default true)
 - `enableMetrics` (boolean, default true)
 - `enablePaths` (boolean, default true — reserved for future path capture)
+
+## Environment & configuration integration
+
+You can build the `TelemetryConfig` you pass to `registerTelemetryBlobs` from plain environment
+variables, or via a typed config using `@speajus/diblob-config`.
+
+**Environment variables only**
+
+```ts
+import { createContainer } from '@speajus/diblob';
+import {
+  registerTelemetryBlobs,
+  type TelemetryConfig,
+} from '@speajus/diblob-telemetry';
+
+const container = createContainer();
+
+const telemetryConfig: TelemetryConfig = {
+  serviceName: process.env.SERVICE_NAME ?? 'example',
+  serviceVersion: process.env.SERVICE_VERSION,
+  deploymentEnvironment: process.env.NODE_ENV ?? 'development',
+  exporter: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ? 'otlp-http' : 'console',
+  exporterEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  traceSampleRatio: Number(process.env.OTEL_TRACE_SAMPLE_RATIO ?? '1.0'),
+};
+
+registerTelemetryBlobs(container, telemetryConfig);
+```
+
+**Using `@speajus/diblob-config`**
+
+```ts
+import { z } from 'zod';
+import { createContainer } from '@speajus/diblob';
+import {
+  type ConfigSchema,
+  loadNodeConfig,
+} from '@speajus/diblob-config';
+import {
+  registerTelemetryBlobs,
+  type TelemetryConfig,
+} from '@speajus/diblob-telemetry';
+
+const TelemetryConfigSchema = z.object({
+  serviceName: z.string().default('example'),
+  serviceVersion: z.string().optional(),
+  deploymentEnvironment: z.string().optional(),
+  exporter: z.enum(['console', 'otlp-http', 'none']).default('console'),
+  exporterEndpoint: z.string().url().optional(),
+  traceSampleRatio: z.number().min(0).max(1).default(1),
+}) satisfies ConfigSchema<TelemetryConfig>;
+
+const container = createContainer();
+
+const telemetryConfig = loadNodeConfig<TelemetryConfig>({
+  schema: TelemetryConfigSchema,
+  envPrefix: 'TELEMETRY_',
+});
+
+registerTelemetryBlobs(container, telemetryConfig);
+```
+
+For more about typed configuration, see
+[Typed Configuration with `@speajus/diblob-config`](./config.md).
 
 ## Disposal
 

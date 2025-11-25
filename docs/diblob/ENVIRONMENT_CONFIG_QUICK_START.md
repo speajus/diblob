@@ -2,7 +2,12 @@
 
 ## TL;DR
 
-Here are the most common patterns for injecting environment variables into your diblob container:
+Here are the most common patterns for injecting environment variables into your diblob container.
+
+For most new applications, the recommended approach is to use
+[`@speajus/diblob-config`](./config.md) to load a **typed, validated configuration object** and
+expose it as a configuration blob. The patterns below still apply;
+`@speajus/diblob-config` just automates the env / file / CLI merging and validation.
 
 ## Pattern 1: Configuration Blob (Recommended)
 
@@ -257,6 +262,7 @@ await api.start();
 ## See Also
 
 - [Full Environment Configuration Guide](./ENVIRONMENT_CONFIGURATION.md)
+- [Typed Configuration with `@speajus/diblob-config`](./config.md)
 - [examples/environment-config.ts](../examples/environment-config.ts)
 - [examples/environment-config-testing.ts](../examples/environment-config-testing.ts)
 
