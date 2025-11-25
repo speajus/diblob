@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob-testing",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Testing utilities and fake infrastructure blobs for diblob containers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

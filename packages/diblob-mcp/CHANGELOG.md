@@ -1,5 +1,11 @@
 # @speajus/diblob-mcp
 
+## 1.0.1
+
+### Patch Changes
+
+- @speajus/diblob@1.0.1
+
 ## 1.0.0
 
 ### Minor Changes

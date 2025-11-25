@@ -1,5 +1,12 @@
 # @speajus/diblob-visualizer
 
+## 1.0.1
+
+### Patch Changes
+
+- 121a43b: added telemetry
+  - @speajus/diblob@1.0.1
+
 ## 1.0.0
 
 ### Minor Changes
