@@ -12,16 +12,17 @@ export default defineConfig({
   themeConfig: {
     logo: '/logo.svg',
 
-    nav: [
-      { text: 'Diblob', link: '/diblob/guide/getting-started' },
-      { text: 'MCP Server', link: '/mcp/' },
-      { text: 'Visualizer', link: '/visualizer/' },
-      { text: 'API Reference', link: '/diblob/api/' },
-      { text: 'Examples', link: '/diblob/examples/' },
-    ],
+	    nav: [
+	      { text: 'Diblob', link: '/diblob/guide/getting-started' },
+	      { text: 'Telemetry', link: '/diblob/telemetry' },
+	      { text: 'MCP Server', link: '/mcp/' },
+	      { text: 'Visualizer', link: '/visualizer/' },
+	      { text: 'API Reference', link: '/diblob/api/' },
+	      { text: 'Examples', link: '/diblob/examples/' },
+	    ],
 
-    sidebar: {
-      '/diblob/guide/': [
+	    sidebar: {
+	      '/diblob/guide/': [
         {
           text: 'Introduction',
           items: [
@@ -38,7 +39,21 @@ export default defineConfig({
             { text: 'Dependency Resolution', link: '/diblob/guide/dependency-resolution' },
             { text: 'Reactive Dependencies', link: '/diblob/guide/reactive-dependencies' },
           ]
-        },
+			        },
+			        {
+			          text: 'Packages',
+			          items: [
+			            { text: '@speajus/diblob',           link: '/diblob/' },
+			            { text: '@speajus/diblob-config',    link: '/diblob/config' },
+			            { text: '@speajus/diblob-telemetry', link: '/diblob/telemetry' },
+			            { text: '@speajus/diblob-logger',    link: '/diblob/logger' },
+			            { text: '@speajus/diblob-connect',   link: '/diblob/connect' },
+			            { text: '@speajus/diblob-svelte',    link: '/diblob/svelte' },
+			            { text: '@speajus/diblob-testing',   link: '/diblob/testing' },
+			            { text: '@speajus/diblob-mcp',       link: '/mcp/' },
+			            { text: '@speajus/diblob-visualizer', link: '/visualizer/' },
+			          ]
+			        },
         {
           text: 'Advanced',
           items: [
@@ -52,7 +67,7 @@ export default defineConfig({
           ]
         }
       ],
-      '/diblob/api/': [
+	      '/diblob/api/': [
         {
           text: 'API Reference',
           items: [
@@ -65,7 +80,7 @@ export default defineConfig({
           ]
         }
       ],
-      '/diblob/examples/': [
+	      '/diblob/examples/': [
         {
           text: 'Examples',
           items: [
@@ -78,7 +93,7 @@ export default defineConfig({
           ]
         }
       ],
-      '/mcp/': [
+	      '/mcp/': [
         {
           text: 'MCP Server',
           items: [
@@ -88,7 +103,7 @@ export default defineConfig({
           ]
         }
       ],
-      '/visualizer/': [
+	      '/visualizer/': [
         {
           text: 'Visualizer',
           items: [
@@ -99,9 +114,71 @@ export default defineConfig({
             { text: 'Server Setup', link: '/visualizer/server' },
             { text: 'Examples', link: '/visualizer/examples' },
             { text: 'API Reference', link: '/visualizer/api' },
-          ]
-        }
-      ]
+	          ]
+	        }
+	      ],
+	    	  // Root diblob docs: group by individual Node modules
+	    	  '/diblob/': [
+	    	    {
+	    	      text: '@speajus/diblob',
+	    	      items: [
+	    	        { text: 'Overview', link: '/diblob/' },
+	    	        { text: 'Getting Started', link: '/diblob/guide/getting-started' },
+	    	        { text: 'API Reference', link: '/diblob/api/' },
+	    	        { text: 'Examples', link: '/diblob/examples/' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-config',
+	    	      items: [
+	    	        { text: 'Typed Config', link: '/diblob/config' },
+	    	        { text: 'Env Config Quick Start', link: '/diblob/ENVIRONMENT_CONFIG_QUICK_START' },
+	    	        { text: 'Env Configuration Guide', link: '/diblob/ENVIRONMENT_CONFIGURATION' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-telemetry',
+	    	      items: [
+	    	        { text: 'Telemetry Guide', link: '/diblob/telemetry' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-logger',
+	    	      items: [
+		    	        { text: 'Logger', link: '/diblob/logger' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-connect',
+	    	      items: [
+		    	        { text: 'Connect gRPC', link: '/diblob/connect' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-svelte',
+	    	      items: [
+		    	        { text: 'Svelte Integration', link: '/diblob/svelte' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-testing',
+	    	      items: [
+		    	        { text: 'Testing Utilities', link: '/diblob/testing' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-mcp',
+	    	      items: [
+	    	        { text: 'Docs', link: '/mcp/' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-visualizer',
+	    	      items: [
+	    	        { text: 'Docs', link: '/visualizer/' },
+	    	      ],
+	    	    },
+	    	  ]
     },
 
     socialLinks: [

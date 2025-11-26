@@ -2,8 +2,18 @@
 
 This guide explains different approaches for injecting environment variables and configuration into the diblob container.
 
+**Recommended:** For most applications, use [`@speajus/diblob-config`](./config.md) to load a
+typed, validated configuration object and expose it as a configuration blob. It wraps the
+patterns in this guide (env, config files, CLI flags) behind a small API and integrates with
+blobs via `registerConfigBlob` / `registerStaticConfigBlob`.
+
+The sections below still document the underlying patterns so you can understand what
+`@speajus/diblob-config` is doing under the hood and choose the right approach when you do not
+want an extra dependency.
+
 ## Table of Contents
 
+0. [Typed configuration with `@speajus/diblob-config` (recommended)](#typed-configuration-with-speajusdiblob-config-recommended)
 1. [Direct Plain Value Injection](#1-direct-plain-value-injection)
 2. [Configuration Blob Pattern](#2-configuration-blob-pattern)
 3. [Typed Configuration Service](#3-typed-configuration-service)
@@ -11,6 +21,48 @@ This guide explains different approaches for injecting environment variables and
 5. [Validated Configuration](#5-validated-configuration)
 6. [Secrets Management](#6-secrets-management)
 7. [Best Practices](#best-practices)
+
+## Typed configuration with `@speajus/diblob-config` (recommended)
+
+If you want strongly typed, validated configuration that merges defaults, JSON files,
+environment variables, and CLI flags, use [`@speajus/diblob-config`](./config.md). It exposes
+`loadConfig` / `loadNodeConfig` plus `registerConfigBlob` / `registerStaticConfigBlob`, built on
+top of the patterns below.
+
+A minimal Node example:
+
+```ts
+import { z } from 'zod';
+import { createBlob, createContainer } from '@speajus/diblob';
+import {
+  type ConfigSchema,
+  registerConfigBlob,
+} from '@speajus/diblob-config';
+
+interface AppConfig {
+  port: number;
+  host: string;
+}
+
+const AppConfigSchema = z.object({
+  port: z.number().int().min(0).max(65535),
+  host: z.string().min(1),
+}) satisfies ConfigSchema<AppConfig>;
+
+const appConfig = createBlob<AppConfig>('appConfig');
+const container = createContainer();
+
+registerConfigBlob(container, appConfig, {
+  schema: AppConfigSchema,
+  envPrefix: 'APP_',
+  env: process.env,
+  environment: (process.env.NODE_ENV ?? 'development'),
+});
+```
+
+Downstream services then depend on `AppConfig` via the `appConfig` blob instead of reading
+`process.env` directly. See [Typed Configuration with `@speajus/diblob-config`](./config.md) for
+more details and browser/Svelte examples.
 
 ## 1. Direct Plain Value Injection
 

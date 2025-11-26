@@ -9,10 +9,11 @@ Diblob is a modern dependency injection framework for TypeScript/JavaScript that
 ## Installation
 
 ```bash
-npm install @speajus/diblob
+pnpm add @speajus/diblob
 ```
 
-Requirements: Node.js >= 22.0.0
+Requirements: Node.js >= 22.0.0. This repository uses **pnpm**, not npm, for
+package management.
 
 ## Core Concepts
 
@@ -176,6 +177,85 @@ container.clear();
 - **Factory Injection**: Support for factory functions
 - **List Blobs**: Special array blobs with automatic invalidation on mutations
 
+## Configuration and Environment Management
+
+### @speajus/diblob-config (typed configuration)
+
+`@speajus/diblob-config` is the canonical way to do typed, validated
+configuration in diblob-based applications. It lets you define a schema for
+your config, merge values from multiple sources (env, files, CLI), and expose
+that config as a blob in your container.
+
+**Installation:**
+```bash
+pnpm add @speajus/diblob-config
+```
+
+**Basic pattern (recommended):**
+
+- Define a TypeScript type `AppConfig`.
+- Define a `ConfigSchema<AppConfig>` using Zod (or a compatible schema).
+- Create a `createBlob<AppConfig>('appConfig')`.
+- Use `registerConfigBlob(container, appConfig, options)` to load and validate
+  configuration.
+
+```typescript
+import { z } from 'zod';
+import { createBlob, createContainer } from '@speajus/diblob';
+import {
+  type ConfigSchema,
+  registerConfigBlob,
+} from '@speajus/diblob-config';
+
+type AppConfig = {
+  port: number;
+  host: string;
+};
+
+const AppConfigSchema = z.object({
+  port: z.number().int().min(0).max(65535).default(3000),
+  host: z.string().default('0.0.0.0'),
+}) satisfies ConfigSchema<AppConfig>;
+
+const appConfig = createBlob<AppConfig>('appConfig');
+const container = createContainer();
+
+registerConfigBlob(container, appConfig, {
+  schema: AppConfigSchema,
+  envPrefix: 'APP_',
+  env: process.env,
+});
+```
+
+After this, any blob or class that depends on `appConfig` gets a **fully
+validated, typed config object** resolved from env (and other sources you
+configure).
+
+#### Node helpers
+
+The `@speajus/diblob-config/node` entrypoint adds helpers for Node CLI
+applications:
+
+- `loadNodeConfig<T>(options)` – automatically reads `process.env`,
+  `process.argv`, optional JSON files, and deduces the environment name, then
+  calls `loadConfig` under the hood.
+- `buildConfigHelpText<T>(options)` – generates CLI help text from your schema
+  (env/CLI mappings, defaults, descriptions).
+- `printNodeConfigHelpIfRequested<T>(options)` – prints help and returns a flag
+  so you can exit early when `--help` is requested.
+
+```typescript
+import { loadNodeConfig } from '@speajus/diblob-config/node';
+
+const appConfig = await loadNodeConfig<AppConfig>({
+  schema: AppConfigSchema,
+  envPrefix: 'APP_',
+});
+```
+
+For tests, you can use `registerStaticConfigBlob(container, blob, value)` to
+inject a prebuilt config object without touching the environment.
+
 ## Documentation
 
 Full documentation: https://jspears.github.io/diblob/
@@ -192,13 +272,114 @@ The diblob ecosystem consists of multiple packages:
 
 The core dependency injection framework. See above for full documentation.
 
+### @speajus/diblob-config
+
+Typed, validated configuration for diblob applications. Defines schemas for
+configuration, merges values from env/files/CLI, and exposes the result as a
+config blob in your container. See the "Configuration and Environment
+Management" section above for details and examples.
+
+### @speajus/diblob-telemetry
+
+OpenTelemetry-based telemetry integration for diblob containers.
+
+**Installation:**
+```bash
+pnpm add @speajus/diblob-telemetry @speajus/diblob
+```
+
+**Purpose:**
+Provides tracing and metrics for applications built with diblob, including
+configurable exporters (OTLP, console, or none).
+
+**Configuration:**
+- `serviceName`, `serviceVersion`, `deploymentEnvironment`
+- `exporter` (e.g. `otlp-http`, `console`, `none`)
+- `exporterEndpoint`
+- `traceSampleRatio`
+
+Can be configured directly from env vars or via a typed config object loaded
+with `@speajus/diblob-config`.
+
+### @speajus/diblob-logger
+
+Winston-based logger integration for diblob containers.
+
+**Installation:**
+```bash
+pnpm add @speajus/diblob-logger @speajus/diblob
+```
+
+**Purpose:**
+Provides a blob-based logger using Winston, with configuration driven through
+config blobs (and typically `@speajus/diblob-config`). Plays well with
+`@speajus/diblob-telemetry` for correlated logs and traces.
+
+### @speajus/diblob-connect
+
+Connect-based gRPC server implementation for diblob containers.
+
+**Installation:**
+```bash
+pnpm add @speajus/diblob-connect @speajus/diblob @connectrpc/connect @connectrpc/connect-node @bufbuild/protobuf
+```
+
+**Purpose:**
+Provides a Connect/ES-powered gRPC/Connect/gRPC-Web server whose lifecycle and
+configuration are managed through a diblob container.
+
+**Key concepts:**
+- `registerGrpcBlobs(container, config)` to register server blobs
+- `grpcServer` blob to start the server on first resolve
+- `grpcServiceRegistry` for registering service implementations
+
+### @speajus/diblob-svelte
+
+Svelte 5 integration helpers for diblob containers.
+
+**Installation:**
+```bash
+pnpm add @speajus/diblob-svelte @speajus/diblob svelte
+```
+
+**Purpose:**
+Makes it easy to provide a diblob container via Svelte context and resolve
+blobs from components.
+
+**Key helpers:**
+- `provideContainerContext(container)` – store a container in Svelte context
+- `useContainer()` – retrieve the current container
+- `useBlob(blob)` – resolve a blob from the current container
+- `attachContainerDisposal(container)` – dispose container when the owning
+  component is destroyed
+
+### @speajus/diblob-testing
+
+Testing utilities and fake infrastructure blobs for diblob containers.
+
+**Installation:**
+```bash
+pnpm add -D @speajus/diblob-testing
+```
+
+**Purpose:**
+Provides test container factories, blob override helpers, and fake
+infrastructure (logger, clock, random, HTTP stubs), plus helpers for
+`node:test`.
+
+**Key features:**
+- `createTestContainer` / `createIsolatedTestContainer`
+- `withBlobOverride(container, blob, impl, testFn)`
+- `testLogger`, `testClock`, `testRandom`, `httpClientStub`, `httpServerStub`
+- `setupFileScopedTestContainer` and `setupEachTestContainer`
+
 ### @speajus/diblob-mcp
 
 Model Context Protocol (MCP) server implementation for diblob containers.
 
 **Installation:**
 ```bash
-npm install @speajus/diblob-mcp @speajus/diblob @modelcontextprotocol/sdk
+pnpm add @speajus/diblob-mcp @speajus/diblob @modelcontextprotocol/sdk
 ```
 
 **Purpose:**
@@ -262,7 +443,7 @@ Interactive dependency injection graph visualization for diblob.
 
 **Installation:**
 ```bash
-npm install @speajus/diblob-visualizer @speajus/diblob
+pnpm add @speajus/diblob-visualizer @speajus/diblob
 ```
 
 **Purpose:**
