@@ -5,6 +5,7 @@
  */
 
 import { createBlob, createContainer } from '@speajus/diblob';
+import { diagnosticsRecorder, registerDiagnosticsBlobs } from '@speajus/diblob-diagnostics';
 import { mcpServer, registerMcpBlobs } from './src/index.js';
 
 // Define some example services
@@ -71,6 +72,18 @@ const container = createContainer();
 container.register(logger, ConsoleLogger);
 container.register(database, MockDatabase, logger);
 container.register(userService, UserServiceImpl, logger, database);
+
+// Register diagnostics helper blobs so MCP can expose summaries
+registerDiagnosticsBlobs(container);
+
+// Optionally record a couple of example diagnostics events at startup so the
+// diagnostics_summarize_recent_activity tool has something to show.
+const recorder = await container.resolve(diagnosticsRecorder);
+recorder.record({
+	blobName: 'startup',
+	level: 'info',
+	message: 'MCP diagnostics example started',
+});
 
 // Register MCP server blobs
 registerMcpBlobs(container, {

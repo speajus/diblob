@@ -1,8 +1,11 @@
-import type { Container } from "@speajus/diblob";
-import { grpcServiceRegistry } from "@speajus/diblob-connect";
-import { registerLoggerBlobs } from "@speajus/diblob-logger";
-import { UserService } from "./generated/user_pb.js";
-import { UserServiceImpl, userService } from "./user-service.js";
+import type { Container } from '@speajus/diblob';
+import { grpcServiceRegistry } from '@speajus/diblob-connect';
+import { diagnosticsRecorder, registerDiagnosticsBlobs } from '@speajus/diblob-diagnostics';
+import { logger, registerLoggerBlobs } from '@speajus/diblob-logger';
+import { DiagnosticsServiceImpl, diagnosticsService } from './diagnostics-service.js';
+import { DiagnosticsService } from './generated/diagnostics_pb.js';
+import { UserService } from './generated/user_pb.js';
+import { UserServiceImpl, userService } from './user-service.js';
 /**
  * Example gRPC server using diblob-connect with a Drizzle ORM-backed database
  *
@@ -14,7 +17,7 @@ import { UserServiceImpl, userService } from "./user-service.js";
  */
 
 import { mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Lifecycle } from '@speajus/diblob';
 import Database from 'better-sqlite3';
@@ -40,16 +43,28 @@ export function registerDrizzleBlobs(container: Container, dbPath: string): void
   container.register(database, drizzle, sqlite, { schema });
 }
 export async function registerUserService(container: Container): Promise<void> {
-  // Ensure logger is registered (UserServiceImpl depends on it)
-  // This is idempotent - if already registered, it will be re-registered
+  // Ensure logger is registered (UserServiceImpl depends on it).
+  // This is idempotent - if already registered, it will be re-registered.
   registerLoggerBlobs(container);
 
-  // Register the user service with its dependencies
-  container.register(userService, UserServiceImpl);
+  // Ensure diagnostics blobs are registered so the service can record events.
+  registerDiagnosticsBlobs(container);
+
+  // Register the user service with its dependencies, including diagnostics.
+  container.register(userService, UserServiceImpl, database, logger, diagnosticsRecorder);
 
   // Resolve the concrete implementation and register it with the service registry
   // before the gRPC server starts, to avoid missing routes (HTTP 404 / UNIMPLEMENTED).
   const impl = await container.resolve(userService);
   const registry = await container.resolve(grpcServiceRegistry);
   registry.registerService(UserService, impl);
+}
+
+export async function registerDiagnosticsService(container: Container): Promise<void> {
+	// Register the diagnostics service with its dependencies.
+	container.register(diagnosticsService, DiagnosticsServiceImpl);
+
+	const impl = await container.resolve(diagnosticsService);
+	const registry = await container.resolve(grpcServiceRegistry);
+	registry.registerService(DiagnosticsService, impl);
 }

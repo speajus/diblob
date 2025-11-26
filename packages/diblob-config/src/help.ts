@@ -30,12 +30,21 @@ function getTypeLabel(schema: z.ZodTypeAny): string {
 	if (schema instanceof z.ZodNumber) return 'number';
 	if (schema instanceof z.ZodBoolean) return 'boolean';
 	if (schema instanceof z.ZodEnum) {
-		const values: readonly string[] =
-			((schema as any).options ?? (schema as any)._def?.values) ?? [];
+				type EnumSchemaLike = {
+					options?: readonly unknown[];
+					_def?: { values?: readonly unknown[] };
+				};
+				const enumSchema = schema as unknown as EnumSchemaLike;
+				const rawValues =
+					enumSchema.options ?? enumSchema._def?.values ?? [];
+				const values = rawValues.filter(
+					(value): value is string => typeof value === 'string',
+				);
 		return `enum(${values.join(' | ')})`;
 	}
 	if (schema instanceof z.ZodArray) {
-		const element = (schema as any).element as z.ZodTypeAny;
+				const arraySchema = schema as unknown as { element: z.ZodTypeAny };
+				const { element } = arraySchema;
 		return `array<${getTypeLabel(element)}>`;
 	}
 	return 'unknown';
@@ -62,8 +71,8 @@ export function buildConfigHelpText<TConfig>(
 	const environment: EnvironmentName =
 		options.environment ?? ('development' as EnvironmentName);
 
-	const resolvedDefaults =
-		typeof defaults === 'function' ? defaults(environment) ?? {} : defaults ?? {};
+		const resolvedDefaults =
+			typeof defaults === 'function' ? defaults(environment) ?? {} : defaults ?? {};
 
 	const lines: string[] = [];
 	lines.push(`Usage: ${programName} [options]`);
@@ -77,10 +86,13 @@ export function buildConfigHelpText<TConfig>(
 		const flag = toCliFlag(cliPrefix, key);
 		const typeLabel = getTypeLabel(fieldSchema);
 		const description = getDescription(fieldSchema);
-		const defaultValue =
-			resolvedDefaults && Object.hasOwn(resolvedDefaults, key)
-				? (resolvedDefaults as any)[key]
-				: undefined;
+			const defaultsRecord = resolvedDefaults as
+				| Partial<Record<string, unknown>>
+				| undefined;
+			const defaultValue =
+				defaultsRecord && Object.hasOwn(defaultsRecord, key)
+					? defaultsRecord[key]
+					: undefined;
 
 		lines.push('');
 		lines.push(`  ${key}`);

@@ -8,10 +8,15 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+	  CallToolRequestSchema,
+	  ListToolsRequestSchema,
+	} from '@modelcontextprotocol/sdk/types.js';
 import type { Container } from '@speajus/diblob';
+import {
+	type DiagnosticsWindowConfig,
+	diagnosticsAggregator,
+	renderDiagnosticsSummaryText,
+} from '@speajus/diblob-diagnostics';
 import type {
   ContainerIntrospector, 
   McpServer,
@@ -103,6 +108,30 @@ export class McpServerImpl implements McpServer {
             properties: {},
           },
         },
+	        {
+	          name: 'diagnostics_summarize_recent_activity',
+	          description:
+	            'Summarize recent logs and diagnostics events grouped by blob for LLM-powered debugging',
+	          inputSchema: {
+	            type: 'object',
+	            properties: {
+	              windowSeconds: {
+	                type: 'number',
+	                description: 'Time window in seconds to analyze (defaults to diagnostics config)',
+	              },
+	              maxBlobs: {
+	                type: 'number',
+	                description: 'Maximum number of blobs to include in the summary',
+	              },
+	              severityThreshold: {
+	                type: 'string',
+	                description:
+	                  'Minimum severity that will cause a blob to be considered degraded (debug|info|warn|error)',
+	                enum: ['debug', 'info', 'warn', 'error'],
+	              },
+	            },
+	          },
+	        },
       ],
     }));
 
@@ -110,7 +139,7 @@ export class McpServerImpl implements McpServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
-      switch (name) {
+	      switch (name) {
         case 'list_blobs': {
           const blobs = await this.introspector.listBlobs();
           return {
@@ -148,6 +177,54 @@ export class McpServerImpl implements McpServer {
             ],
           };
         }
+
+	        case 'diagnostics_summarize_recent_activity': {
+	          const container = this.introspector.getContainer();
+	          if (!container.has(diagnosticsAggregator)) {
+	            return {
+	              content: [
+	                {
+	                  type: 'text',
+	                  text:
+	                    'Diagnostics aggregator (diagnosticsAggregator blob) is not registered in this container.',
+	                },
+	              ],
+	            };
+	          }
+
+	          const overrides: Partial<DiagnosticsWindowConfig> = {};
+	          // biome-ignore lint/suspicious/noExplicitAny: validated by input schema
+	          const rawArgs = (args ?? {}) as any;
+	          if (typeof rawArgs.windowSeconds === 'number') {
+	            overrides.windowSeconds = rawArgs.windowSeconds;
+	          }
+	          if (typeof rawArgs.maxBlobs === 'number') {
+	            overrides.maxBlobs = rawArgs.maxBlobs;
+	          }
+	          if (
+	            typeof rawArgs.severityThreshold === 'string' &&
+	            ['debug', 'info', 'warn', 'error'].includes(rawArgs.severityThreshold)
+	          ) {
+	            overrides.severityThreshold = rawArgs.severityThreshold as DiagnosticsWindowConfig['severityThreshold'];
+	          }
+
+	          const aggregator = await container.resolve(diagnosticsAggregator);
+	          const snapshot = await aggregator.calculateSnapshot(overrides);
+	          const summaryText = renderDiagnosticsSummaryText(snapshot);
+
+	          return {
+	            content: [
+	              {
+	                type: 'text',
+	                text: summaryText,
+	              },
+	              {
+	                type: 'text',
+	                text: JSON.stringify(snapshot, null, 2),
+	              },
+	            ],
+	          };
+	        }
 
         default:
           throw new Error(`Unknown tool: ${name}`);
@@ -279,5 +356,9 @@ export class ContainerIntrospectorImpl implements ContainerIntrospector {
 
     return { nodes, edges };
   }
+
+	  getContainer(): Container {
+	    return this.container;
+	  }
 }
 
