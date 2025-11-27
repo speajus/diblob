@@ -4,22 +4,20 @@
 
 import type { Message } from '@bufbuild/protobuf';
 import type {
-  GenFile,
-  GenMessage,
-  GenService,
-} from '@bufbuild/protobuf/codegenv2';
-import {
-  fileDesc,
-  messageDesc,
-  serviceDesc,
-} from '@bufbuild/protobuf/codegenv2';
+	GenFile,
+	GenMessage,
+	GenService,
+	} from '@bufbuild/protobuf/codegenv2';
+import { messageDesc, serviceDesc } from '@bufbuild/protobuf/codegenv2';
+import { file_diagnostics as serverFileDiagnostics } from '../../../example-grpc-server/src/generated/diagnostics_pb.js';
 
 /**
- * Describes the file diagnostics.proto.
- */
-export const file_diagnostics: GenFile = /*@__PURE__*/ fileDesc(
-  'ChFkaWFnbm9zdGljcy5wcm90bxILZGlhZ25vc3RpY3MiZgodR2V0RGlhZ25vc3RpY3NTbmFwc2hvdFJlcXVlc3QSFgoOd2luZG93X3NlY29uZHMYASABKAUSEQoJbWF4X2Jsb2JzGAIgASgFEhoKEnNldmVyaXR5X3RocmVzaG9sZBgDIAEoCSLBAgoWRGlhZ25vc3RpY3NCbG9iU3VtbWFyeRIRCglibG9iX25hbWUYASABKAkSDgoGaGVhbHRoGAIgASgJEhQKDHRvdGFsX2V2ZW50cxgDIAEoAxITCgtlcnJvcl9jb3VudBgEIAEoAxISCgp3YXJuX2NvdW50GAUgASgDEhIKCmluZm9fY291bnQYBiABKAMSEwoLZGVidWdfY291bnQYByABKAMSFQoNc3VjY2Vzc19jb3VudBgIIAEoAxIVCg1mYWlsdXJlX2NvdW50GAkgASgDEhsKE2F2ZXJhZ2VfZHVyYXRpb25fbXMYCiABKAESFwoPcDk1X2R1cmF0aW9uX21zGAsgASgBEhoKEmxhc3RfZXJyb3JfbWVzc2FnZRgMIAEoCRIcChRsYXN0X2Vycm9yX3RpbWVzdGFtcBgNIAEoCSKuAQoeR2V0RGlhZ25vc3RpY3NTbmFwc2hvdFJlc3BvbnNlEhQKDGdlbmVyYXRlZF9hdBgBIAEoCRIWCg53aW5kb3dfc2Vjb25kcxgCIAEoBRIUCgx0b3RhbF9ldmVudHMYAyABKAMSMgoFYmxvYnMYBCADKAsyIy5kaWFnbm9zdGljcy5EaWFnbm9zdGljc0Jsb2JTdW1tYXJ5EhQKDHN1bW1hcnlfdGV4dBgFIAEoCTKHAQoSRGlhZ25vc3RpY3NTZXJ2aWNlEnEKFkdldERpYWdub3N0aWNzU25hcHNob3QSKi5kaWFnbm9zdGljcy5HZXREaWFnbm9zdGljc1NuYXBzaG90UmVxdWVzdHorLmRpYWdub3N0aWNzLkdldERpYWdub3N0aWNzU25hcHNob3RSZXNwb25zZWIGcHJvdG8z',
-);
+	 * Describes the file diagnostics.proto.
+	 *
+	 * For the web client, we reuse the canonical file descriptor generated for the
+	 * example gRPC server to avoid descriptor drift between the two examples.
+	 */
+export const file_diagnostics: GenFile = serverFileDiagnostics;
 
 /**
  * Request to retrieve a diagnostics snapshot.
