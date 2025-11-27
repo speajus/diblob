@@ -231,7 +231,7 @@ import type {
 		      // Resolve telemetry from the container the first time we need it so
 		      // diagnostics can still operate even if telemetry isn't registered.
 		      if (this.telemetry === null) {
-		        const maybeTelemetry = await (this.container as any).resolve(telemetryContext);
+		        const maybeTelemetry = await this.container.resolve(telemetryContext);
 		        this.telemetry = maybeTelemetry ?? undefined;
 		      }
 		    } catch {
