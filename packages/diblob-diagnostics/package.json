@@ -12,10 +12,10 @@
     }
   },
   "scripts": {
-    "build": "tsc -b",
-    "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "lint": "biome check .",
-    "test": "tsx --test src/test/*.test.ts"
+	    "build": "tsc -b",
+	    "clean": "rimraf dist tsconfig.tsbuildinfo",
+	    "lint": "biome check .",
+	    "test": "tsc -b && tsx --test src/test/*.test.ts"
   },
   "dependencies": {
     "@speajus/diblob": "workspace:*",

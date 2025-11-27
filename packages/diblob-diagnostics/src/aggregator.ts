@@ -2,24 +2,24 @@ import type { Span } from '@opentelemetry/api';
 import type { Container } from '@speajus/diblob';
 import { type TelemetryContext, telemetryContext } from '@speajus/diblob-telemetry';
 import type {
-  BlobDiagnosticsSummary,
-  DiagnosticsAggregator,
-  DiagnosticsEvent,
-  DiagnosticsRecorder,
-  DiagnosticsSnapshot,
-  DiagnosticsWindowConfig,
-} from './blobs.js';
+	  BlobDiagnosticsSummary,
+	  DiagnosticsAggregator,
+	  DiagnosticsEvent,
+	  DiagnosticsRecorder,
+	  DiagnosticsSnapshot,
+	  DiagnosticsWindowConfig,
+	} from './blobs.js';
 
-const DEFAULT_WINDOW_SECONDS = 300; // 5 minutes
-const DEFAULT_MAX_BLOBS = 32;
-const DEFAULT_MAX_EVENTS_PER_BLOB = 20;
-const DEFAULT_SEVERITY: DiagnosticsWindowConfig['severityThreshold'] = 'info';
+	const DEFAULT_WINDOW_SECONDS = 300; // 5 minutes
+	const DEFAULT_MAX_BLOBS = 32;
+	const DEFAULT_MAX_EVENTS_PER_BLOB = 20;
+	const DEFAULT_SEVERITY: DiagnosticsWindowConfig['severityThreshold'] = 'info';
 
-export class DiagnosticsAggregatorImpl implements DiagnosticsAggregator {
-  private readonly recorder: DiagnosticsRecorder;
-  private readonly baseConfig: DiagnosticsWindowConfig;
-  private readonly container?: Container;
-  private telemetry?: TelemetryContext | null;
+	export class DiagnosticsAggregatorImpl implements DiagnosticsAggregator {
+		  private readonly recorder: DiagnosticsRecorder;
+		  private readonly baseConfig: DiagnosticsWindowConfig;
+		  private readonly container?: Container;
+		  private telemetry?: TelemetryContext | null;
 
   constructor(recorder: DiagnosticsRecorder, baseConfig: DiagnosticsWindowConfig, container?: Container) {
     this.recorder = recorder;
@@ -222,28 +222,29 @@ export class DiagnosticsAggregatorImpl implements DiagnosticsAggregator {
     return a.errorCount - b.errorCount;
   }
 
-  private async startSpanSafe(name: string): Promise<Span | undefined> {
-    if (!this.container) {
-      return undefined;
-    }
+		  private async startSpanSafe(name: string): Promise<Span | undefined> {
+		    if (!this.container) {
+		      return undefined;
+		    }
 
-    try {
-      // Lazy-resolve telemetry so diagnostics can work without it.
-      if (this.telemetry === null) {
-        const maybeTelemetry = (await this.container.resolve(telemetryContext)) as TelemetryContext;
-        this.telemetry = maybeTelemetry ?? undefined;
-      }
-    } catch {
-      this.telemetry = undefined;
-    }
+		    try {
+		      // Resolve telemetry from the container the first time we need it so
+		      // diagnostics can still operate even if telemetry isn't registered.
+		      if (this.telemetry === null) {
+		        const maybeTelemetry = await (this.container as any).resolve(telemetryContext);
+		        this.telemetry = maybeTelemetry ?? undefined;
+		      }
+		    } catch {
+		      this.telemetry = undefined;
+		    }
 
-    if (!this.telemetry) {
-      return undefined;
-    }
+		    if (!this.telemetry) {
+		      return undefined;
+		    }
 
-    return this.telemetry.tracer.startSpan(name);
-  }
-}
+		    return this.telemetry.tracer.startSpan(name);
+		  }
+		}
 
 /**
  * Render a human-readable summary string suitable for feeding into an LLM.

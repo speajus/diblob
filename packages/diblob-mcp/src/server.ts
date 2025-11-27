@@ -153,9 +153,11 @@ export class McpServerImpl implements McpServer {
         }
 
         case 'get_blob_details': {
-          // biome-ignore lint/suspicious/noExplicitAny: it's a hack
-          const blobId = (args as any).blobId;
-          const details = await this.introspector.getBlobDetails(blobId);
+          const blobId = args?.blobId;
+          if (!blobId) {
+            throw new Error('Missing blobId argument');
+          }
+          const details = await this.introspector.getBlobDetails(blobId as string);
           return {
             content: [
               {
