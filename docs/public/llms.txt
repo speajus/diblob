@@ -256,6 +256,46 @@ const appConfig = await loadNodeConfig<AppConfig>({
 For tests, you can use `registerStaticConfigBlob(container, blob, value)` to
 inject a prebuilt config object without touching the environment.
 
+## LLM-driven diagnostics and debugging helper
+
+The `@speajus/diblob-diagnostics` package provides a reusable diagnostics
+helper for blob-centric debugging and incident triage. It records lightweight
+`DiagnosticsEvent` objects (blob name, message, severity, outcome,
+timestamp, duration, and context), keeps an in-memory ring buffer of recent
+events, and exposes a `diagnosticsAggregator` blob that can calculate a
+`DiagnosticsSnapshot` over a configurable time window.
+
+A snapshot contains per-blob summaries with:
+
+- Event counts by severity (debug/info/warn/error).
+- Success vs failure counts.
+- Average and p95 durations (when provided).
+- The last error message and timestamp.
+- A computed health classification: `healthy`, `degraded`, or `failing`.
+
+This data can be consumed in three main ways:
+
+1. **MCP diagnostics tool** – `@speajus/diblob-mcp` exposes a
+   `diagnostics_summarize_recent_activity` tool when diagnostics blobs are
+   registered in the container. The tool accepts options like
+   `windowSeconds`, `maxBlobs`, and `severityThreshold`, then returns both a
+   short, human/LLM-friendly text summary and a JSON snapshot.
+
+2. **DiagnosticsService (Buf + Connect)** – the `example-grpc-server`
+   example hosts a `DiagnosticsService` gRPC/Connect endpoint generated from
+   `diagnostics.proto`. It takes the same window/max/severity inputs and
+   returns a `GetDiagnosticsSnapshotResponse` with summary text and per-blob
+   `DiagnosticsBlobSummary` records.
+
+3. **Example diagnostics frontend** – the `example-diagnostics-web` package
+   is a Svelte 5 web app that calls `DiagnosticsService` over HTTP using
+   Connect-Web. It lets you adjust the window and filters, then renders
+   per-blob health, counts, and latency metrics.
+
+By combining `@speajus/diblob-diagnostics`, `@speajus/diblob-logger`, and
+`@speajus/diblob-telemetry`, you get a canonical, reusable way to expose
+recent operational state to both humans and LLMs.
+
 ## Documentation
 
 Full documentation: https://jspears.github.io/diblob/

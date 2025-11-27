@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "types": [],
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+    "moduleDetection": "force"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.svelte",
+    "test/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -117,6 +117,15 @@ export default defineConfig({
 	          ]
 	        }
 	      ],
+		      '/internal/': [
+		        {
+		          text: 'Internal Docs',
+		          items: [
+		            { text: 'ADR-0002: diblob-config', link: '/internal/ADR-0002-diblob-config' },
+		            { text: 'ADR-0003: LLM debugging helper', link: '/internal/ADR-0003-llm-debug-helper' },
+		          ]
+		        }
+		      ],
 	    	  // Root diblob docs: group by individual Node modules
 	    	  '/diblob/': [
 	    	    {
@@ -140,6 +149,12 @@ export default defineConfig({
 	    	      text: '@speajus/diblob-telemetry',
 	    	      items: [
 	    	        { text: 'Telemetry Guide', link: '/diblob/telemetry' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-diagnostics',
+	    	      items: [
+	    	        { text: 'Diagnostics + LLM helper', link: '/diblob/diagnostics' },
 	    	      ],
 	    	    },
 	    	    {

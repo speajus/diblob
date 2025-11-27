@@ -1,0 +1,33 @@
+{
+  "name": "@speajus/diblob-diagnostics",
+  "version": "0.0.1",
+  "description": "Diagnostics helper for diblob containers (LLM-friendly snapshots of logs and metrics)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+	    "build": "tsc -b",
+	    "clean": "rimraf dist tsconfig.tsbuildinfo",
+	    "lint": "biome check .",
+	    "test": "tsc -b && tsx --test src/test/*.test.ts"
+  },
+  "dependencies": {
+    "@speajus/diblob": "workspace:*",
+    "@speajus/diblob-logger": "workspace:*",
+    "@speajus/diblob-telemetry": "workspace:*"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@types/node": "^22.0.0",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.4.5"
+  }
+}
+

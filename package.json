@@ -24,7 +24,7 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules && pnpm clean:projects",
+    "clean": "pnpm clean:projects && rm -rf packages/*/dist packages/*/node_modules node_modules",
     "clean:projects": "pnpm -r run clean",
     "clean:tsc": "tsc --build --clean",
     "changeset": "changeset",

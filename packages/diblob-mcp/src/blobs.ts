@@ -7,6 +7,7 @@
 
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import type { Container } from '@speajus/diblob';
 import { createBlob } from '@speajus/diblob';
 
 /**
@@ -109,6 +110,13 @@ export interface ContainerIntrospector {
     nodes: Array<{ id: string; name?: string }>;
     edges: Array<{ from: string; to: string }>;
   }>;
+
+	  /**
+	   * Access to the underlying diblob container. This is intentionally
+	   * exposed for advanced tools (for example, diagnostics helpers that
+	   * need to resolve additional blobs like aggregators).
+	   */
+	  getContainer(): Container;
 }
 
 // Blob declarations

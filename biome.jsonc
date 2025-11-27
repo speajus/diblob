@@ -1,9 +1,17 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.3.7/schema.json",
-  "files": {
-    "includes": ["packages/**", "examples/**", "docs/**", "!!**/dist", "!**/*.svelte"],
-    "ignoreUnknown": true
-  },
+	"files": {
+	  "includes": [
+	    "packages/**",
+	    "examples/**",
+	    "docs/**",
+	    "!!docs/.vitepress/cache",
+	    "!!docs/.vitepress/dist",
+	    "!!**/dist",
+	    "!**/*.svelte"
+	  ],
+	  "ignoreUnknown": true
+	},
   "linter": {
     "enabled": true,
     "rules": {

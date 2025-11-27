@@ -11,23 +11,24 @@
 import { createContainer } from '@speajus/diblob';
 	import { printNodeConfigHelpIfRequested } from '@speajus/diblob-config/node';
 import { grpcServer, registerGrpcBlobs } from '@speajus/diblob-connect';
+import { registerDiagnosticsBlobs } from '@speajus/diblob-diagnostics';
 import {
-	registerTelemetryBlobs,
-	registerTelemetryLoggerBlobs,
-	telemetryContext,
-} from '@speajus/diblob-telemetry';
+		registerTelemetryBlobs,
+		registerTelemetryLoggerBlobs,
+		telemetryContext,
+	} from '@speajus/diblob-telemetry';
 import {
 	registerVisualizerBlobs,
 	visualizerServer,
 } from '@speajus/diblob-visualizer/server';
 	import {
-		EXAMPLE_GRPC_CLI_PREFIX,
-		EXAMPLE_GRPC_ENV_PREFIX,
-		ExampleGrpcServerConfigSchema,
-		exampleGrpcServerConfig,
-		registerExampleGrpcServerConfig,
-	} from './config.js';
-import { registerDrizzleBlobs, registerUserService } from './register.js';
+			EXAMPLE_GRPC_CLI_PREFIX,
+			EXAMPLE_GRPC_ENV_PREFIX,
+			ExampleGrpcServerConfigSchema,
+			exampleGrpcServerConfig,
+			registerExampleGrpcServerConfig,
+		} from './config.js';
+	import { registerDiagnosticsService, registerDrizzleBlobs, registerUserService } from './register.js';
 
 async function main(container = createContainer()) {
 		if (
@@ -84,16 +85,20 @@ async function main(container = createContainer()) {
 	// Ensure telemetry context is initialized early so spans/meters are ready
 	await container.resolve(telemetryContext);
 
-	// Register gRPC blobs using typed configuration
-	registerGrpcBlobs(container, {
-		host: config.host,
-		port: config.port,
-	});
+		// Register gRPC blobs using typed configuration
+		registerGrpcBlobs(container, {
+			host: config.host,
+			port: config.port,
+		});
 
-	registerDrizzleBlobs(container, config.dbPath);
+		registerDrizzleBlobs(container, config.dbPath);
 
-	// Ensure service is registered before starting servers to avoid 404/UNIMPLEMENTED.
-	await registerUserService(container);
+		// Register diagnostics helper blobs (recorder + aggregator)
+		registerDiagnosticsBlobs(container);
+
+		// Ensure services are registered before starting servers to avoid 404/UNIMPLEMENTED.
+		await registerUserService(container);
+		await registerDiagnosticsService(container);
 
 	// Register visualizer server blobs so the container graph is exposed via HTTP
 	registerVisualizerBlobs(container, {

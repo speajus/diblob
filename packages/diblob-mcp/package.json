@@ -42,7 +42,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "@speajus/diblob": "workspace:*"
+		"@speajus/diblob": "workspace:*",
+		"@speajus/diblob-diagnostics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

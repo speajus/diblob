@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package diagnostics;
+
+// DiagnosticsService exposes a summarized, blob-centric view of recent
+// application activity for debugging and observability.
+service DiagnosticsService {
+  // Get a snapshot of recent diagnostics activity grouped by blob.
+  rpc GetDiagnosticsSnapshot (GetDiagnosticsSnapshotRequest) returns (GetDiagnosticsSnapshotResponse);
+}
+
+// Request to retrieve a diagnostics snapshot.
+message GetDiagnosticsSnapshotRequest {
+  // Time window in seconds to analyze. If zero, server uses its default.
+  int32 window_seconds = 1;
+
+  // Maximum number of blobs to include. If zero, server uses its default.
+  int32 max_blobs = 2;
+
+  // Minimum severity that will cause a blob to be considered degraded.
+  // Valid values are: "debug", "info", "warn", "error".
+  string severity_threshold = 3;
+}
+
+// Per-blob summary of diagnostics over the window.
+message DiagnosticsBlobSummary {
+  string blob_name = 1;
+  string health = 2; // healthy | degraded | failing
+
+  int64 total_events = 3;
+  int64 error_count = 4;
+  int64 warn_count = 5;
+  int64 info_count = 6;
+  int64 debug_count = 7;
+
+  int64 success_count = 8;
+  int64 failure_count = 9;
+
+  double average_duration_ms = 10;
+  double p95_duration_ms = 11;
+
+  string last_error_message = 12;
+  string last_error_timestamp = 13;
+}
+
+// Response with the overall diagnostics snapshot and summaries.
+message GetDiagnosticsSnapshotResponse {
+  string generated_at = 1;
+  int32 window_seconds = 2;
+  int64 total_events = 3;
+
+  repeated DiagnosticsBlobSummary blobs = 4;
+
+  // Optional pre-rendered human-readable summary text, optimized for LLMs.
+  string summary_text = 5;
+}
