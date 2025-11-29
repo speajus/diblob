@@ -3,15 +3,16 @@ import { URL } from 'node:url';
 import { createContainer } from '@speajus/diblob';
 import { logger, registerLoggerBlobs } from '@speajus/diblob-logger';
 import {
-  accessTokenVerifier,
-  oauthClientConfig,
-  oauthSessionManager,
-  oidcClient,
-  registerAccessTokenVerifier,
-  registerInMemorySessionManager,
-  registerOAuthClientConfigBlob,
-  registerOidcClientBlobs,
+	  accessTokenVerifier,
+	  oauthClientConfig,
+	  oauthSessionManager,
+	  oidcClient,
+	  registerAccessTokenVerifier,
+	  registerInMemorySessionManager,
+	  registerOAuthClientConfigBlob,
+	  registerOidcClientBlobs,
 } from '@speajus/diblob-oauth';
+import { z } from 'zod';
 
 function parseCookies(cookieHeader: string): Record<string, string> {
   const result: Record<string, string> = {};
@@ -27,19 +28,23 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 const container = createContainer();
 registerLoggerBlobs(container);
 
+const OAuthClientConfigSchema = z.object({
+	issuerUrl: z.string().url(),
+	clientId: z.string().min(1),
+	clientSecret: z.string().optional(),
+	redirectUris: z.array(z.string().url()).nonempty(),
+	defaultScopes: z.array(z.string().min(1)).nonempty(),
+});
+
 registerOAuthClientConfigBlob(container, {
-  schema: {
-    parse(value: unknown) {
-      return value as unknown;
-    },
-  },
-  fileConfig: {
-    issuerUrl: process.env.COGNITO_ISSUER_URL ?? '',
-    clientId: process.env.COGNITO_CLIENT_ID ?? '',
-    clientSecret: process.env.COGNITO_CLIENT_SECRET,
-    redirectUris: [process.env.COGNITO_REDIRECT_URI ?? ''],
-    defaultScopes: ['openid', 'profile'],
-  },
+	schema: OAuthClientConfigSchema,
+	fileConfig: {
+	  issuerUrl: process.env.COGNITO_ISSUER_URL ?? '',
+	  clientId: process.env.COGNITO_CLIENT_ID ?? '',
+	  clientSecret: process.env.COGNITO_CLIENT_SECRET,
+	  redirectUris: [process.env.COGNITO_REDIRECT_URI ?? ''],
+	  defaultScopes: ['openid', 'profile'],
+	},
 });
 
 registerOidcClientBlobs(container);
