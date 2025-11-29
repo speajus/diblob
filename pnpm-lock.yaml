@@ -202,6 +202,21 @@ importers:
         specifier: ^7.1.7
         version: 7.2.4(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1)
 
+  examples/oauth-cognito:
+    dependencies:
+      '@speajus/diblob':
+        specifier: workspace:*
+        version: link:../../packages/diblob
+      '@speajus/diblob-config':
+        specifier: workspace:^
+        version: link:../../packages/diblob-config
+      '@speajus/diblob-logger':
+        specifier: workspace:^
+        version: link:../../packages/diblob-logger
+      '@speajus/diblob-oauth':
+        specifier: workspace:^
+        version: link:../../packages/diblob-oauth
+
   packages/diblob:
     devDependencies:
       '@types/node':
@@ -338,6 +353,9 @@ importers:
 
   packages/diblob-oauth:
     dependencies:
+      '@speajus/diblob':
+        specifier: workspace:*
+        version: link:../diblob
       '@speajus/diblob-config':
         specifier: workspace:^
         version: link:../diblob-config
