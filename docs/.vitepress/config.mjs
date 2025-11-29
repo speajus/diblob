@@ -50,6 +50,7 @@ export default defineConfig({
 			            { text: '@speajus/diblob-connect',   link: '/diblob/connect' },
 			            { text: '@speajus/diblob-svelte',    link: '/diblob/svelte' },
 			            { text: '@speajus/diblob-testing',   link: '/diblob/testing' },
+			            { text: '@speajus/diblob-oauth',     link: '/diblob/oauth' },
 			            { text: '@speajus/diblob-mcp',       link: '/mcp/' },
 			            { text: '@speajus/diblob-visualizer', link: '/visualizer/' },
 			          ]

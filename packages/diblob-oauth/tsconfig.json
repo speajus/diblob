@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
-  },
-  "include": ["src/**/*", "test/**/*"],
+	  "compilerOptions": {
+	    "composite": true,
+	    "outDir": "./dist",
+	    "rootDir": "./",
+	    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+	  },
+	  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../diblob" },

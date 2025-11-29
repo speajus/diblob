@@ -1,0 +1,14 @@
+{
+  "name": "diblob-oauth-cognito-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js"
+  },
+  "dependencies": {
+    "@speajus/diblob": "workspace:*",
+    "@speajus/diblob-config": "workspace:^",
+    "@speajus/diblob-logger": "workspace:^",
+    "@speajus/diblob-oauth": "workspace:^"
+  }
+}
