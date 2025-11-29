@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node src/server.js"
+    "dev": "tsc -p . && node dist/server.js"
   },
   "dependencies": {
     "@speajus/diblob": "workspace:*",
