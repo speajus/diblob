@@ -1,5 +1,12 @@
 # @speajus/diblob-connect
 
+## 1.0.2
+
+### Patch Changes
+
+- @speajus/diblob@1.0.2
+- @speajus/diblob-logger@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes

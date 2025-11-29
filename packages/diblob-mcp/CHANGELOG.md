@@ -1,5 +1,14 @@
 # @speajus/diblob-mcp
 
+## 1.0.2
+
+### Patch Changes
+
+- cfc4b57: Added mcp goodness for better ai integration
+- Updated dependencies [cfc4b57]
+  - @speajus/diblob-diagnostics@1.0.2
+  - @speajus/diblob@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "example-web-svelte",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Svelte 5 web client example using diblob and Connect-ES to talk to example-grpc-server",
   "type": "module",
   "private": true,
