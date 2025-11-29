@@ -1,0 +1,52 @@
+{
+  "name": "@speajus/diblob-oauth",
+  "version": "1.0.0",
+  "description": "OAuth 2.1 / OpenID Connect integration helpers for diblob containers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/speajus/diblob.git"
+  },
+  "bugs": {
+    "url": "https://github.com/speajus/diblob/issues"
+  },
+  "homepage": "https://speajus.github.io/diblob/",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsc --watch",
+    "test": "pnpm run build && tsx --test test/*.test.ts",
+    "test:watch": "tsx --test --watch test/*.test.ts"
+  },
+  "keywords": [
+    "oauth",
+    "oidc",
+    "authentication",
+    "authorization",
+    "diblob"
+  ],
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@speajus/diblob": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@speajus/diblob-config": "workspace:^",
+    "openid-client": "^5.7.1"
+  }
+}

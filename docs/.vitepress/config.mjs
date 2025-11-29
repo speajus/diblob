@@ -123,6 +123,7 @@ export default defineConfig({
 		          items: [
 		            { text: 'ADR-0002: diblob-config', link: '/internal/ADR-0002-diblob-config' },
 		            { text: 'ADR-0003: LLM debugging helper', link: '/internal/ADR-0003-llm-debug-helper' },
+		            { text: 'ADR-0004: OAuth/OIDC integration', link: '/internal/ADR-0004-oauth-diblob' },
 		          ]
 		        }
 		      ],
