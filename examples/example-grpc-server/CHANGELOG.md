@@ -1,5 +1,19 @@
 # example-grpc-server
 
+## 0.1.2
+
+### Patch Changes
+
+- cfc4b57: Added mcp goodness for better ai integration
+- Updated dependencies [cfc4b57]
+  - @speajus/diblob-diagnostics@1.0.2
+  - @speajus/diblob-config@1.0.2
+  - @speajus/diblob-telemetry@1.0.2
+  - @speajus/diblob@1.0.2
+  - @speajus/diblob-connect@1.0.2
+  - @speajus/diblob-logger@1.0.2
+  - @speajus/diblob-visualizer@1.0.2
+
 ## 0.1.1
 
 ### Patch Changes
