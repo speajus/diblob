@@ -1,5 +1,12 @@
 # @speajus/diblob-config
 
+## 2.0.0
+
+### Patch Changes
+
+- cfc4b57: Added mcp goodness for better ai integration
+  - @speajus/diblob@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes
