@@ -1,5 +1,9 @@
 # diblob Monorepo
 
+[![CI](https://github.com/speajus/diblob/actions/workflows/ci.yml/badge.svg)](https://github.com/speajus/diblob/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-diblob-green)](https://speajus.github.io/diblob/)
+[![License](https://img.shields.io/github/license/speajus/diblob)](./LICENSE)
+
 A monorepo containing the diblob dependency injection framework and its visualization tools.
 
 ## Packages
@@ -24,6 +28,13 @@ Winston-based logger integration for diblob containers.
 
 - **Description**: Winston-based logger implementation that integrates with diblob's dependency injection system
 - **Features**: Configurable logging levels, structured logging, diblob container integration
+
+### [@speajus/diblob-oauth](./packages/diblob-oauth)
+
+OAuth 2.1 / OpenID Connect helpers for diblob containers.
+
+- **Description**: High-level OAuth/OIDC utilities built on openid-client, wired through diblob blobs
+- **Features**: Zod-validated client configuration via @speajus/diblob-config, OIDC client helper, access token verifier, pluggable session manager
 
 ### [@speajus/diblob-mcp](./packages/diblob-mcp)
 
@@ -249,6 +260,17 @@ pnpm start
 # Run tests
 pnpm test
 ```
+
+### oauth-cognito
+
+An OAuth 2.1 / OpenID Connect example using @speajus/diblob-oauth with an AWS Cognito user pool.
+
+**Location**: `examples/oauth-cognito/`
+
+**Features**:
+- Authorization Code flow with redirect-based login
+- Typed OAuth client configuration and validation
+- Cookie-based session management via an OAuth session manager blob
 
 ### example-web-svelte
 
