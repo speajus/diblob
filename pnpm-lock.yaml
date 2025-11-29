@@ -384,6 +384,9 @@ importers:
       '@speajus/diblob':
         specifier: workspace:*
         version: link:../diblob
+      '@speajus/diblob-config':
+        specifier: workspace:*
+        version: link:../diblob-config
       '@speajus/diblob-logger':
         specifier: workspace:*
         version: link:../diblob-logger
@@ -393,6 +396,9 @@ importers:
       winston-loki:
         specifier: ^6.1.3
         version: 6.1.3
+      zod:
+        specifier: ^4.1.13
+        version: 4.1.13
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.8.3

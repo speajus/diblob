@@ -2,7 +2,14 @@ import assert from 'node:assert/strict';
 import { after, afterEach, beforeEach, describe, it } from 'node:test';
 import { createContainer } from '@speajus/diblob';
 import { logger } from '@speajus/diblob-logger';
-import { registerTelemetryBlobs, registerTelemetryLoggerBlobs, telemetryConfig, telemetryContext, telemetryLokiConfig } from '../index.js';
+import {
+	registerTelemetryBlobs,
+	registerTelemetryConfigBlob,
+	registerTelemetryLoggerBlobs,
+	telemetryConfig,
+	telemetryContext,
+	telemetryLokiConfig,
+} from '../index.js';
 
 describe('registerTelemetryBlobs', () => {
   let container: ReturnType<typeof createContainer>;
@@ -34,6 +41,29 @@ describe('registerTelemetryBlobs', () => {
     const ctx2 = await container.resolve(telemetryContext);
     assert.strictEqual(ctx, ctx2);
   });
+
+	it('registerTelemetryConfigBlob loads config via diblob-config and registers blobs', async () => {
+		registerTelemetryConfigBlob(container, {
+			envPrefix: 'TELEMETRY_',
+			env: {
+				TELEMETRY_SERVICE_NAME: 'config-test',
+				TELEMETRY_EXPORTER: 'none',
+				TELEMETRY_TRACE_SAMPLE_RATIO: '0.5',
+			},
+			cliPrefix: 'telemetry-',
+			cliArgs: ['--telemetry-service-version=1.2.3'],
+			environment: 'test',
+		});
+
+		const cfg = await container.resolve(telemetryConfig);
+		assert.equal(cfg.serviceName, 'config-test');
+		assert.equal(cfg.exporter, 'none');
+		assert.equal(cfg.serviceVersion, '1.2.3');
+		assert.equal(cfg.traceSampleRatio, 0.5);
+
+		const ctx = await container.resolve(telemetryContext);
+		assert.ok(ctx.tracer, 'tracer is defined');
+	});
 
   it('disposes telemetry providers on container.dispose', async () => {
     registerTelemetryBlobs(container, { serviceName: 'dispose-test' });

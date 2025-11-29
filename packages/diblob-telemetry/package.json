@@ -28,8 +28,10 @@
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "@speajus/diblob": "workspace:*",
     "@speajus/diblob-logger": "workspace:*",
+    "@speajus/diblob-config": "workspace:*",
     "winston": "^3.18.3",
-    "winston-loki": "^6.1.3"
+    "winston-loki": "^6.1.3",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",

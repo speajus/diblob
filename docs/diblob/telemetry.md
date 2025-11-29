@@ -65,37 +65,18 @@ const telemetryConfig: TelemetryConfig = {
 registerTelemetryBlobs(container, telemetryConfig);
 ```
 
-**Using `@speajus/diblob-config`**
+**Using `@speajus/diblob-config` (Node helper)**
 
 ```ts
-import { z } from 'zod';
 import { createContainer } from '@speajus/diblob';
-import {
-  type ConfigSchema,
-  loadNodeConfig,
-} from '@speajus/diblob-config';
-import {
-  registerTelemetryBlobs,
-  type TelemetryConfig,
-} from '@speajus/diblob-telemetry';
-
-const TelemetryConfigSchema = z.object({
-  serviceName: z.string().default('example'),
-  serviceVersion: z.string().optional(),
-  deploymentEnvironment: z.string().optional(),
-  exporter: z.enum(['console', 'otlp-http', 'none']).default('console'),
-  exporterEndpoint: z.string().url().optional(),
-  traceSampleRatio: z.number().min(0).max(1).default(1),
-}) satisfies ConfigSchema<TelemetryConfig>;
+import { registerTelemetryConfigBlob } from '@speajus/diblob-telemetry';
 
 const container = createContainer();
 
-const telemetryConfig = loadNodeConfig<TelemetryConfig>({
-  schema: TelemetryConfigSchema,
-  envPrefix: 'TELEMETRY_',
+registerTelemetryConfigBlob(container, {
+	envPrefix: 'TELEMETRY_',
+	// optional: file, cliPrefix, cliArgs, defaults, environment, env, etc.
 });
-
-registerTelemetryBlobs(container, telemetryConfig);
 ```
 
 For more about typed configuration, see
