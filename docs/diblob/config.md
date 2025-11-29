@@ -108,6 +108,27 @@ const configObject = loadNodeConfig<AppConfig>({
 registerStaticConfigBlob(container, appConfig, configObject);
 ```
 
+### Example: Telemetry configuration via `@speajus/diblob-config`
+
+`@speajus/diblob-telemetry` exposes a helper that uses `loadNodeConfig` under the
+hood and wires the result into the telemetry blobs for you:
+
+```ts
+import { createContainer } from '@speajus/diblob';
+import { registerTelemetryConfigBlob } from '@speajus/diblob-telemetry';
+
+const container = createContainer();
+
+registerTelemetryConfigBlob(container, {
+  envPrefix: 'TELEMETRY_',
+  // optional: file, cliPrefix, cliArgs, defaults, environment, env, etc.
+});
+```
+
+This registers the `telemetryConfig` and `telemetryContext` blobs based on
+typed, validated configuration using the shared `TelemetryConfigSchema` inside
+`@speajus/diblob-telemetry`.
+
 ### What `loadNodeConfig` does
 
 `loadNodeConfig`:
