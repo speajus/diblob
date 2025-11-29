@@ -2,6 +2,8 @@
   "name": "@speajus/diblob-diagnostics",
   "version": "0.0.1",
   "description": "Diagnostics helper for diblob containers (LLM-friendly snapshots of logs and metrics)",
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

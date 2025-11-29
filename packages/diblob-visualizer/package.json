@@ -4,6 +4,8 @@
   "version": "1.0.1",
   "type": "module",
   "description": "Interactive dependency injection graph visualization for diblob",
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
   "main": "./dist/server/src/server/index.js",
   "types": "./dist/types/src/server/index.d.ts",
   "exports": {
@@ -19,7 +21,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "dev": "vite --mode demo",
