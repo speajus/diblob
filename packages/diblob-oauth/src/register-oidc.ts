@@ -54,6 +54,7 @@ export function registerOidcClientBlobs(
 	          );
 
 	          return {
+				// biome-ignore lint/style/noNonNullAssertion: trust me
 	            accessToken: tokenSet.access_token!,
 	            idToken: tokenSet.id_token,
 	            refreshToken: tokenSet.refresh_token,
@@ -68,6 +69,7 @@ export function registerOidcClientBlobs(
 	        async refreshTokens(input) {
 	          const tokenSet = await client.refresh(input.refreshToken);
 	          return {
+	            // biome-ignore lint/style/noNonNullAssertion: trust me
 	            accessToken: tokenSet.access_token!,
 	            idToken: tokenSet.id_token,
 	            refreshToken: tokenSet.refresh_token,

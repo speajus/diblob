@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { Container } from '@speajus/diblob';
 import { createContainer } from '@speajus/diblob';
-import type { Client, Issuer, TokenSet } from 'openid-client';
+import type { Client, Issuer } from 'openid-client';
 import { type AccessTokenVerifier, accessTokenVerifier } from '../src/blobs.js';
 import { registerOAuthClientConfigBlob } from '../src/register-config.js';
 import { registerAccessTokenVerifier } from '../src/tokens.js';
@@ -28,12 +28,7 @@ test('AccessTokenVerifier.verifyAccessToken maps claims and scopes', async () =>
 		  allowedAudiences: ['api://default'],
 	};
 
-	const fakeTokenSet: Partial<TokenSet> = {
-		access_token: 'access',
-		id_token: 'id',
-		token_type: 'Bearer',
-		expires_at: Math.floor(Date.now() / 1000) + 60,
-	};
+	
 
 	const fakeClaims = {
 		sub: 'user-123',
