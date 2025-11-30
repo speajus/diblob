@@ -47,6 +47,7 @@ export default defineConfig({
 			            { text: '@speajus/diblob-config',    link: '/diblob/config' },
 			            { text: '@speajus/diblob-telemetry', link: '/diblob/telemetry' },
 			            { text: '@speajus/diblob-logger',    link: '/diblob/logger' },
+			            { text: '@speajus/diblob-async-context', link: '/diblob/async-context' },
 			            { text: '@speajus/diblob-connect',   link: '/diblob/connect' },
 			            { text: '@speajus/diblob-svelte',    link: '/diblob/svelte' },
 			            { text: '@speajus/diblob-testing',   link: '/diblob/testing' },
@@ -163,6 +164,12 @@ export default defineConfig({
 	    	      text: '@speajus/diblob-logger',
 	    	      items: [
 		    	        { text: 'Logger', link: '/diblob/logger' },
+	    	      ],
+	    	    },
+	    	    {
+	    	      text: '@speajus/diblob-async-context',
+	    	      items: [
+	    	        { text: 'Async Context', link: '/diblob/async-context' },
 	    	      ],
 	    	    },
 	    	    {
