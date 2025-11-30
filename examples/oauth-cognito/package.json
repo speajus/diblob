@@ -3,12 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsc -p . && node dist/server.js"
+    "dev": "tsx src/server.ts"
   },
   "dependencies": {
     "@speajus/diblob": "workspace:*",
     "@speajus/diblob-config": "workspace:^",
     "@speajus/diblob-logger": "workspace:^",
-    "@speajus/diblob-oauth": "workspace:^"
+    "@speajus/diblob-oauth": "workspace:^",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.20.6"
   }
 }

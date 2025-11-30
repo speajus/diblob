@@ -3,16 +3,16 @@ import { URL } from 'node:url';
 import { createContainer } from '@speajus/diblob';
 import { logger, registerLoggerBlobs } from '@speajus/diblob-logger';
 import {
-	  accessTokenVerifier,
-	  oauthClientConfig,
-	  oauthSessionManager,
-	  oidcClient,
-	  registerAccessTokenVerifier,
-	  registerInMemorySessionManager,
-	  registerOAuthClientConfigBlob,
-	  registerOidcClientBlobs,
-} from '@speajus/diblob-oauth';
-import { z } from 'zod';
+			  accessTokenVerifier,
+			  oauthClientConfig,
+			  oauthSessionManager,
+			  oidcClient,
+			  registerAccessTokenVerifier,
+			  registerInMemorySessionManager,
+        registerOAuthClientConfigBlob,
+			  registerOidcClientBlobs,
+		} from '@speajus/diblob-oauth';
+import { config as loadEnv } from 'dotenv';
 
 function parseCookies(cookieHeader: string): Record<string, string> {
   const result: Record<string, string> = {};
@@ -25,31 +25,16 @@ function parseCookies(cookieHeader: string): Record<string, string> {
   return result;
 }
 
+// Load .env into process.env for local development. In production, prefer
+// real environment variables and secrets management.
+loadEnv();
+
 const container = createContainer();
 registerLoggerBlobs(container);
-
-const OAuthClientConfigSchema = z.object({
-	issuerUrl: z.string().url(),
-	clientId: z.string().min(1),
-	clientSecret: z.string().optional(),
-	redirectUris: z.array(z.string().url()).nonempty(),
-	defaultScopes: z.array(z.string().min(1)).nonempty(),
-});
-
-registerOAuthClientConfigBlob(container, {
-	schema: OAuthClientConfigSchema,
-	fileConfig: {
-	  issuerUrl: process.env.COGNITO_ISSUER_URL ?? '',
-	  clientId: process.env.COGNITO_CLIENT_ID ?? '',
-	  clientSecret: process.env.COGNITO_CLIENT_SECRET,
-	  redirectUris: [process.env.COGNITO_REDIRECT_URI ?? ''],
-	  defaultScopes: ['openid', 'profile'],
-	},
-});
-
 registerOidcClientBlobs(container);
 registerAccessTokenVerifier(container);
 registerInMemorySessionManager(container);
+registerOAuthClientConfigBlob(container);
 
 const appLogger = await container.resolve(logger);
 const config = await container.resolve(oauthClientConfig);
@@ -66,7 +51,7 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const url = new URL(req.url, 'http://localhost:3000');
+  const url = new URL(req.url, 'http://localhost:3005');
   const cookies = parseCookies(req.headers.cookie ?? '');
 
   if (req.method === 'GET' && url.pathname === '/login') {
@@ -86,7 +71,7 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    try {
+	    try {
       const tokens = await client.exchangeAuthorizationCode({
         code,
         redirectUri: config.redirectUris[0] ?? '',
@@ -107,7 +92,15 @@ const server = createServer(async (req, res) => {
       res.setHeader('Location', '/me');
       res.end();
     } catch (error) {
-      appLogger.error('Callback handling failed', { error });
+	      const err = error as Error & { error?: unknown; error_description?: string };
+	      appLogger.error('Callback handling failed', {
+	        errorName: err.name,
+	        errorMessage: err.message,
+	        errorStack: err.stack,
+	        // OpenID errors often carry extra fields
+	        errorCode: err.error,
+	        errorDescription: err.error_description,
+	      });
       res.statusCode = 500;
       res.end('Error handling callback');
     }
@@ -135,9 +128,19 @@ const server = createServer(async (req, res) => {
       });
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ subject: result.subject, scopes: result.scopes ?? [] }));
+      res.end(JSON.stringify(result));
     } catch (error) {
-      appLogger.error('Session verification failed', { error });
+	      const err = error as Error & {
+	        error?: unknown;
+	        error_description?: string;
+	      };
+	      appLogger.error('Session verification failed', {
+	        errorName: err.name,
+	        errorMessage: err.message,
+	        errorStack: err.stack,
+	        errorCode: err.error,
+	        errorDescription: err.error_description,
+	      });
       res.statusCode = 401;
       res.end('Invalid token');
     }
@@ -148,9 +151,13 @@ const server = createServer(async (req, res) => {
   res.end('Not Found');
 });
 
-server.listen(3000, () => {
-  appLogger.info('OAuth Cognito example listening on http://localhost:3000', {
+server.listen( 3005, '127.0.0.1', () => {
+  const address = server.address() as { address: string; port: number };
+  appLogger.info(`OAuth Cognito example listening on`, {
     redirectUri: config.redirectUris[0],
+    address: address.address,
+    port: address.port,
   });
+  console.log(`OAuth Cognito example listening on http://${address.address}:${address.port}/login`);
 });
 

@@ -53,11 +53,15 @@ test('AccessTokenVerifier.verifyAccessToken maps claims and scopes', async () =>
 		},
 	};
 
-	const fakeIssuer: Partial<Issuer<Client>> = {
-		Client: function Client(this: Client): void {
-			Object.assign(this, fakeClient);
-		} as unknown as Issuer<Client>['Client'],
-	};
+		const fakeIssuer: Partial<Issuer<Client>> = {
+			metadata: {
+				issuer: 'https://example.com',
+				introspection_endpoint: 'https://example.com/oauth2/introspect',
+			},
+			Client: function Client(this: Client): void {
+				Object.assign(this, fakeClient);
+			} as unknown as Issuer<Client>['Client'],
+		};
 
 	const container = createTestContainer(config);
 	registerAccessTokenVerifier(container, { issuer: fakeIssuer as Issuer<Client> });

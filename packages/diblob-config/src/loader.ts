@@ -71,7 +71,7 @@ export function loadConfig<TConfig>(options: LoadConfigOptions<TConfig>): TConfi
     raw = deepMerge(raw, options.fileConfig as AnyRecord);
   }
 
-  const env = options.env ?? {};
+  const env = { ...process.env, ...options.env };
   const envPrefix = options.envPrefix;
   for (const [key, value] of Object.entries(env)) {
     if (value == null) continue;
