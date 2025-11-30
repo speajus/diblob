@@ -46,12 +46,19 @@ export function registerOidcClientBlobs(
 	          if (input.expectedState && input.state !== input.expectedState) {
 	            throw new Error('OAuth state mismatch');
 	          }
-
-	          const tokenSet = await client.callback(
-	            input.redirectUri,
-	            callbackParams,
-	            {},
-	          );
+		
+		          const checks: { state?: string } = {};
+		          if (typeof input.expectedState === 'string') {
+		            checks.state = input.expectedState;
+		          } else if (typeof input.state === 'string') {
+		            checks.state = input.state;
+		          }
+		
+		          const tokenSet = await client.callback(
+		            input.redirectUri,
+		            callbackParams,
+		            checks,
+		          );
 
 	          return {
 				// biome-ignore lint/style/noNonNullAssertion: trust me

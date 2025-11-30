@@ -2,9 +2,9 @@
  * Array blob implementation for managing arrays with automatic invalidation
  */
 
-import { BlobNotReadyError, blobHandlers, blobInstanceGetters, getBlobContainer, registerBlobId } from './blob';
-import type { Blob, BlobMetadata, Container } from './types';
-import { blobPropSymbol } from './types';
+import { BlobNotReadyError, blobHandlers, blobInstanceGetters, getBlobContainer, registerBlobId } from './blob.js';
+import type { Blob, BlobMetadata, Container } from './types.js';
+import { blobPropSymbol } from './types.js';
 
 /**
  * Create a new array blob that manages an array with automatic invalidation

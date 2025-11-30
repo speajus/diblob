@@ -99,10 +99,10 @@ const appConfig = createBlob<AppConfig>('appConfig');
 const container = createContainer();
 
 const configObject = loadNodeConfig<AppConfig>({
-  schema: AppConfigSchema,
-  envPrefix: 'APP_',
-  file: './config/app.json',
-  cliPrefix: 'app-',
+	schema: AppConfigSchema,
+	envPrefix: 'APP_',
+	file: './config/app.json',
+	cliPrefix: 'app-',
 });
 
 registerStaticConfigBlob(container, appConfig, configObject);
@@ -134,7 +134,7 @@ typed, validated configuration using the shared `TelemetryConfigSchema` inside
 `loadNodeConfig`:
 
 - Derives `environment` from `options.environment` or
-  `process.env.NODE_ENV ?? 'development'`.
+	`process.env.NODE_ENV ?? 'development'`.
 - Uses `options.env` or `process.env`.
 - Optionally reads a JSON file (if `file` is provided) and parses it.
 - Uses `options.cliArgs` or `process.argv.slice(2)` when `cliPrefix` is set.

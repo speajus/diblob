@@ -72,8 +72,7 @@ export function loadNodeConfig<TConfig>(options: NodeConfigOptions<TConfig>): TC
   const environment: EnvironmentName =
     options.environment ?? ((process.env.NODE_ENV ?? 'development') as EnvironmentName);
 
-  const env =
-    options.env ?? (process.env as Record<string, string | undefined>);
+  const env = {...process.env, ...options.env };
 
   let fileConfig: unknown;
   if (options.file) {

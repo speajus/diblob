@@ -35,6 +35,7 @@ OAuth 2.1 / OpenID Connect helpers for diblob containers.
 
 - **Description**: High-level OAuth/OIDC utilities built on openid-client, wired through diblob blobs
 - **Features**: Zod-validated client configuration via @speajus/diblob-config, OIDC client helper, access token verifier, pluggable session manager
+- **Docs & example**: [OAuth docs](https://speajus.github.io/diblob/diblob/oauth) · [Cognito example](./examples/oauth-cognito/)
 
 ### [@speajus/diblob-mcp](./packages/diblob-mcp)
 
@@ -118,6 +119,45 @@ pnpm run dev:mcp
 # Start documentation site
 pnpm run docs:dev
 ```
+
+## OAuth / OIDC quickstart with @speajus/diblob-oauth
+
+1. **Install in your app**
+
+   Using pnpm in your application:
+
+   ```bash
+   pnpm add @speajus/diblob @speajus/diblob-config @speajus/diblob-oauth zod openid-client
+   ```
+
+2. **Define a Zod config schema**
+
+   Define an `OAuthClientConfig` and matching Zod schema (for example: issuer URL, client ID/secret, redirect URIs, default scopes) and use `@speajus/diblob-config` to load it from environment, files, or other sources. See the [OAuth docs](https://speajus.github.io/diblob/diblob/oauth) for a full schema example.
+
+3. **Register OAuth blobs in your container**
+
+   In your server bootstrap, register the OAuth configuration, OIDC client, access token verifier, and a session manager:
+
+   ```ts
+   const container = createContainer();
+
+   registerOAuthClientConfigBlob(container, { schema: OAuthClientConfigSchema });
+   registerOidcClientBlobs(container);
+   registerAccessTokenVerifier(container);
+   registerInMemorySessionManager(container);
+   ```
+
+   This gives you the `oauthClientConfig`, `oidcClient`, `accessTokenVerifier`, and `oauthSessionManager` blobs to use in your handlers.
+
+4. **Wire HTTP routes**
+
+   A common pattern is:
+
+   - `/login` – call `oidcClient.fetchAuthorizationUrl(...)` and redirect.
+   - `/callback` – exchange the `code` for tokens, create a session, set a cookie.
+   - `/me` (or other APIs) – fetch the session and call `accessTokenVerifier.verifyAccessToken(...)`.
+
+   The [`oauth-cognito` example](./examples/oauth-cognito/) implements this flow end-to-end using AWS Cognito. Its [README](./examples/oauth-cognito/README.md) documents the required environment variables and routes.
 
 ## Monorepo Structure
 

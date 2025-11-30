@@ -12,3 +12,6 @@ docs/.vitepress/dist
 # Generated proto files
 **/src/generated/
 
+# Ignore .env
+.env
+.env.*

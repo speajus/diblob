@@ -1,6 +1,6 @@
-import type { ConfigSchema, EnvironmentName } from '@speajus/diblob-config';
+import type { EnvironmentName } from '@speajus/diblob-config';
 
-export interface OAuthClientConfig {
+	export interface OAuthClientConfig {
   issuerUrl: string;
   clientId: string;
   clientSecret?: string;
@@ -14,6 +14,4 @@ export interface OAuthClientConfig {
   clockSkewSeconds?: number;
   allowedAudiences?: string[];
   environment?: EnvironmentName;
-}
-
-export type OAuthClientConfigSchema = ConfigSchema<OAuthClientConfig>;
+	}

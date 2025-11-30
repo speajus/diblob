@@ -39,6 +39,9 @@ export {
   mcpServerConfig,
   mcpTransport,
 } from './blobs.js';
+
+	// Export configuration schema
+	export { McpServerConfigSchema } from './config.js';
 // Export registration function
 export { registerMcpBlobs } from './register.js';
 

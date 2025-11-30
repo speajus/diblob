@@ -15,14 +15,22 @@ It demonstrates:
 You need an AWS Cognito user pool and an app client configured for the
 Authorization Code flow.
 
-Configure these environment variables before running the example:
+### Configuration via `.env`
 
-- `COGNITO_ISSUER_URL` – your user pool issuer URL, for example
-  `https://cognito-idp.<region>.amazonaws.com/<user-pool-id>`
-- `COGNITO_CLIENT_ID` – the app client ID
-- `COGNITO_CLIENT_SECRET` – the app client secret (if configured)
-- `COGNITO_REDIRECT_URI` – redirect URI that matches the app client settings,
-  for example `http://localhost:3000/callback`
+For local development, the example uses [`dotenv`](https://www.npmjs.com/package/dotenv)
+to load configuration from a `.env` file into `process.env`.
+
+Create `examples/oauth-cognito/.env` with:
+
+```bash
+OAUTH_ISSUER_URL=https://cognito-idp.<region>.amazonaws.com/<user-pool-id>
+OAUTH_CLIENT_ID=your-client-id
+OAUTH_CLIENT_SECRET=your-client-secret   # optional
+OAUTH_REDIRECT_URI=http://localhost:3000/callback
+```
+
+In production, prefer real environment variables and a secrets manager instead
+of committing `.env` files.
 
 ## Running the example
 
@@ -32,7 +40,7 @@ From the repo root:
 pnpm --filter diblob-oauth-cognito-example dev
 ```
 
-Then open `http://localhost:3000/login` in your browser.
+Then open `http://localhost:3005/login` in your browser.
 
 ## HTTP routes
 
