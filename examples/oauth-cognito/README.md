@@ -60,3 +60,16 @@ Then open `http://localhost:3005/login` in your browser.
   - Verifies the access token via `accessTokenVerifier.verifyAccessToken`
   - Returns a small JSON payload containing the subject and scopes
 
+- `POST /logout`
+  - Invalidates the current `sessionId` via `oauthSessionManager.invalidateSession`
+  - Clears the `sessionId` HttpOnly cookie
+
+  From a browser or frontend app you can call it with:
+
+  ```ts
+  await fetch('/logout', {
+    method: 'POST',
+    credentials: 'include',
+  });
+  ```
+
