@@ -98,8 +98,8 @@ const server = createServer(async (req, res) => {
 	        errorMessage: err.message,
 	        errorStack: err.stack,
 	        // OpenID errors often carry extra fields
-	        errorCode: (err as any).error,
-	        errorDescription: (err as any).error_description,
+	        errorCode: err.error,
+	        errorDescription: err.error_description,
 	      });
       res.statusCode = 500;
       res.end('Error handling callback');
@@ -138,8 +138,8 @@ const server = createServer(async (req, res) => {
 	        errorName: err.name,
 	        errorMessage: err.message,
 	        errorStack: err.stack,
-	        errorCode: (err as any).error,
-	        errorDescription: (err as any).error_description,
+	        errorCode: err.error,
+	        errorDescription: err.error_description,
 	      });
       res.statusCode = 401;
       res.end('Invalid token');
