@@ -27,6 +27,7 @@ OAUTH_ISSUER_URL=https://cognito-idp.<region>.amazonaws.com/<user-pool-id>
 OAUTH_CLIENT_ID=your-client-id
 OAUTH_CLIENT_SECRET=your-client-secret   # optional
 OAUTH_REDIRECT_URI=http://localhost:3000/callback
+OAUTH_POST_LOGOUT_REDIRECT_URI=http://localhost:3005/
 ```
 
 In production, prefer real environment variables and a secrets manager instead
@@ -60,9 +61,12 @@ Then open `http://localhost:3005/login` in your browser.
   - Verifies the access token via `accessTokenVerifier.verifyAccessToken`
   - Returns a small JSON payload containing the subject and scopes
 
-- `POST /logout`
+- `GET /logout` (and `POST /logout` if you prefer a fetch-based API)
+  - Looks up the current session (if any) and captures its `idToken`
   - Invalidates the current `sessionId` via `oauthSessionManager.invalidateSession`
   - Clears the `sessionId` HttpOnly cookie
+  - Redirects the browser to Cognito's `end_session_endpoint` using
+    `post_logout_redirect_uri` and `id_token_hint`
 
   From a browser or frontend app you can call it with:
 

@@ -66,6 +66,25 @@ memory only. For production scenarios you should provide your own
 `OAuthSessionManager` implementation backed by a durable store (for example,
 Redis or a database).
 
+### Logout and post-logout redirect
+
+To integrate IdP logout, configure a post-logout redirect URI on your OAuth
+client and in `OAuthClientConfig`:
+
+- Set `postLogoutRedirectUri` (for example via an
+  `OAUTH_POST_LOGOUT_REDIRECT_URI` environment variable when using
+  `registerOAuthClientConfigBlob`).
+- Configure your IdP to allow this URI as a post-logout redirect.
+
+When `paths.logout` is set on the adapter, both `GET /logout` and `POST /logout`
+will:
+
+- Look up the current session (if any) and capture its `idToken`.
+- Invalidate the `sessionId` via `oauthSessionManager.invalidateSession`.
+- Clear the `sessionId` HttpOnly cookie.
+- When the IdP exposes an `end_session_endpoint`, redirect the browser there
+  using `post_logout_redirect_uri` and `id_token_hint`.
+
 ## Generic WHATWG server adapter + async context
 
 For HTTP servers, `@speajus/diblob-oauth` also provides a generic adapter built on
@@ -111,23 +130,24 @@ registerOidcClientBlobs(container);
 registerAccessTokenVerifier(container);
 registerInMemorySessionManager(container);
 
-const asyncContext = new AsyncLocalStorageContext<RequestContext>(container);
+const asyncContext = new AsyncLocalStorageContext(container);
 asyncContext.registerWithContext(requestContext);
 
 const adapter = createOAuthServerAdapter<RequestContext>({
-  container,
-  asyncContext,
-  initializeContext: () => ({ requestId: randomUUID() }),
-  applyAuthenticatedResult: (context, result) => {
-    context.userId = result.subject;
-  },
+	container,
+	asyncContext,
+	contextBlob: requestContext,
+	initializeContext: () => ({ requestId: randomUUID() }),
+	applyAuthenticatedResult: (context, result) => {
+		context.userId = result.subject;
+	},
 });
 
 const server = createServer(adapter);
 server.listen(3005);
 ```
 
-Every request is wrapped in `asyncContext.runWithContext(context, handler)`, so
+Every request is wrapped in `asyncContext.runWithContext(requestContext, context, handler)`, so
 downstream code can resolve `requestContext` from the container and read
 `requestId`, `userId`, etc., while the adapter handles `/login`, `/callback`,
 and `/me` using the blobs from this package.
@@ -136,14 +156,19 @@ and `/me` using the blobs from this package.
 
 `OAuthServerAdapterOptions<TContext>` supports several optional settings:
 
-	- `paths` – override default route paths:
+- `contextBlob` – the blob representing your per-request context; used with
+  `AsyncLocalStorageContext.runWithContext` to scope the current context value
+  per request.
+- `paths` – override default route paths:
   - `login` (default `/login`)
   - `callback` (default `/callback`)
   - `me` (default `/me`)
-  - `logout` (no route by default; if set, `POST /logout` will invalidate the
-    session and clear the cookie)
-	- `requiredScopes` – scopes required by `/me` (default `['openid']`)
-	- `onRequest` – called for every request after the async context is
+  - `logout` (no route by default; if set, `GET/POST /logout` will invalidate
+    the session, clear the cookie, and when possible redirect the browser to
+    the IdP `end_session_endpoint` using `post_logout_redirect_uri` and
+    `id_token_hint`.)
+- `requiredScopes` – scopes required by `/me` (default `['openid']`)
+- `onRequest` – called for every request after the async context is
   established:
 
   ```ts
@@ -152,7 +177,7 @@ and `/me` using the blobs from this package.
   }
   ```
 
-	- `onError` – called when an internal error occurs in one of the built-in
+- `onError` – called when an internal error occurs in one of the built-in
   routes:
 
   ```ts

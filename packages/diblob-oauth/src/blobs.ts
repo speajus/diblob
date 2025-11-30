@@ -36,6 +36,11 @@ export interface OidcClient {
     tokenType?: string;
     raw: Record<string, unknown>;
   }>;
+
+	  buildEndSessionUrl(input: {
+	    postLogoutRedirectUri: string;
+	    idTokenHint?: string;
+	  }): Promise<URL>;
 }
 
 export const oidcClient = createBlob<OidcClient>('oidcClient');

@@ -1,4 +1,4 @@
-import type { Container } from '@speajus/diblob';
+import type { Blob, Container } from '@speajus/diblob';
 import type { AsyncLocalStorageContext } from '@speajus/diblob-async-context';
 import { createServerAdapter } from '@whatwg-node/server';
 import {
@@ -24,9 +24,10 @@ type VerifiedAccessToken = Awaited<
 >;
 
 export interface OAuthServerAdapterOptions<TContext extends object> {
-	container: Container;
-	asyncContext: AsyncLocalStorageContext<TContext>;
-	initializeContext(request: Request): TContext | Promise<TContext>;
+		container: Container;
+		asyncContext: AsyncLocalStorageContext;
+		contextBlob: Blob<TContext>;
+		initializeContext(request: Request): TContext | Promise<TContext>;
 	applyAuthenticatedResult?: (
 		context: TContext,
 		result: VerifiedAccessToken,
@@ -69,16 +70,17 @@ function redirect(location: string, extraHeaders?: HeadersInit): Response {
 	export function createOAuthServerAdapter<TContext extends object>(
 		options: OAuthServerAdapterOptions<TContext>,
 	) {
-		const {
-			container,
-			asyncContext,
-			initializeContext,
-			applyAuthenticatedResult,
-			paths,
-			requiredScopes,
-			onRequest,
-			onError,
-		} = options;
+			const {
+				container,
+				asyncContext,
+				contextBlob,
+				initializeContext,
+				applyAuthenticatedResult,
+				paths,
+				requiredScopes,
+				onRequest,
+				onError,
+			} = options;
 	
 		const loginPath = paths?.login ?? '/login';
 		const callbackPath = paths?.callback ?? '/callback';
@@ -103,9 +105,9 @@ function redirect(location: string, extraHeaders?: HeadersInit): Response {
 			return resolved;
 		}
 	
-		return createServerAdapter(async (request: Request) => {
-			const ctx = await initializeContext(request);
-			return asyncContext.runWithContext(ctx, async () => {
+			return createServerAdapter(async (request: Request) => {
+				const ctx = await initializeContext(request);
+				return asyncContext.runWithContext(contextBlob, ctx, async () => {
 				const url = new URL(request.url);
 				const { pathname, searchParams } = url;
 				const cookies = parseCookies(request.headers.get('cookie'));
@@ -187,34 +189,62 @@ function redirect(location: string, extraHeaders?: HeadersInit): Response {
 					}
 				}
 		
-				if (logoutPath && request.method === 'POST' && pathname === logoutPath) {
-					const sessionId = cookies.sessionId;
-					if (!sessionId) {
-						return new Response(null, {
-							status: 204,
-							headers: {
-								'Set-Cookie':
-									'sessionId=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0',
-							},
-						});
-					}
-		
-					try {
-						await deps.sessionManager.invalidateSession(sessionId);
-						return new Response(null, {
-							status: 204,
-							headers: {
-								'Set-Cookie':
-									'sessionId=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0',
-							},
-						});
-					} catch (error) {
-						if (onError) {
-							await onError({ request, context: ctx, error, stage: 'logout' });
+					if (
+						logoutPath &&
+						pathname === logoutPath &&
+						(request.method === 'POST' || request.method === 'GET')
+					) {
+						const sessionId = cookies.sessionId;
+						const clearSessionCookie =
+							'sessionId=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0';
+
+						let idToken: string | undefined;
+						if (sessionId) {
+							const session = await deps.sessionManager.fetchSession(sessionId);
+							idToken = session?.idToken;
 						}
-						return new Response('Error during logout', { status: 500 });
+
+						if (sessionId) {
+							try {
+								await deps.sessionManager.invalidateSession(sessionId);
+							} catch (error) {
+								if (onError) {
+									await onError({ request, context: ctx, error, stage: 'logout' });
+								}
+								return new Response('Error during logout', { status: 500 });
+							}
+						}
+
+						// Attempt IdP-level logout via end_session_endpoint when possible.
+						const postLogoutRedirectUri =
+							deps.config.postLogoutRedirectUri ??
+							deps.config.redirectUris[0];
+
+						if (postLogoutRedirectUri) {
+							try {
+								const endSessionUrl = await deps.client.buildEndSessionUrl({
+									postLogoutRedirectUri,
+									idTokenHint: idToken,
+								});
+								return redirect(endSessionUrl.toString(), {
+									'Set-Cookie': clearSessionCookie,
+								});
+							} catch (error) {
+								// If we cannot build an IdP logout URL, fall back to local-only logout
+								// while still signalling the error to onError.
+								if (onError) {
+									await onError({ request, context: ctx, error, stage: 'logout' });
+								}
+							}
+						}
+
+						return new Response(null, {
+							status: 204,
+							headers: {
+								'Set-Cookie': clearSessionCookie,
+							},
+						});
 					}
-				}
 		
 				return new Response('Not found', { status: 404 });
 			});

@@ -65,6 +65,13 @@ export const OAuthClientConfigSchema = z
 			.preprocess(coerceStringArray, z.array(z.string()))
 			.optional()
 			.describe('Optional list of accepted token audiences.'),
+			postLogoutRedirectUri: z
+				.string()
+				.url()
+				.optional()
+				.describe(
+					'Optional post-logout redirect URI for the IdP end_session_endpoint; defaults to the first redirectUris entry when omitted.',
+				),
 		environment: z
 			.string()
 			.optional()

@@ -14,11 +14,11 @@ const requestContext = createBlob<RequestContext>('requestContext');
 test('requestContext blob exposes RequestContext within runWithContext', async () => {
   const container = createContainer();
   const asyncContext = new AsyncLocalStorageContext(container);
-  asyncContext.registerWithContext(requestContext);
+	  asyncContext.registerWithContext(requestContext);
 
-  const context: RequestContext = { requestId: 'req-1' };
+	  const context: RequestContext = { requestId: 'req-1' };
 
-  await asyncContext.runWithContext(context, async () => {
+	  await asyncContext.runWithContext(requestContext, context, async () => {
     assert.equal(requestContext.requestId, 'req-1');
     assert.equal(requestContext.userId, undefined);
 
@@ -45,12 +45,12 @@ test('concurrent contexts remain isolated', async () => {
   const first: RequestContext = { requestId: 'req-1' };
   const second: RequestContext = { requestId: 'req-2' };
 
-  await Promise.all([
-    asyncContext.runWithContext(first, async () => {
+	  await Promise.all([
+	    asyncContext.runWithContext(requestContext, first, async () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
       assert.equal(requestContext.requestId, 'req-1');
     }),
-    asyncContext.runWithContext(second, async () => {
+	    asyncContext.runWithContext(requestContext, second, async () => {
       await new Promise((resolve) => setTimeout(resolve, 5));
       assert.equal(requestContext.requestId, 'req-2');
     }),
@@ -65,10 +65,10 @@ test('nested runWithContext scopes override and then restore the previous contex
   const outer: RequestContext = { requestId: 'outer' };
   const inner: RequestContext = { requestId: 'inner' };
 
-  await asyncContext.runWithContext(outer, async () => {
+	  await asyncContext.runWithContext(requestContext, outer, async () => {
     assert.equal(requestContext.requestId, 'outer');
 
-    await asyncContext.runWithContext(inner, async () => {
+	    await asyncContext.runWithContext(requestContext, inner, async () => {
       assert.equal(requestContext.requestId, 'inner');
     });
 
@@ -95,7 +95,7 @@ test('context is visible across multiple async hops in a single request', async 
     await hopTwo();
   }
 
-  await asyncContext.runWithContext(ctx, async () => {
+	  await asyncContext.runWithContext(requestContext, ctx, async () => {
     assert.equal(requestContext.requestId, 'async-hops');
     await hopOne();
   });
@@ -132,9 +132,9 @@ test('requestContext can be injected into other blobs via Container', async () =
     requestContext,
   );
 
-  const context: RequestContext = { requestId: 'svc-1' };
+	  const context: RequestContext = { requestId: 'svc-1' };
 
-  await asyncContext.runWithContext(context, async () => {
+	  await asyncContext.runWithContext(requestContext, context, async () => {
     const svc = container.resolve(contextAwareService);
     assert.equal(svc.getRequestId(), 'svc-1');
     assert.equal(svc.getUser(), undefined);
@@ -153,25 +153,35 @@ test('requestContext can be injected into other blobs via Container', async () =
   }, /outside of an active async context/i);
 });
 
-test('AsyncLocalStorageContext can manage arbitrary context types', async () => {
-	  const container = createContainer();
-	  interface TaskContext {
-	    taskName: string;
-	    attempts: number;
-	  }
+	test('AsyncLocalStorageContext can manage arbitrary context types', async () => {
+		const container = createContainer();
+		interface TaskContext {
+			taskName: string;
+			attempts: number;
+		}
 
-	  const taskContextBlob = createBlob<TaskContext>('taskContext');
-	  const asyncContext = new AsyncLocalStorageContext<TaskContext>(container);
-	  asyncContext.registerWithContext(taskContextBlob);
+		const taskContextBlob = createBlob<TaskContext>('taskContext');
+		const asyncContext = new AsyncLocalStorageContext(container);
+		asyncContext.registerWithContext(taskContextBlob);
 
-	  const initial: TaskContext = { taskName: 'example', attempts: 0 };
+		const initial: TaskContext = { taskName: 'example', attempts: 0 };
 
-	  await asyncContext.runWithContext(initial, async () => {
-	    assert.equal(taskContextBlob.taskName, 'example');
-	    assert.equal(taskContextBlob.attempts, 0);
+		await asyncContext.runWithContext(taskContextBlob, initial, async () => {
+			assert.equal(taskContextBlob.taskName, 'example');
+			assert.equal(taskContextBlob.attempts, 0);
 
-	    taskContextBlob.attempts += 1;
-	    assert.equal(taskContextBlob.attempts, 1);
-	  });
-});
+			taskContextBlob.attempts += 1;
+			assert.equal(taskContextBlob.attempts, 1);
+		});
+
+		// Running with a new value for the same blob should override within the
+		// nested scope and then restore afterwards.
+		const next: TaskContext = { taskName: 'example-2', attempts: 5 };
+		await asyncContext.runWithContext(taskContextBlob, next, async () => {
+			assert.equal(taskContextBlob.taskName, 'example-2');
+			assert.equal(taskContextBlob.attempts, 5);
+			taskContextBlob.attempts++; // mutate through the proxy
+			assert.equal(taskContextBlob.attempts, 6);
+		});
+	});
 
