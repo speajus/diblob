@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob-diagnostics",
-  "version": "0.0.1",
+  "version": "1.0.2",
   "description": "Diagnostics helper for diblob containers (LLM-friendly snapshots of logs and metrics)",
   "author": "Justin Spears <speajus@gmail.com>",
   "license": "MIT",
@@ -14,10 +14,10 @@
     }
   },
   "scripts": {
-	    "build": "tsc -b",
-	    "clean": "rimraf dist tsconfig.tsbuildinfo",
-	    "lint": "biome check .",
-	    "test": "tsc -b && tsx --test src/test/*.test.ts"
+    "build": "tsc -b",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "lint": "biome check .",
+    "test": "tsc -b && tsx --test src/test/*.test.ts"
   },
   "dependencies": {
     "@speajus/diblob": "workspace:*",
@@ -32,4 +32,3 @@
     "typescript": "^5.4.5"
   }
 }
-
