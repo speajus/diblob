@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob-oauth",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "OAuth 2.1 / OpenID Connect integration helpers for diblob containers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
