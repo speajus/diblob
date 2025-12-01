@@ -1,5 +1,12 @@
 # @speajus/diblob
 
+## 2.0.0
+
+### Patch Changes
+
+- 9920ff8: trying to get everything on the same page
+- f252d82: Mad oauth more good, and workie
+
 ## 1.0.1
 
 ## 1.0.0

@@ -1,5 +1,15 @@
 # @speajus/diblob-connect
 
+## 2.0.0
+
+### Patch Changes
+
+- 9920ff8: trying to get everything on the same page
+- Updated dependencies [9920ff8]
+- Updated dependencies [f252d82]
+  - @speajus/diblob@2.0.0
+  - @speajus/diblob-logger@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes
