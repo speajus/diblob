@@ -1,5 +1,17 @@
 # @speajus/diblob-mcp
 
+## 2.0.0
+
+### Patch Changes
+
+- cfc4b57: Added mcp goodness for better ai integration
+- f252d82: Mad oauth more good, and workie
+- Updated dependencies [cfc4b57]
+- Updated dependencies [f252d82]
+  - @speajus/diblob-diagnostics@2.0.0
+  - @speajus/diblob-config@2.0.0
+  - @speajus/diblob@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes

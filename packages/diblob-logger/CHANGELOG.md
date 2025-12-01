@@ -1,5 +1,15 @@
 # @speajus/diblob-logger
 
+## 2.0.0
+
+### Patch Changes
+
+- f252d82: Mad oauth more good, and workie
+- Updated dependencies [cfc4b57]
+- Updated dependencies [f252d82]
+  - @speajus/diblob-config@2.0.0
+  - @speajus/diblob@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes

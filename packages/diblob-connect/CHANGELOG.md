@@ -1,5 +1,13 @@
 # @speajus/diblob-connect
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [f252d82]
+  - @speajus/diblob-logger@2.0.0
+  - @speajus/diblob@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes

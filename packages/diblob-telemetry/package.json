@@ -1,6 +1,6 @@
 {
   "name": "@speajus/diblob-telemetry",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "OpenTelemetry integration for diblob containers",
   "author": "Justin Spears <speajus@gmail.com>",
   "license": "MIT",

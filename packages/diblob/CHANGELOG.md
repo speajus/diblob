@@ -1,5 +1,11 @@
 # @speajus/diblob
 
+## 2.0.0
+
+### Patch Changes
+
+- f252d82: Mad oauth more good, and workie
+
 ## 1.0.1
 
 ## 1.0.0
