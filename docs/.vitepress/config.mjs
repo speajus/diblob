@@ -13,7 +13,8 @@ export default defineConfig({
     logo: '/logo.svg',
 
 	    nav: [
-	      { text: 'Diblob', link: '/diblob/guide/getting-started' },
+	    	      { text: 'Diblob', link: '/diblob/guide/getting-started' },
+	    	      { text: 'Architecture & Patterns', link: '/architecture/overview' },
 	      { text: 'Telemetry', link: '/diblob/telemetry' },
 	      { text: 'MCP Server', link: '/mcp/' },
 	      { text: 'Visualizer', link: '/visualizer/' },
@@ -119,6 +120,18 @@ export default defineConfig({
 	          ]
 	        }
 	      ],
+	    	      '/architecture/': [
+	    	        {
+	    	          text: 'Architecture & Patterns',
+	    	          items: [
+	    	            { text: 'Overview', link: '/architecture/overview' },
+	    	            { text: 'HTTP / Connect / gRPC service', link: '/architecture/http-grpc-service' },
+	    	            { text: 'Background worker / job runner', link: '/architecture/worker' },
+	    	            { text: 'Svelte SPA', link: '/architecture/svelte-spa' },
+	    	            { text: 'Reference application', link: '/architecture/reference-app' },
+	    	          ],
+	    	        },
+	    	      ],
 		      '/internal/': [
 		        {
 		          text: 'Internal Docs',
@@ -136,6 +149,7 @@ export default defineConfig({
 	    	      items: [
 	    	        { text: 'Overview', link: '/diblob/' },
 	    	        { text: 'Getting Started', link: '/diblob/guide/getting-started' },
+	    	        { text: 'Architecture & Patterns', link: '/architecture/overview' },
 	    	        { text: 'API Reference', link: '/diblob/api/' },
 	    	        { text: 'Examples', link: '/diblob/examples/' },
 	    	      ],
