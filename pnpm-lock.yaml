@@ -202,6 +202,31 @@ importers:
         specifier: ^7.1.7
         version: 7.2.4(@types/node@24.10.1)(tsx@4.20.6)(yaml@2.8.1)
 
+  examples/example-worker-tasks:
+    dependencies:
+      '@speajus/diblob':
+        specifier: workspace:*
+        version: link:../../packages/diblob
+      '@speajus/diblob-config':
+        specifier: workspace:*
+        version: link:../../packages/diblob-config
+      '@speajus/diblob-logger':
+        specifier: workspace:*
+        version: link:../../packages/diblob-logger
+      '@speajus/diblob-telemetry':
+        specifier: workspace:*
+        version: link:../../packages/diblob-telemetry
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.1
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   examples/oauth-cognito:
     dependencies:
       '@speajus/diblob':
@@ -232,6 +257,8 @@ importers:
       tsx:
         specifier: ^4.20.6
         version: 4.20.6
+
+  examples/reference-app: {}
 
   packages/diblob:
     devDependencies:
@@ -6076,7 +6103,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 24.10.1
+      '@types/node': 22.19.1
       long: 5.3.2
 
   protoc@33.1.0: {}

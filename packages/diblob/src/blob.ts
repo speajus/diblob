@@ -79,7 +79,8 @@ export function registerBlobId(proxy: Blob<unknown>, id: symbol): void {
  * const user = userService.getUser(123);
  * ```
  */
-export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetadata): Blob<T> {
+let blobIndex = 0;
+export function createBlob<T extends object>(name = `blob-${blobIndex++}`, metadata?: BlobMetadata): Blob<T> {
   const blobId = Symbol(name);
 
   // Create a proxy that will be populated by the container

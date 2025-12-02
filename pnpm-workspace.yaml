@@ -2,3 +2,10 @@ packages:
   - 'packages/*'
   - 'examples/*'
 
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - '@bufbuild/buf'
+  - 'better-sqlite3'
+  - 'esbuild'
+  - 'protobufjs'
+

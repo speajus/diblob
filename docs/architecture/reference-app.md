@@ -55,8 +55,10 @@ Today, the closest thing to this reference app in the repository is the combinat
 
 - `examples/example-grpc-server` – back-end Connect/gRPC service with config, logging, telemetry, database, and visualizer integration.
 - `examples/example-web-svelte` – Svelte 5 web client that talks to the example-grpc-server using Connect and visualizes both client and server containers.
+- `examples/example-worker-tasks` – a background worker example that uses a root worker container and per-job child containers.
+- `examples/reference-app` – a thin wrapper package/README that explains how to run all three together as a single reference app.
 
-These examples already illustrate most of the architecture described on this page. A dedicated reference app may extend or reorganize them so that all three components (API, worker, SPA) are configured and documented together.
+These examples already illustrate most of the architecture described on this page. Over time, the worker and API can be expanded to share more configuration, logging, and domain concepts so that all three patterns (API, worker, SPA) are configured and documented together.
 
 ## Running the reference app
 
