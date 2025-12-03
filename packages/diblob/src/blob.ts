@@ -2,9 +2,8 @@
  * Blob creation and proxy implementation
  */
 
-	import type { Container } from './container.js';
 	import type { Blob, BlobMetadata } from './types.js';
-	import { blobPropSymbol } from './types.js';
+	import { blobContainerSymbol, blobMetadatStoreSymbol, blobPropSymbol, containerResolveBlobInstanceSymbol, containerResolveBlobPropSymbol } from './types.js';
 
 /**
  * Error thrown when a blob is accessed during constructor execution
@@ -29,24 +28,6 @@ const blobIds = new WeakMap<Blob<unknown>, symbol>();
  */
 const blobMetadataStore = new WeakMap<Blob<unknown>, BlobMetadata>();
 
-/**
- * Global registry of blob handlers
- * Maps blob ID to a handler function that resolves the blob
- */
-export const blobHandlers = new Map<symbol, (prop: string | symbol) => unknown>();
-
-/**
- * Global registry of instance getters
- * Maps blob ID to a function that returns the resolved instance
- */
-export const blobInstanceGetters = new Map<symbol, () => unknown>();
-
-/**
- * Global registry of blob containers
- * Maps blob ID to the container that first registered it
- * Used by ListBlob and other special blobs to detect their container
- */
-export const blobContainers = new Map<symbol, Container>();
 
 /**
  * Register a blob ID for a proxy object
@@ -81,64 +62,107 @@ export function registerBlobId(proxy: Blob<unknown>, id: symbol): void {
  */
 let blobIndex = 0;
 export function createBlob<T extends object>(name = `blob-${blobIndex++}`, metadata?: BlobMetadata): Blob<T> {
-  const blobId = Symbol(name);
+	  const blobId = Symbol(name);
 
-  // Create a proxy that will be populated by the container
-  const proxy = new Proxy({} as Blob<T>, {
-    get(_target, prop) {
-      // Special property to identify this as a blob and get its ID
-      if (prop === blobPropSymbol) {
-        return blobId;
-      }
+		  // Target object used only for storing internal state (like the container).
+		  const target = {} as Blob<T>;
+		  
+		  // Create a proxy that will be populated by the container
+		  const proxy = new Proxy(target, {
+		    get(_target, prop) {
+	      // Special property to identify this as a blob and get its ID
+	      if (prop === blobPropSymbol) {
+	        return blobId;
+	      }
 
-      // If we're tracking constructor dependencies, record this blob access
-      if (isTrackingConstructor()) {
-        trackConstructorDependency(proxy);
-      }
+		  if (prop === blobMetadatStoreSymbol) {
+				return metadata;
+ 		}
 
-      // Check if a handler is registered for this blob
-      const handler = blobHandlers.get(blobId);
-      if (!handler) {
-        throw new Error(
-          `Blob not yet resolved. Make sure to register this blob with a container before using it.`
-        );
-      }
+	      // Allow reading the attached container (used by special blobs)
+	      if (prop === blobContainerSymbol) {
+	        return target[blobContainerSymbol];
+	      }
 
-      // Delegate to the handler
-      const result = handler(prop);
+	      // If we're tracking constructor dependencies, record this blob access
+	      if (isTrackingConstructor()) {
+	        trackConstructorDependency(proxy);
+	      }
 
-      // If we're tracking constructor dependencies and the result is a Promise,
-      // throw a special error that includes the promise
-      if (isTrackingConstructor() && result instanceof Promise) {
-        throw new BlobNotReadyError(result);
-      }
+	      // Resolve via the owning container
+	      // biome-ignore lint/suspicious/noExplicitAny: internal wiring only.
+	      const container = (target as any)[blobContainerSymbol];
+	      if (!container) {
+	        throw new Error(
+	          'Blob not yet resolved. Make sure to register this blob with a container before using it.',
+	        );
+	      }
 
-      return result;
-    },
+		      // Containers that support blobs expose a resolver method keyed by
+		      // containerResolveBlobPropSymbol.
+		      const resolveProperty = container[containerResolveBlobPropSymbol] as
+		        | ((blob: Blob<unknown>, property: string | symbol) => unknown)
+		        | undefined;
+		      if (!resolveProperty) {
+		        throw new Error('Container does not support blob property resolution.');
+		      }
+		
+		      // Make sure the container instance is used as `this` so internal
+		      // resolution logic (which calls this.resolve) works correctly.
+		      const result = resolveProperty.call(container, proxy, prop);
 
-    set(_target, prop, value) {
-      // Check if an instance getter is registered for this blob
-      const instanceGetter = blobInstanceGetters.get(blobId);
-      if (!instanceGetter) {
-        throw new Error(
-          `Blob not yet resolved. Make sure to register this blob with a container before using it.`
-        );
-      }
+	      // If we're tracking constructor dependencies and the result is a Promise,
+	      // throw a special error that includes the promise
+	      if (isTrackingConstructor() && result instanceof Promise) {
+	        throw new BlobNotReadyError(result);
+	      }
 
-      // Get the resolved instance
-      const instance = instanceGetter();
+	      return result;
+	    },
 
-      // Handle async instance
-      if (instance instanceof Promise) {
-        throw new Error('Cannot set property on async blob. Await the blob first.');
-      }
+	    set(_target, prop, value) {
+	      // Allow the container to attach itself once (first registration wins)
+	      if (prop === blobContainerSymbol) {
+	        // biome-ignore lint/suspicious/noExplicitAny: internal wiring only.
+	        if ((target as any)[blobContainerSymbol] === undefined) {
+	          // biome-ignore lint/suspicious/noExplicitAny: internal wiring only.
+	          (target as any)[blobContainerSymbol] = value;
+	        }
+	        return true;
+	      }
 
-      // Set the property on the actual instance
-      // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
-            (instance as any)[prop] = value;
-      return true;
-    },
-  });
+	      // biome-ignore lint/suspicious/noExplicitAny: internal wiring only.
+	      const container = (target as any)[blobContainerSymbol];
+	      if (!container) {
+	        throw new Error(
+	          'Blob not yet resolved. Make sure to register this blob with a container before using it.',
+	        );
+	      }
+
+		      // Containers that support blobs expose an instance resolver method keyed
+		      // by containerResolveBlobInstanceSymbol.
+		      const resolveInstance = container[containerResolveBlobInstanceSymbol] as
+		        | ((blob: Blob<unknown>) => unknown)
+		        | undefined;
+		      if (!resolveInstance) {
+		        throw new Error('Container does not support blob instance resolution.');
+		      }
+
+		      // Use the container instance as `this` so the resolver can call
+		      // this.resolve correctly.
+		      const instance = resolveInstance.call(container, proxy);
+
+	      // Handle async instance
+	      if (instance instanceof Promise) {
+	        throw new Error('Cannot set property on async blob. Await the blob first.');
+	      }
+
+	      // Set the property on the actual instance
+	      // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
+	      (instance as any)[prop] = value;
+	      return true;
+	    },
+	  });
 
   // Store the blob ID
   blobIds.set(proxy, blobId);
@@ -176,8 +200,10 @@ export function isBlob(obj: unknown): obj is Blob<unknown> {
  * @returns The metadata object, or undefined if no metadata was set
  */
 export function getBlobMetadata<T>(blob: Blob<T>): BlobMetadata | undefined {
-  return blobMetadataStore.get(blob);
+	return blob?.[blobMetadatStoreSymbol];
 }
+
+
 
 /**
  * Set the container that registered a blob
@@ -186,21 +212,9 @@ export function getBlobMetadata<T>(blob: Blob<T>): BlobMetadata | undefined {
  * @param blobId - The blob ID
  * @param container - The container that registered the blob
  */
-export function setBlobContainer(blobId: symbol, container: Container): void {
-  if (!blobContainers.has(blobId)) {
-    blobContainers.set(blobId, container);
-  }
-}
-
-/**
- * Get the container that registered a blob
- *
- * @param blobId - The blob ID
- * @returns The container, or undefined if not registered
- */
-export function getBlobContainer(blobId: symbol): Container | undefined {
-  return blobContainers.get(blobId);
-}
+// setBlobContainer/getBlobContainer have been removed in favor of attaching
+// the container instance directly to the blob via blobContainerSymbol. This
+// keeps handler mappings scoped to the container instead of global maps.
 
 /**
  * Singleton array for tracking blob accesses during constructor execution

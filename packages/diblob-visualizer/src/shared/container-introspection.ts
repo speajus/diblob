@@ -63,7 +63,7 @@ export function extractDependencyGraph(container: unknown): DependencyGraph {
     // Extract factory name if possible
     let factoryName = 'Unknown';
     if (registration.factory) {
-      factoryName = registration.factory.name || blobId.description || metadata?.name ?? 'Anonymous';
+      factoryName = registration.factory.name || blobId.description || metadata?.name || 'Anonymous';
     }
 
 

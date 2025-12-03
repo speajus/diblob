@@ -2,9 +2,12 @@
  * Array blob implementation for managing arrays with automatic invalidation
  */
 
-import { BlobNotReadyError, blobHandlers, blobInstanceGetters, getBlobContainer, registerBlobId } from './blob.js';
-import type { Blob, BlobMetadata, Container } from './types.js';
-import { blobPropSymbol } from './types.js';
+	import {
+	  BlobNotReadyError,
+	  registerBlobId,
+	} from './blob.js';
+	import { type Blob, type BlobMetadata, blobContainerSymbol,blobPropSymbol, type Container, containerResolveBlobInstanceSymbol	  
+ } from './types.js';
 
 /**
  * Create a new array blob that manages an array with automatic invalidation
@@ -40,22 +43,37 @@ import { blobPropSymbol } from './types.js';
  * ```
  */
 export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): Blob<Array<T>> {
-  const blobId = Symbol(name);
+	  const blobId = Symbol(name);
 
-  // Forward declaration for use in closures
-  let proxyBlob: Blob<Array<T>>;
+	  // Target object used for storing internal state such as the container
+	  // reference. The container will attach itself by setting
+	  // target[blobContainerSymbol] via the proxy.
+	  const target: { [blobContainerSymbol]?: Container } = {};
+
+	  // Forward declaration for use in closures
+	  let proxyBlob: Blob<Array<T>>;
 
   /**
    * Get the current array from the container
    */
-  const getCurrentArray = (): Array<T> => {
-    let instanceGetter = blobInstanceGetters.get(blobId);
-    if (!instanceGetter) {
-      instanceGetter = () => [];
-      blobInstanceGetters.set(blobId,  instanceGetter);
-     // throw new Error('Array blob must be registered with a container before use. Call container.register(list, () => []) first.');
-    }
-    const current = instanceGetter();
+	  const getCurrentArray = (): Array<T> => {
+		    const container = target[blobContainerSymbol];
+	    if (!container) {
+	      throw new Error(
+	        'Array blob must be registered with a container before use. Call container.register(list, () => []) first.',
+	      );
+	    }
+
+		    // Containers that support blobs expose an instance resolver via symbol.
+		    // biome-ignore lint/suspicious/noExplicitAny: internal wiring only.
+		    const resolveInstance = (container as any)[containerResolveBlobInstanceSymbol] as
+	      | ((blob: Blob<unknown>) => unknown)
+	      | undefined;
+	    if (!resolveInstance) {
+	      throw new Error('Container does not support blob instance resolution.');
+	    }
+
+		    const current = resolveInstance.call(container, proxyBlob as unknown as Blob<unknown>);
     if (current instanceof Promise) {
       throw new BlobNotReadyError(current);
     }
@@ -65,8 +83,8 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
   /**
    * Update the array and trigger invalidation
    */
-  const updateArray = (newArray: Array<T>): void => {
-    const container = getBlobContainer(blobId) as Container | undefined;
+	  const updateArray = (newArray: Array<T>): void => {
+		    const container = target[blobContainerSymbol];
     if (!container) {
       throw new Error('Array blob must be registered with a container before mutations. Call container.register(list, () => []) first.');
     }
@@ -152,12 +170,17 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
     },
   };
 
-  const handler: ProxyHandler<object> = {
-    get(_target, prop) {
+	  const handler: ProxyHandler<object> = {
+	    get(_target, prop) {
       // Return the blob ID symbol
       if (prop === blobPropSymbol) {
         return blobId;
       }
+
+	      // Allow containers and internals to read the attached container
+	      if (prop === blobContainerSymbol) {
+	        return target[blobContainerSymbol];
+	      }
 
       // Intercept mutation methods
       if (prop in mutationMethods) {
@@ -198,24 +221,21 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
           configurable: false,
         };
       }
+
+	      // For internal container wiring, allow the engine to inspect the
+	      // container attachment without forcing array resolution.
+	      if (prop === blobContainerSymbol) {
+	        return Reflect.getOwnPropertyDescriptor(target, prop);
+	      }
       const current = getCurrentArray();
       return Reflect.getOwnPropertyDescriptor(current, prop);
     },
   };
 
-  proxyBlob = new Proxy({} as object, handler) as Blob<Array<T>>;
+	  proxyBlob = new Proxy(target as object, handler) as Blob<Array<T>>;
 
   // Register the blob ID so getBlobId() works
   registerBlobId(proxyBlob, blobId);
-
-  // Store a handler function that delegates to the proxy handler
-  blobHandlers.set(blobId, (prop: string | symbol) => {
-    const getter = handler.get;
-    if (getter) {
-      return getter({}, prop, proxyBlob);
-    }
-    return undefined;
-  });
 
   return proxyBlob;
 }
