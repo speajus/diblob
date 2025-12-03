@@ -37,26 +37,26 @@ describe('Container Introspection - Basic', () => {
     assert.ok(depNode, 'Expected dep registration in introspection');
     assert.ok(serviceNode, 'Expected service registration in introspection');
 
-    assert.strictEqual(serviceNode!.metadata?.name, 'Service');
-    assert.strictEqual(depNode!.metadata?.name, 'Dep');
+    assert.strictEqual(serviceNode?.metadata?.name, 'Service');
+    assert.strictEqual(depNode?.metadata?.name, 'Dep');
 
-    assert.strictEqual(serviceNode!.lifecycle, Lifecycle.Singleton);
-    assert.strictEqual(depNode!.lifecycle, Lifecycle.Singleton);
+    assert.strictEqual(serviceNode?.lifecycle, Lifecycle.Singleton);
+    assert.strictEqual(depNode?.lifecycle, Lifecycle.Singleton);
 
-    assert.strictEqual(serviceNode!.hasInstance, true);
-    assert.strictEqual(depNode!.hasInstance, true);
-    assert.strictEqual(serviceNode!.isResolving, false);
-    assert.strictEqual(depNode!.isResolving, false);
+    assert.strictEqual(serviceNode?.hasInstance, true);
+    assert.strictEqual(depNode?.hasInstance, true);
+    assert.strictEqual(serviceNode?.isResolving, false);
+    assert.strictEqual(depNode?.isResolving, false);
 
     const depId = dep[blobPropSymbol];
     const serviceId = service[blobPropSymbol];
 
     assert.ok(
-      serviceNode!.dependencies.includes(depId),
+      serviceNode?.dependencies.includes(depId),
       'Service should depend on dep',
     );
     assert.ok(
-      depNode!.dependents.includes(serviceId),
+      depNode?.dependents.includes(serviceId),
       'Dep should have service as dependent',
     );
   });
