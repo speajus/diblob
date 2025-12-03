@@ -68,7 +68,7 @@ export function getSqliteConstructorOrThrow(): SqliteConstructor {
     );
 
     if (cachedError && typeof cachedError === 'object') {
-      (error as any).cause = cachedError;
+      (error as Error).cause = cachedError;
     }
 
     throw error;
