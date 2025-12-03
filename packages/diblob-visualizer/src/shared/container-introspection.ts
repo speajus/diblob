@@ -58,8 +58,7 @@ export function extractDependencyGraph(container: unknown): DependencyGraph {
   registrations.forEach((registration, blobId) => {
     const nodeId = blobId.toString();
 		// Try to find the blob proxy from dependencies to get metadata
-		const metadata: BlobMetadata | undefined = getBlobMetadata(blobId as any);
-
+		const metadata: BlobMetadata | undefined = getBlobMetadata(blobId as unknown as Blob<unknown>);
     // Extract factory name if possible
     let factoryName = 'Unknown';
     if (registration.factory) {
