@@ -20,23 +20,25 @@ import {
   getDependents,
   trackDependency,
 } from './reactive.js';
-import {
-  type Blob,
-  type BlobMetadata,
-    blobContainerSymbol,blobPropSymbol, 
-  type ContainerBlobIntrospection,
-  type ContainerIntrospection,
-  type Ctor,
-  containerResolveBlobInstanceSymbol,
-  containerResolveBlobPropSymbol,
-  type Factory,
-  type FactoryFn,
-  type FactoryParams,
-  type Container as IContainer,Lifecycle, 
-  type RegisterParams,
-  type RegistrationOptions
-
-} from './types.js';
+	import {
+	  type Blob,
+	  type BlobMetadata,
+	  blobContainerSymbol,
+	  blobPropSymbol,
+	  type ContainerBlobIntrospection,
+	  type ContainerIntrospection,
+	  type Ctor,
+	  containerResolveBlobInstanceSymbol,
+	  containerResolveBlobPropSymbol,
+	  type Factory,
+	  type FactoryFn,
+	  type FactoryParams,
+	  type Container as IContainer,
+	  Lifecycle,
+	  listBlobMarkerSymbol,
+	  type RegisterParams,
+	  type RegistrationOptions,
+	} from './types.js';
 
 interface Registration<T = unknown> {
 	blob: Blob<T>;
@@ -126,15 +128,19 @@ export class Container implements IContainer {
 	    return this.resolve(blob);
 	  }
 
-	  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
-    const blobId = getBlobId(blob);
-
-	    // Attach this container to the blob proxy for resolution (first wins)
-	    // biome-ignore lint/suspicious/noExplicitAny: internal wiring only.
-	    if ((blob as any)[blobContainerSymbol] === undefined) {
-	      // biome-ignore lint/suspicious/noExplicitAny: internal wiring only.
-	      (blob as any)[blobContainerSymbol] = this;
-	    }
+		  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
+	    const blobId = getBlobId(blob);
+	
+		    // Attach this container to the blob proxy for resolution.
+		    // For regular blobs we keep "first registration wins" semantics, but
+		    // list blobs are re-bound to the most recent container so they can be
+		    // safely reused across containers (e.g. in example apps and tests).
+		    const currentContainer = blob[blobContainerSymbol];
+		    // biome-ignore lint/suspicious/noExplicitAny: internal marker access
+		    const isListBlob = (blob as any)[listBlobMarkerSymbol] === true;
+		    if (currentContainer === undefined || (isListBlob && currentContainer !== this)) {
+		      blob[blobContainerSymbol] = this;
+		    }
 
 	    // Extract lifecycle option if the last dep is a RegistrationOptions object
 	    let lifecycle = Lifecycle.Singleton;
@@ -182,9 +188,9 @@ export class Container implements IContainer {
         }
         throw error;
       }
-    } else {
-      return this.resolveConstructor(blobOrConstructor );
-    }
+	    } else {
+	      return this.resolveConstructor(blobOrConstructor);
+	    }
   }
 
   private resolveBlob<T>(blob: Blob<T>): T | Promise<T> {
@@ -193,13 +199,15 @@ export class Container implements IContainer {
 
     // If not found in this container, check parent containers (last parent wins)
     if (!registration) {
-      for (let i = this.parents.length - 1; i >= 0; i--) {
-        const parent = this.parents[i];
-        if (parent.has(blob)) {
-          return parent.resolveBlob(blob);
-        }
-      }
-      throw new Error('Blob not registered. Call container.register() first.');
+	      for (let i = this.parents.length - 1; i >= 0; i--) {
+	        const parent = this.parents[i];
+	        if (parent.has(blob)) {
+	          return parent.resolveBlob(blob);
+	        }
+	      }
+	      // Preserve the original error message for backward compatibility with
+	      // existing code and tests that assert on this text.
+	      throw new Error(`Blob[${blobId.description}] not registered. Call container.register() first.`);
     }
 
     // Detect cyclic dependency - if already resolving, return the blob itself
@@ -358,16 +366,16 @@ export class Container implements IContainer {
     }
   }
 
-  private resolveConstructor<T>(ctor: Ctor<T>): T | Promise<T> {
+	  private resolveConstructor<T>(ctor: Ctor<T>): T | Promise<T> {
     // Begin tracking blob accesses during constructor execution
     beginConstructorTracking();
 
     let instance: T | undefined;
     let asyncPromise: Promise<unknown> | null = null;
 
-    try {
-      // Instantiate the constructor - any blob default parameters will be tracked
-      instance = new ctor();
+	    try {
+	      // Instantiate the constructor - any blob default parameters will be tracked
+	      instance = new ctor();
     } catch (error) {
       // Check if this is a BlobNotReadyError (async dependency)
       if (error instanceof BlobNotReadyError) {
@@ -383,14 +391,14 @@ export class Container implements IContainer {
     const blobDeps = endConstructorTracking();
 
     // If we caught an async dependency error, resolve all blob dependencies
-    if (asyncPromise) {
+	    if (asyncPromise) {
       // Resolve all blob dependencies that were tracked
-      const resolvedDeps = blobDeps.map(blob => this.resolveBlob(blob));
-      // Wait for all of them (including the one that threw the error)
-      return Promise.all(resolvedDeps).then(() => {
-        // Re-instantiate - all async blobs should now be resolved and cached
-        return new ctor();
-      }) as Promise<T>;
+	      const resolvedDeps = blobDeps.map(blob => this.resolveBlob(blob));
+	      // Wait for all of them (including the one that threw the error)
+	      return Promise.all(resolvedDeps).then(() => {
+	        // Re-instantiate - all async blobs should now be resolved and cached
+	        return new ctor();
+	      }) as Promise<T>;
     }
 
     // Collect all blob dependencies (both accessed and stored in instance properties)
@@ -442,7 +450,7 @@ export class Container implements IContainer {
     if (isCtor(factory)) {
       // If there are no dependencies, use resolveConstructor to handle blob default parameters
       if (deps.length === 0) {
-        return this.resolveConstructor(factory) as K | Promise<K>;
+	        return this.resolveConstructor(factory) as K | Promise<K>;
       }
       // Otherwise, use 'new' with the provided dependencies
       return new factory(...deps);
@@ -712,6 +720,15 @@ export function isFactoryFn(obj: unknown): obj is FactoryFn<unknown> {
   return isFn(obj) && !isCtor(obj);
 }
 
-function isLifecycleOption(obj: unknown): obj is RegistrationOptions<unknown> {
-  return obj != null && typeof obj === 'object' && 'lifecycle' in obj;
-}
+	function isLifecycleOption(obj: unknown): obj is RegistrationOptions<unknown> {
+	  if (obj == null || typeof obj !== 'object') {
+	    return false;
+	  }
+	  // Avoid treating blobs (including list blobs) as lifecycle option objects.
+	  // This also prevents triggering proxy traps like `has` on blobs when
+	  // checking for the `lifecycle` property.
+	  if (isBlob(obj)) {
+	    return false;
+	  }
+	  return 'lifecycle' in obj;
+	}

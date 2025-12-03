@@ -22,7 +22,7 @@ describe('Edge Cases - Error Handling', () => {
     
     assert.throws(
       () => container.resolve(blob),
-      /Blob not registered/
+      /not registered\. Call container\.register\(\) first\./
     );
   });
 

@@ -2,8 +2,15 @@
  * Blob creation and proxy implementation
  */
 
-	import type { Blob, BlobMetadata } from './types.js';
-	import { blobContainerSymbol, blobMetadatStoreSymbol, blobPropSymbol, containerResolveBlobInstanceSymbol, containerResolveBlobPropSymbol } from './types.js';
+import type { Blob, BlobMetadata } from './types.js';
+import {
+	blobContainerSymbol,
+	blobMetadatStoreSymbol,
+	blobPropSymbol,
+	containerResolveBlobInstanceSymbol,
+	containerResolveBlobPropSymbol,
+	listBlobMarkerSymbol,
+} from './types.js';
 
 /**
  * Error thrown when a blob is accessed during constructor execution
@@ -16,26 +23,6 @@ export class BlobNotReadyError extends Error {
   }
 }
 
-/**
- * WeakMap to store blob IDs
- * Maps from the blob proxy to its internal ID
- */
-const blobIds = new WeakMap<Blob<unknown>, symbol>();
-
-/**
- * WeakMap to store blob metadata
- * Maps from the blob proxy to its metadata object
- */
-const blobMetadataStore = new WeakMap<Blob<unknown>, BlobMetadata>();
-
-
-/**
- * Register a blob ID for a proxy object
- * Used by createListBlob and other special blob creators
- */
-export function registerBlobId(proxy: Blob<unknown>, id: symbol): void {
-  blobIds.set(proxy, id);
-}
 
 /**
  * Create a new blob that acts as both a key and a proxy for type T
@@ -75,14 +62,24 @@ export function createBlob<T extends object>(name = `blob-${blobIndex++}`, metad
 	        return blobId;
 	      }
 
-		  if (prop === blobMetadatStoreSymbol) {
-				return metadata;
- 		}
+			  if (prop === blobMetadatStoreSymbol) {
+					return metadata;
+		 	}
 
-	      // Allow reading the attached container (used by special blobs)
-	      if (prop === blobContainerSymbol) {
-	        return target[blobContainerSymbol];
-	      }
+				// Regular blobs are not list blobs, but they must safely report that
+				// they are *not* marked as such without touching the container. This is
+				// important because container.register() probes blobs with the
+				// listBlobMarkerSymbol before the container reference has been
+				// attached. If we tried to resolve via the container here we would
+				// throw, breaking basic registration flows.
+				if (prop === listBlobMarkerSymbol) {
+					return undefined;
+				}
+
+		      // Allow reading the attached container (used by special blobs)
+		      if (prop === blobContainerSymbol) {
+		        return target[blobContainerSymbol];
+		      }
 
 	      // If we're tracking constructor dependencies, record this blob access
 	      if (isTrackingConstructor()) {
@@ -164,14 +161,6 @@ export function createBlob<T extends object>(name = `blob-${blobIndex++}`, metad
 	    },
 	  });
 
-  // Store the blob ID
-  blobIds.set(proxy, blobId);
-
-  // Store metadata if provided
-  if (metadata) {
-    blobMetadataStore.set(proxy, metadata);
-  }
-
   return proxy as Blob<T>;
 }
 
@@ -179,7 +168,7 @@ export function createBlob<T extends object>(name = `blob-${blobIndex++}`, metad
  * Get the internal ID of a blob
  */
 export function getBlobId<T>(blob: Blob<T>): symbol {
-  const id = blobIds.get(blob);
+  const id = blob[blobPropSymbol];
   if (!id) {
     throw new Error('Invalid blob: not created with createBlob()');
   }
@@ -187,20 +176,32 @@ export function getBlobId<T>(blob: Blob<T>): symbol {
 }
 
 /**
- * Check if an object is a blob
+ * Check if an object is a blob.
+ *
+ * We detect blobs by reading the special symbol property rather than using
+ * the `in` operator. This is important because some special blobs (like
+ * list blobs) implement a `has` trap that would otherwise try to resolve
+ * their value from the container when probed with `in`, which can throw if
+ * they haven't been registered yet.
  */
 export function isBlob(obj: unknown): obj is Blob<unknown> {
-  return obj != null && blobIds.has(obj as Blob<unknown>);
+	  if (obj == null || typeof obj !== 'object') {
+	    return false;
+	  }
+	  // Safe for proxies: both regular blobs and list blobs handle this symbol
+	  // specially in their `get` trap without touching the container.
+	  const id = (obj as Blob<unknown>)[blobPropSymbol];
+	  return typeof id === 'symbol';
 }
 
 /**
  * Get the metadata associated with a blob
  *
  * @param blob - The blob to get metadata for
- * @returns The metadata object, or undefined if no metadata was set
+	 * @returns The metadata object, or undefined if no metadata was set
  */
 export function getBlobMetadata<T>(blob: Blob<T>): BlobMetadata | undefined {
-	return blob?.[blobMetadatStoreSymbol];
+		return blob?.[blobMetadatStoreSymbol];
 }
 
 

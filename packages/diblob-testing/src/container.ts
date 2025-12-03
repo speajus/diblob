@@ -2,7 +2,7 @@
  * Test container factories and blob override utilities.
  */
 
-import { type Blob, type Container, createContainer, type Factory, Lifecycle } from '@speajus/diblob';
+	import { type Blob, type Container, createContainer, type Factory, isBlob, Lifecycle } from '@speajus/diblob';
 import { registerTestInfrastructureBlobs } from './register.js';
 import type { TestContainerOptions } from './types.js';
 
@@ -28,27 +28,39 @@ export function createTestContainer(options?: TestContainerOptions): Container {
 export function createIsolatedTestContainer(options?: TestContainerOptions): Container {
   const container = createTestContainer(options);
 
-  // Store the original register method
-  const originalRegister = container.register.bind(container);
+	  // Store the original register method
+	  const originalRegister = container.register.bind(container);
 
-  // Override the register method to default to transient lifecycle
-  container.register = <T>(
-    blob: Blob<T>,
-    factory: unknown,
-    ...deps: unknown[]
-  ): void => {
-    // Check if the last argument is a registration options object
-    const lastDep = deps[deps.length - 1];
-    const hasOptions = lastDep && typeof lastDep === 'object' && lastDep !== null && 'lifecycle' in lastDep;
+	  // Override the register method to default to transient lifecycle
+	  container.register = <T>(
+	    blob: Blob<T>,
+	    factory: unknown,
+	    ...deps: unknown[]
+	  ): void => {
+	    const lastDep = deps[deps.length - 1];
+	    let hasOptions = false;
 
-    if (!hasOptions) {
-      // No options provided, add transient lifecycle
-      deps.push({ lifecycle: Lifecycle.Transient });
-    }
-    // If options are provided with an explicit lifecycle, don't override it
+	    if (lastDep !== undefined && lastDep !== null && typeof lastDep === 'object') {
+	      // Never treat blobs (including list blobs) as registration options.
+	      if (!isBlob(lastDep as unknown)) {
+	        // Treat only "plain" objects as options. This avoids probing
+	        // properties (which would trigger proxy traps like `has`/`get`
+	        // on special blobs such as list blobs).
+	        const proto = Object.getPrototypeOf(lastDep);
+	        if (proto === Object.prototype || proto === null) {
+	          hasOptions = true;
+	        }
+	      }
+	    }
 
-    originalRegister(blob, factory as Factory<T>, ...deps);
-  };
+	    if (!hasOptions) {
+	      // No options provided, add transient lifecycle
+	      deps.push({ lifecycle: Lifecycle.Transient });
+	    }
+	    // If options are provided with an explicit lifecycle, don't override it
+
+	    originalRegister(blob, factory as Factory<T>, ...deps);
+	  };
 
   return container;
 }

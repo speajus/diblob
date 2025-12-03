@@ -1,60 +1,66 @@
 /**
- * Core types for diblob dependency injection framework
- */
-export const blobPropSymbol = Symbol('blobProp');
-
-
-/**
-	 * Symbol used to attach the owning container to a blob proxy.
-	 *
-	 * The container is responsible for resolving blob instances and properties.
-	 * We only ever set this once per blob ("first registration wins").
+	 * Core types for diblob dependency injection framework
 	 */
-	export const blobContainerSymbol = Symbol('blobContainer');
+	export const blobPropSymbol = Symbol('blobProp');
 
-/**
-	 * Symbol used by the container to expose a blob-property resolution method.
-	 *
-	 * Containers that support blob proxies implement a method keyed by this
-	 * symbol with the signature:
-	 *   (blob, prop) => unknown
+	/**
+	 * Symbol used to mark list blobs so the container can adjust registration
+	 * semantics (allowing them to be reused across containers safely).
 	 */
-	export const containerResolveBlobPropSymbol = Symbol('containerResolveBlobProperty');
+	export const listBlobMarkerSymbol = Symbol('listBlobMarker');
 
-  /**
-	 * Symbol used to attach metadata to a blob proxy.
+	/**
+		 * Symbol used to attach the owning container to a blob proxy.
+		 *
+		 * The container is responsible for resolving blob instances and properties.
+		 * We only ever set this once per blob ("first registration wins").
+		 */
+		export const blobContainerSymbol = Symbol('blobContainer');
+
+	/**
+		 * Symbol used by the container to expose a blob-property resolution method.
+		 *
+		 * Containers that support blob proxies implement a method keyed by this
+		 * symbol with the signature:
+		 *   (blob, prop) => unknown
+		 */
+		export const containerResolveBlobPropSymbol = Symbol('containerResolveBlobProperty');
+
+	  /**
+		 * Symbol used to attach metadata to a blob proxy.
+		 */
+	export const blobMetadatStoreSymbol = Symbol('blobMetadataStore');
+
+
+	/**
+		 * Symbol used by the container to expose a blob-instance resolution method.
+		 *
+		 * Containers that support blob proxies implement a method keyed by this
+		 * symbol with the signature:
+		 *   (blob) => instance | Promise<instance>
+		 */
+		export const containerResolveBlobInstanceSymbol = Symbol('containerResolveBlobInstance');
+	/**
+	 * Metadata that can be attached to blobs and containers
+	 * for debugging and visualization purposes
 	 */
-export const blobMetadatStoreSymbol = Symbol('blobMetadataStore');
-
-
-/**
-	 * Symbol used by the container to expose a blob-instance resolution method.
-	 *
-	 * Containers that support blob proxies implement a method keyed by this
-	 * symbol with the signature:
-	 *   (blob) => instance | Promise<instance>
+	export interface BlobMetadata {
+	  name?: string;
+	  description?: string;
+		[key: string]: unknown;
+	}
+	
+	/**
+	 * A Blob is a proxy object that acts as both the key and the interface
+	 * for dependency injection. It can be passed around and will resolve to
+	 * the registered implementation.
 	 */
-	export const containerResolveBlobInstanceSymbol = Symbol('containerResolveBlobInstance');
-/**
- * Metadata that can be attached to blobs and containers
- * for debugging and visualization purposes
- */
-export interface BlobMetadata {
-  name?: string;
-  description?: string;
-	[key: string]: unknown;
-}
-
-/**
- * A Blob is a proxy object that acts as both the key and the interface
- * for dependency injection. It can be passed around and will resolve to
- * the registered implementation.
- */
-export type Blob<T> = T & {
-  readonly [blobPropSymbol]: symbol;
-  [blobContainerSymbol]?: Container;
-  readonly [blobMetadatStoreSymbol]?: BlobMetadata;
-};
+	export type Blob<T> = T & {
+	  readonly [blobPropSymbol]: symbol;
+	  [blobContainerSymbol]?: Container;
+	  readonly [blobMetadatStoreSymbol]?: BlobMetadata;
+	  readonly [listBlobMarkerSymbol]?: true;
+	};
 
 // biome-ignore lint/suspicious/noExplicitAny: it needs any
 export type Ctor<T> = new (...args: any[]) => T;

@@ -4,10 +4,17 @@
 
 	import {
 	  BlobNotReadyError,
-	  registerBlobId,
 	} from './blob.js';
-	import { type Blob, type BlobMetadata, blobContainerSymbol,blobPropSymbol, type Container, containerResolveBlobInstanceSymbol	  
- } from './types.js';
+	import {
+	  type Blob,
+	  type BlobMetadata,
+	  blobContainerSymbol,
+	  blobMetadatStoreSymbol,
+	  blobPropSymbol,
+	  type Container,
+	  containerResolveBlobInstanceSymbol,
+	  listBlobMarkerSymbol,
+	} from './types.js';
 
 /**
  * Create a new array blob that manages an array with automatic invalidation
@@ -42,13 +49,20 @@
  * console.log(list.length); // 1
  * ```
  */
-export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): Blob<Array<T>> {
-	  const blobId = Symbol(name);
+	let listBlobIndex = 0;
+	export function createListBlob<T>(
+	  name = `listBlob-${listBlobIndex++}`,
+	  metadata?: BlobMetadata,
+	): Blob<Array<T>> {
+		  const blobId = Symbol(name);
 
-	  // Target object used for storing internal state such as the container
-	  // reference. The container will attach itself by setting
-	  // target[blobContainerSymbol] via the proxy.
-	  const target: { [blobContainerSymbol]?: Container } = {};
+		  // Target object used for storing internal state such as the container
+		  // reference. The container will attach itself by setting
+		  // target[blobContainerSymbol] via the proxy.
+			  const target: { [blobContainerSymbol]?: Container; [listBlobMarkerSymbol]?: true } = {};
+				// Mark this proxy as a list blob so the container can recognize and
+				// safely re-bind it to different containers when reused.
+				target[listBlobMarkerSymbol] = true;
 
 	  // Forward declaration for use in closures
 	  let proxyBlob: Blob<Array<T>>;
@@ -170,17 +184,28 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
     },
   };
 
-	  const handler: ProxyHandler<object> = {
-	    get(_target, prop) {
-      // Return the blob ID symbol
-      if (prop === blobPropSymbol) {
-        return blobId;
-      }
-
-	      // Allow containers and internals to read the attached container
-	      if (prop === blobContainerSymbol) {
-	        return target[blobContainerSymbol];
+			  const handler: ProxyHandler<object> = {
+			    get(_target, prop) {
+	      // Return the blob ID symbol
+	      if (prop === blobPropSymbol) {
+	        return blobId;
 	      }
+
+		      // Allow metadata introspection without resolving the array
+		      if (prop === blobMetadatStoreSymbol) {
+		        return metadata;
+		      }
+
+			      // Allow containers and internals to read the attached container
+			      if (prop === blobContainerSymbol) {
+			        return target[blobContainerSymbol];
+			      }
+
+			      // Internal marker so the container can detect list blobs without
+			      // forcing array resolution.
+			      if (prop === listBlobMarkerSymbol) {
+			        return true;
+			      }
 
       // Intercept mutation methods
       if (prop in mutationMethods) {
@@ -212,21 +237,22 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
       return Reflect.ownKeys(current);
     },
 
-    getOwnPropertyDescriptor(_target, prop) {
-      if (prop === blobPropSymbol) {
+		    getOwnPropertyDescriptor(_target, prop) {
+		      if (prop === blobPropSymbol) {
         return {
           value: blobId,
           writable: false,
           enumerable: false,
           configurable: false,
         };
-      }
-
-	      // For internal container wiring, allow the engine to inspect the
-	      // container attachment without forcing array resolution.
-	      if (prop === blobContainerSymbol) {
-	        return Reflect.getOwnPropertyDescriptor(target, prop);
-	      }
+		      }
+		
+			      // For internal container wiring, allow the engine to inspect the
+			      // container attachment and list marker without forcing array
+			      // resolution.
+			      if (prop === blobContainerSymbol || prop === listBlobMarkerSymbol) {
+			        return Reflect.getOwnPropertyDescriptor(target, prop);
+			      }
       const current = getCurrentArray();
       return Reflect.getOwnPropertyDescriptor(current, prop);
     },
@@ -234,8 +260,6 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
 
 	  proxyBlob = new Proxy(target as object, handler) as Blob<Array<T>>;
 
-  // Register the blob ID so getBlobId() works
-  registerBlobId(proxyBlob, blobId);
 
   return proxyBlob;
 }
