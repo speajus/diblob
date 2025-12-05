@@ -1,7 +1,7 @@
 /**
  * Utilities for introspecting diblob containers to extract dependency graph data
  */
-import type { BlobMetadata, } from '@speajus/diblob';
+import type { Blob, BlobMetadata, } from '@speajus/diblob';
 import { getBlobId, getBlobMetadata, isBlob, Lifecycle } from '@speajus/diblob';
 
 export interface BlobNode {
@@ -57,15 +57,14 @@ export function extractDependencyGraph(container: unknown): DependencyGraph {
   // Process each registration
   registrations.forEach((registration, blobId) => {
     const nodeId = blobId.toString();
-
+		// Try to find the blob proxy from dependencies to get metadata
+		const metadata: BlobMetadata | undefined = getBlobMetadata(blobId as unknown as Blob<unknown>);
     // Extract factory name if possible
     let factoryName = 'Unknown';
     if (registration.factory) {
-      factoryName = registration.factory.name || 'Anonymous';
+      factoryName = registration.factory.name || blobId.description || metadata?.name || 'Anonymous';
     }
 
-		// Try to find the blob proxy from dependencies to get metadata
-		let metadata: BlobMetadata | undefined;
 
     // Create node for this blob
     nodes.push({
@@ -125,8 +124,10 @@ export function createBlobLabel(node: BlobNode): string {
   const lifecycle = node.lifecycle === 'transient' ? '⚡' : '🔒';
   const status = node.isRegistered ? '' : ' (unregistered)';
 
-  // Use metadata name if available, otherwise use factory name
-  const displayName = node.metadata?.name || node.label;
+	  // Prefer metadata name when available, then fall back to the blob Symbol description,
+	  // and finally to the existing label (typically the factory name).
+	  const symbolName = typeof node.blobId?.description === 'string' ? node.blobId.description : undefined;
+	  const displayName = node.metadata?.name ?? symbolName ?? node.label;
 
   return `${lifecycle} ${displayName}${status}`;
 }

@@ -54,9 +54,11 @@
       bgColor = '#fff3e0';
       borderColor = '#ff9800';
       borderWidth = '2px';
-    }
+	    }
 
-    return `background: ${bgColor}; border: ${borderWidth} solid ${borderColor}; border-radius: 8px; padding: 10px; font-size: 12px;`;
+	    // Force a high-contrast text color so labels remain readable even when the
+	    // global app is in dark mode (where the default text color is light).
+	    return `background: ${bgColor}; border: ${borderWidth} solid ${borderColor}; border-radius: 8px; padding: 10px; font-size: 12px; color: #111; font-weight: 600;`;
   }
 
   // Use Svelte 5 $state.raw for nodes and edges

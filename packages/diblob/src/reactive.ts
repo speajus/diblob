@@ -70,6 +70,13 @@ export function getDependents(blobId: symbol): Set<symbol> {
 }
 
 /**
+ * Get all blobs that the given blob depends on
+ */
+export function dependenciesFor(blobId: symbol): Set<symbol> {
+	return dependencies.get(blobId) || new Set();
+}
+
+/**
  * Clear all dependencies for a blob
  */
 export function clearDependencies(blobId: symbol): void {

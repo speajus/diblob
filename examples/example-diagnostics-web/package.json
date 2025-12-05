@@ -5,11 +5,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "tsx --test test/*.test.ts"
-  },
+	    "dev": "vite dev",
+	    "build": "pnpm --filter example-grpc-server run proto:generate && vite build",
+	    "preview": "vite preview",
+	    "test": "tsx --test test/*.test.ts"
+	  },
   "dependencies": {
     "@bufbuild/protobuf": "^2.10.0",
     "@connectrpc/connect": "^2.1.0",

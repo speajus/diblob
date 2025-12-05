@@ -9,7 +9,7 @@ import type {
 	GenService,
 	} from '@bufbuild/protobuf/codegenv2';
 import { messageDesc, serviceDesc } from '@bufbuild/protobuf/codegenv2';
-import { file_diagnostics as serverFileDiagnostics } from '../../../example-grpc-server/src/generated/diagnostics_pb.js';
+import { file_diagnostics as serverFileDiagnostics } from '../../../example-grpc-server/src/generated/diagnostics_pb.ts';
 
 /**
 	 * Describes the file diagnostics.proto.

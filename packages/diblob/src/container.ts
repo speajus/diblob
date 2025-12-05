@@ -2,19 +2,46 @@
  * DI Container implementation
  */
 
-	import { BlobNotReadyError, beginConstructorTracking, blobHandlers, blobInstanceGetters, endConstructorTracking, getBlobId, isBlob, isTrackingConstructor, setBlobContainer } from './blob.js';
+import {
+  BlobNotReadyError,
+  beginConstructorTracking,
+  endConstructorTracking,
+  getBlobId,
+  getBlobMetadata,
+  isBlob,
+  isTrackingConstructor,
+} from './blob.js';
 import {
   beginTracking,
   clearAllDependencies,
   clearDependencies,
+  dependenciesFor,
   endTracking,
   getDependents,
   trackDependency,
-	} from './reactive.js';
-	import type { Blob, BlobMetadata, Ctor, Factory, FactoryFn, FactoryParams, Container as IContainer, RegisterParams, RegistrationOptions } from './types.js';
-	import { blobPropSymbol, Lifecycle } from './types.js';
+} from './reactive.js';
+	import {
+	  type Blob,
+	  type BlobMetadata,
+	  blobContainerSymbol,
+	  blobPropSymbol,
+	  type ContainerBlobIntrospection,
+	  type ContainerIntrospection,
+	  type Ctor,
+	  containerResolveBlobInstanceSymbol,
+	  containerResolveBlobPropSymbol,
+	  type Factory,
+	  type FactoryFn,
+	  type FactoryParams,
+	  type Container as IContainer,
+	  Lifecycle,
+	  listBlobMarkerSymbol,
+	  type RegisterParams,
+	  type RegistrationOptions,
+	} from './types.js';
 
 interface Registration<T = unknown> {
+	blob: Blob<T>;
   factory: Factory<T>;
   deps: unknown[];
   lifecycle: Lifecycle;
@@ -45,11 +72,75 @@ export class Container implements IContainer {
     }
   }
 
-	  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
-    const blobId = getBlobId(blob);
+	  /**
+	   * Internal hook used by blob proxies to resolve a property via this container.
+	   * Exposed via a symbol to avoid leaking into the public Container interface.
+	   */
+	  [containerResolveBlobPropSymbol]<T>(blob: Blob<T>, prop: string | symbol): unknown {
+	    const blobId = getBlobId(blob);
 
-    // Track which container registered this blob (first registration wins)
-    setBlobContainer(blobId, this);
+	    // Preserve the blob ID when accessed directly
+	    if (prop === blobPropSymbol) {
+	      return blobId;
+	    }
+
+	    // Track this dependency for reactive invalidation
+	    trackDependency(blobId);
+
+	    // Resolve the actual instance
+	    let instance: T | Promise<T>;
+	    try {
+	      instance = this.resolve(blob);
+	    } catch (error) {
+	      // If we caught a BlobNotReadyError, wait for the promise and retry
+	      if (error instanceof BlobNotReadyError) {
+	        // If we're tracking constructors, re-throw so resolveConstructor can handle it
+	        if (isTrackingConstructor()) {
+	          throw error;
+	        }
+	        // Otherwise, wait for the promise and then retry resolving this blob
+	        return error.promise.then(() => {
+	          // The async dependency should now be cached
+	          // Retry resolving this blob
+	          const resolved = this.resolve(blob);
+	          if (resolved instanceof Promise) {
+	            return resolved.then((r) => bindResolvedProperty(r, prop));
+	          }
+	          return bindResolvedProperty(resolved, prop);
+	        });
+	      }
+	      throw error;
+	    }
+
+	    // Handle async resolution
+	    if (instance instanceof Promise) {
+	      return instance.then((resolved) => bindResolvedProperty(resolved, prop));
+	    }
+
+	    // Forward the property access to the instance
+	    return bindResolvedProperty(instance, prop);
+	  }
+
+	  /**
+	   * Internal hook used by blob proxies to resolve the full instance.
+	   */
+	  [containerResolveBlobInstanceSymbol]<T>(blob: Blob<T>): T | Promise<T> {
+	    return this.resolve(blob);
+	  }
+
+		  register<T, TFactory extends Factory<T>>(blob: Blob<T>, factory: Factory<T>, ...deps: RegisterParams<TFactory>): void {
+	    const blobId = getBlobId(blob);
+	
+		    // Attach this container to the blob proxy for resolution.
+		    // For regular blobs we keep "first registration wins" semantics, but
+		    // list blobs are re-bound to the most recent container so they can be
+		    // safely reused across containers (e.g. in example apps and tests).
+		    const currentContainer = blob[blobContainerSymbol];
+		    // biome-ignore lint/suspicious/noExplicitAny: internal marker access
+		    const isListBlob = (blob as any)[listBlobMarkerSymbol] === true;
+		    if (currentContainer === undefined || (isListBlob && currentContainer !== this)) {
+		      blob[blobContainerSymbol] = this;
+		    }
 
 	    // Extract lifecycle option if the last dep is a RegistrationOptions object
 	    let lifecycle = Lifecycle.Singleton;
@@ -70,97 +161,18 @@ export class Container implements IContainer {
 	      }
 	    }
 
-    // If re-registering, invalidate the old instance and its dependents
-    if (this.registrations.has(blobId)) {
-      this.invalidate(blobId);
-    }
-
-    // Register the handler for this blob
-    blobHandlers.set(blobId, (prop: string | symbol) => {
-      // Preserve the blob ID
-      if (prop === blobPropSymbol) {
-        return blobId;
-      }
-
-      // Track this dependency
-      trackDependency(blobId);
-
-      // Resolve the actual instance
-      let instance: T | Promise<T>;
-      try {
-        instance = this.resolve(blob);
-      } catch (error) {
-        // If we caught a BlobNotReadyError, wait for the promise and retry
-        if (error instanceof BlobNotReadyError) {
-          // If we're tracking constructors, re-throw so resolveConstructor can handle it
-          if (isTrackingConstructor()) {
-            throw error;
-          }
-          // Otherwise, wait for the promise and then retry resolving this blob
-          return error.promise.then(() => {
-            // The async dependency should now be cached
-            // Retry resolving this blob
-            const resolved = this.resolve(blob);
-            // If it's still a promise, wait for it
-            if (resolved instanceof Promise) {
-              return resolved.then((r) => {
-                // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
-                const value = (r as any)[prop];
-                if (typeof value === 'function') {
-                  return value.bind(r);
-                }
-                return value;
-              });
-            }
-            // Access the property on the resolved instance
-            // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
-            const value = (resolved as any)[prop];
-            if (typeof value === 'function') {
-              return value.bind(resolved);
-            }
-            return value;
-          });
-        }
-        throw error;
-      }
-
-      // Handle async resolution
-      if (instance instanceof Promise) {
-        return instance.then((resolved) => {
-
-          // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
-              const value = (resolved as any)[prop];
-          if (typeof value === 'function') {
-            return value.bind(resolved);
-          }
-          return value;
-        });
-      }
-
-      // Forward the property access to the instance
-      // biome-ignore lint/suspicious/noExplicitAny: we know what it is.
-      const value = (instance as any)[prop];
-
-      // Bind methods to the instance
-      if (typeof value === 'function') {
-        return value.bind(instance);
-      }
-
-      return value;
-    });
-
-    // Register the instance getter for property setters
-    blobInstanceGetters.set(blobId, () => {
-      return this.resolve(blob);
-    });
-
-	    this.registrations.set(blobId, {
-	      factory,
-	      deps: actualDeps,
-	      lifecycle,
-	      dispose:(dispose as Registration<unknown>["dispose"]),
-	      initialize:(initialize as Registration<unknown>["initialize"]),
-	    });
+	    // If re-registering, invalidate the old instance and its dependents
+	    if (this.registrations.has(blobId)) {
+	      this.invalidate(blobId);
+	    }
+		    this.registrations.set(blobId, {
+		      blob,
+		      factory,
+		      deps: actualDeps,
+		      lifecycle,
+		      dispose:(dispose as Registration<unknown>["dispose"]),
+		      initialize:(initialize as Registration<unknown>["initialize"]),
+		    });
   }
 
   resolve<T>(blobOrConstructor: Blob<T> | Ctor<T>): T | Promise<T> {
@@ -176,9 +188,9 @@ export class Container implements IContainer {
         }
         throw error;
       }
-    } else {
-      return this.resolveConstructor(blobOrConstructor );
-    }
+	    } else {
+	      return this.resolveConstructor(blobOrConstructor);
+	    }
   }
 
   private resolveBlob<T>(blob: Blob<T>): T | Promise<T> {
@@ -187,13 +199,15 @@ export class Container implements IContainer {
 
     // If not found in this container, check parent containers (last parent wins)
     if (!registration) {
-      for (let i = this.parents.length - 1; i >= 0; i--) {
-        const parent = this.parents[i];
-        if (parent.has(blob)) {
-          return parent.resolveBlob(blob);
-        }
-      }
-      throw new Error('Blob not registered. Call container.register() first.');
+	      for (let i = this.parents.length - 1; i >= 0; i--) {
+	        const parent = this.parents[i];
+	        if (parent.has(blob)) {
+	          return parent.resolveBlob(blob);
+	        }
+	      }
+	      // Preserve the original error message for backward compatibility with
+	      // existing code and tests that assert on this text.
+	      throw new Error(`Blob[${blobId.description}] not registered. Call container.register() first.`);
     }
 
     // Detect cyclic dependency - if already resolving, return the blob itself
@@ -352,16 +366,16 @@ export class Container implements IContainer {
     }
   }
 
-  private resolveConstructor<T>(ctor: Ctor<T>): T | Promise<T> {
+	  private resolveConstructor<T>(ctor: Ctor<T>): T | Promise<T> {
     // Begin tracking blob accesses during constructor execution
     beginConstructorTracking();
 
     let instance: T | undefined;
     let asyncPromise: Promise<unknown> | null = null;
 
-    try {
-      // Instantiate the constructor - any blob default parameters will be tracked
-      instance = new ctor();
+	    try {
+	      // Instantiate the constructor - any blob default parameters will be tracked
+	      instance = new ctor();
     } catch (error) {
       // Check if this is a BlobNotReadyError (async dependency)
       if (error instanceof BlobNotReadyError) {
@@ -377,14 +391,14 @@ export class Container implements IContainer {
     const blobDeps = endConstructorTracking();
 
     // If we caught an async dependency error, resolve all blob dependencies
-    if (asyncPromise) {
+	    if (asyncPromise) {
       // Resolve all blob dependencies that were tracked
-      const resolvedDeps = blobDeps.map(blob => this.resolveBlob(blob));
-      // Wait for all of them (including the one that threw the error)
-      return Promise.all(resolvedDeps).then(() => {
-        // Re-instantiate - all async blobs should now be resolved and cached
-        return new ctor();
-      }) as Promise<T>;
+	      const resolvedDeps = blobDeps.map(blob => this.resolveBlob(blob));
+	      // Wait for all of them (including the one that threw the error)
+	      return Promise.all(resolvedDeps).then(() => {
+	        // Re-instantiate - all async blobs should now be resolved and cached
+	        return new ctor();
+	      }) as Promise<T>;
     }
 
     // Collect all blob dependencies (both accessed and stored in instance properties)
@@ -436,7 +450,7 @@ export class Container implements IContainer {
     if (isCtor(factory)) {
       // If there are no dependencies, use resolveConstructor to handle blob default parameters
       if (deps.length === 0) {
-        return this.resolveConstructor(factory) as K | Promise<K>;
+	        return this.resolveConstructor(factory) as K | Promise<K>;
       }
       // Otherwise, use 'new' with the provided dependencies
       return new factory(...deps);
@@ -470,7 +484,6 @@ export class Container implements IContainer {
     const blobId = getBlobId(blob);
     this.invalidate(blobId);
     this.registrations.delete(blobId);
-    blobHandlers.delete(blobId);
   }
 
 	  async dispose(): Promise<void> {
@@ -504,7 +517,6 @@ export class Container implements IContainer {
 	
   clear(): void {
     this.registrations.clear();
-    blobHandlers.clear();
     clearAllDependencies();
   }
 
@@ -638,6 +650,64 @@ export function getContainerMetadata(container: IContainer): BlobMetadata | unde
   return containerMetadataStore.get(container as Container);
 }
 
+/**
+ * Create an introspection snapshot for a container that can be used by
+ * diagnostics and visualization tooling.
+ */
+export function introspectContainer(container: IContainer): ContainerIntrospection {
+	const concrete = container as Container;
+
+	// If this isn't our concrete Container implementation, we can still
+	// surface metadata but cannot see internal registrations.
+	if (!(concrete instanceof Container)) {
+		return {
+			metadata: getContainerMetadata(container),
+			parents: [],
+			blobs: [],
+		};
+	}
+
+	const internal = concrete as unknown as {
+		registrations: Map<symbol, Registration>;
+		parents: Container[];
+	};
+
+	const blobs: ContainerBlobIntrospection[] = [];
+
+	for (const [blobId, registration] of internal.registrations.entries()) {
+		const blob = registration.blob as Blob<unknown>;
+		const metadata = getBlobMetadata(blob);
+		const deps = Array.from(dependenciesFor(blobId));
+		const dependents = Array.from(getDependents(blobId));
+
+		blobs.push({
+			blob,
+			id: blobId,
+			metadata,
+			lifecycle: registration.lifecycle,
+			hasInstance: registration.instance !== undefined,
+			isResolving: registration.resolving === true,
+			dependencies: deps,
+			dependents,
+		});
+	}
+
+	return {
+		metadata: getContainerMetadata(container),
+		parents: internal.parents as IContainer[],
+		blobs,
+	};
+}
+
+function bindResolvedProperty<T>(instance: T, prop: string | symbol): unknown {
+	  // biome-ignore lint/suspicious/noExplicitAny: dynamic property access
+	  const value = (instance as any)[prop];
+	  if (typeof value === 'function') {
+	    return value.bind(instance);
+	  }
+	  return value;
+	}
+
 // biome-ignore lint/complexity/noBannedTypes: cause we need to check if it's a function
 export function isFn(obj: unknown): obj is Function {
   return obj != null && typeof obj === 'function';
@@ -650,6 +720,15 @@ export function isFactoryFn(obj: unknown): obj is FactoryFn<unknown> {
   return isFn(obj) && !isCtor(obj);
 }
 
-function isLifecycleOption(obj: unknown): obj is RegistrationOptions<unknown> {
-  return obj != null && typeof obj === 'object' && 'lifecycle' in obj;
-}
+	function isLifecycleOption(obj: unknown): obj is RegistrationOptions<unknown> {
+	  if (obj == null || typeof obj !== 'object') {
+	    return false;
+	  }
+	  // Avoid treating blobs (including list blobs) as lifecycle option objects.
+	  // This also prevents triggering proxy traps like `has` on blobs when
+	  // checking for the `lifecycle` property.
+	  if (isBlob(obj)) {
+	    return false;
+	  }
+	  return 'lifecycle' in obj;
+	}

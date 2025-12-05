@@ -5,6 +5,7 @@ dist/
 *.tsbuildinfo
 docs/.vitepress/cache
 docs/.vitepress/dist
+.pnpm-store/
 
 #ignore data
 **/data/**

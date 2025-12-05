@@ -1,0 +1,21 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/diblob" },
+    { "path": "../../packages/diblob-svelte" },
+    { "path": "../../packages/diblob-config" },
+    { "path": "../../packages/diblob-visualizer" },
+    { "path": "../../packages/diblob-logger" },
+    { "path": "../../packages/diblob-telemetry" }
+  ]
+}
+

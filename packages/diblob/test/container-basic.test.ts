@@ -65,7 +65,7 @@ describe('Container - Basic Registration', () => {
     
     assert.throws(
       () => container.resolve(service),
-      /Blob not registered/
+      /not registered\. Call container\.register\(\) first\./
     );
   });
 

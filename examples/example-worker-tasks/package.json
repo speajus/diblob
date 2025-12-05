@@ -1,0 +1,22 @@
+{
+  "name": "example-worker-tasks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Background worker example using diblob containers for per-job execution.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "test": "tsx --test src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@speajus/diblob": "workspace:*",
+    "@speajus/diblob-config": "workspace:*",
+    "@speajus/diblob-logger": "workspace:*",
+    "@speajus/diblob-telemetry": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.7.2"
+  }
+}

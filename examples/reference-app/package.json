@@ -1,0 +1,12 @@
+{
+  "name": "reference-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reference app wrapper that ties together example-grpc-server and example-web-svelte.",
+  "type": "module",
+  "scripts": {
+    "dev:api": "pnpm --filter example-grpc-server dev",
+    "dev:web": "pnpm --filter example-web-svelte dev",
+    "dev": "echo 'Run \"pnpm dev:api\" and \"pnpm dev:web\" in separate terminals.'"
+  }
+}

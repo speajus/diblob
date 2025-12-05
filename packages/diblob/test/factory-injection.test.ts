@@ -353,7 +353,7 @@ describe('Factory Injection - Edge Cases', () => {
 
     assert.throws(
       () => service.work(),
-      /Blob not registered/
+      /not registered\. Call container.register\(\) first\./
     );
   });
 
