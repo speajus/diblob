@@ -12,6 +12,10 @@ import {
   isTrackingConstructor,
 } from './blob.js';
 import {
+  BlobNotRegisteredError,
+  InvalidFactoryError,
+} from './errors.js';
+import {
   beginTracking,
   clearAllDependencies,
   clearDependencies,
@@ -205,9 +209,7 @@ export class Container implements IContainer {
 	          return parent.resolveBlob(blob);
 	        }
 	      }
-	      // Preserve the original error message for backward compatibility with
-	      // existing code and tests that assert on this text.
-	      throw new Error(`Blob[${blobId.description}] not registered. Call container.register() first.`);
+	      throw new BlobNotRegisteredError(blobId.description || 'anonymous');
     }
 
     // Detect cyclic dependency - if already resolving, return the blob itself
@@ -458,7 +460,7 @@ export class Container implements IContainer {
       // It's a factory function - call it directly
       return factory(...deps);
     }else{
-      throw new Error('Invalid factory');
+      throw new InvalidFactoryError('unknown', typeof factory);
     }
   }
 

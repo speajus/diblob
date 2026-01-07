@@ -49,7 +49,7 @@ describe('Blob Creation', () => {
     const blob = createBlob<{ test: string }>();
     assert.throws(
       () => blob.test,
-      /Blob not yet resolved/
+      /is not yet resolved/
     );
   });
 

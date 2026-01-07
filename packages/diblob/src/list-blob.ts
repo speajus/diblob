@@ -6,6 +6,10 @@
 	  BlobNotReadyError,
 	} from './blob.js';
 	import {
+	  ContainerNotSupportedError,
+	  ListBlobNotRegisteredError,
+	} from './errors.js';
+	import {
 	  type Blob,
 	  type BlobMetadata,
 	  blobContainerSymbol,
@@ -68,14 +72,17 @@
 	  let proxyBlob: Blob<Array<T>>;
 
   /**
+   * Extract readable name from the blob's symbol ID
+   */
+  const getBlobName = (): string => blobId.description || 'anonymous';
+
+  /**
    * Get the current array from the container
    */
 	  const getCurrentArray = (): Array<T> => {
 		    const container = target[blobContainerSymbol];
 	    if (!container) {
-	      throw new Error(
-	        'Array blob must be registered with a container before use. Call container.register(list, () => []) first.',
-	      );
+	      throw new ListBlobNotRegisteredError(getBlobName(), 'access');
 	    }
 
 		    // Containers that support blobs expose an instance resolver via symbol.
@@ -84,7 +91,7 @@
 	      | ((blob: Blob<unknown>) => unknown)
 	      | undefined;
 	    if (!resolveInstance) {
-	      throw new Error('Container does not support blob instance resolution.');
+	      throw new ContainerNotSupportedError('instance');
 	    }
 
 		    const current = resolveInstance.call(container, proxyBlob as unknown as Blob<unknown>);
@@ -100,7 +107,7 @@
 	  const updateArray = (newArray: Array<T>): void => {
 		    const container = target[blobContainerSymbol];
     if (!container) {
-      throw new Error('Array blob must be registered with a container before mutations. Call container.register(list, () => []) first.');
+      throw new ListBlobNotRegisteredError(getBlobName(), 'mutation');
     }
     container.register(proxyBlob, () => newArray);
   };
