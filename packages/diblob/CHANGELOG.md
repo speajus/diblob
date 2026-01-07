@@ -1,5 +1,12 @@
 # @speajus/diblob
 
+## 1.0.3
+
+### Patch Changes
+
+- 994785f: Updated architecture docs and examples
+- a2a4bd7: better error reporting
+
 ## 1.0.2
 
 ### Patch Changes

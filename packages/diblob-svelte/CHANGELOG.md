@@ -1,5 +1,13 @@
 # @speajus/diblob-svelte
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [994785f]
+- Updated dependencies [a2a4bd7]
+  - @speajus/diblob@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes
