@@ -2,7 +2,8 @@
  * Array blob implementation for managing arrays with automatic invalidation
  */
 
-import { BlobNotReadyError, blobHandlers, blobInstanceGetters, getBlobContainer, registerBlobId } from './blob.js';
+import { blobHandlers, blobInstanceGetters, getBlobContainer, registerBlobId } from './blob.js';
+import { BlobNotReadyError, ListBlobNotRegisteredError } from './errors.js';
 import type { Blob, BlobMetadata, Container } from './types.js';
 import { blobPropSymbol } from './types.js';
 
@@ -68,7 +69,8 @@ export function createListBlob<T>(name = 'listBlob', _metadata?: BlobMetadata): 
   const updateArray = (newArray: Array<T>): void => {
     const container = getBlobContainer(blobId) as Container | undefined;
     if (!container) {
-      throw new Error('Array blob must be registered with a container before mutations. Call container.register(list, () => []) first.');
+      const blobName = blobId.description || name;
+      throw new ListBlobNotRegisteredError(blobName);
     }
     container.register(proxyBlob, () => newArray);
   };

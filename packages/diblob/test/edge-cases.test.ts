@@ -4,25 +4,25 @@
 
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { createBlob, createContainer } from '../src';
+import { BlobNotRegisteredError, BlobNotResolvedError, createBlob, createContainer } from '../src';
 
 describe('Edge Cases - Error Handling', () => {
   it('should throw error when accessing unregistered blob', () => {
     const blob = createBlob<{ test: string }>();
-    
+
     assert.throws(
       () => blob.test,
-      /Blob not yet resolved/
+      BlobNotResolvedError
     );
   });
 
   it('should throw error when resolving unregistered blob', () => {
     const blob = createBlob<{ test: string }>();
     const container = createContainer();
-    
+
     assert.throws(
       () => container.resolve(blob),
-      /Blob not registered/
+      BlobNotRegisteredError
     );
   });
 

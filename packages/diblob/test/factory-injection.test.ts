@@ -5,7 +5,7 @@
 
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { createBlob, createContainer, Lifecycle } from '../src';
+import { BlobNotRegisteredError, createBlob, createContainer, Lifecycle } from '../src';
 
 describe('Factory Injection - Basic', () => {
   it('should inject single blob dependency into factory', () => {
@@ -353,7 +353,7 @@ describe('Factory Injection - Edge Cases', () => {
 
     assert.throws(
       () => service.work(),
-      /Blob not registered/
+      BlobNotRegisteredError
     );
   });
 

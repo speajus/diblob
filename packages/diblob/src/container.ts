@@ -2,7 +2,8 @@
  * DI Container implementation
  */
 
-	import { BlobNotReadyError, beginConstructorTracking, blobHandlers, blobInstanceGetters, endConstructorTracking, getBlobId, isBlob, isTrackingConstructor, setBlobContainer } from './blob.js';
+import { beginConstructorTracking, blobHandlers, blobInstanceGetters, endConstructorTracking, getBlobId, isBlob, isTrackingConstructor, setBlobContainer } from './blob.js';
+import { BlobNotReadyError, BlobNotRegisteredError, InvalidFactoryError } from './errors.js';
 import {
   beginTracking,
   clearAllDependencies,
@@ -193,7 +194,8 @@ export class Container implements IContainer {
           return parent.resolveBlob(blob);
         }
       }
-      throw new Error('Blob not registered. Call container.register() first.');
+      const blobName = blobId.description || 'anonymous';
+      throw new BlobNotRegisteredError(blobName);
     }
 
     // Detect cyclic dependency - if already resolving, return the blob itself
@@ -444,7 +446,8 @@ export class Container implements IContainer {
       // It's a factory function - call it directly
       return factory(...deps);
     }else{
-      throw new Error('Invalid factory');
+      const receivedType = factory === null ? 'null' : typeof factory;
+      throw new InvalidFactoryError('unknown', receivedType);
     }
   }
 

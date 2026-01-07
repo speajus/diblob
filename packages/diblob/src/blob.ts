@@ -2,19 +2,25 @@
  * Blob creation and proxy implementation
  */
 
-	import type { Container } from './container.js';
-	import type { Blob, BlobMetadata } from './types.js';
-	import { blobPropSymbol } from './types.js';
+import type { Container } from './container.js';
+import {
+	BlobAsyncSetError,
+	BlobNotReadyError,
+	BlobNotResolvedError,
+	InvalidBlobError,
+} from './errors.js';
+import type { Blob, BlobMetadata } from './types.js';
+import { blobPropSymbol } from './types.js';
+
+// Re-export BlobNotReadyError for backward compatibility
+export { BlobNotReadyError } from './errors.js';
 
 /**
- * Error thrown when a blob is accessed during constructor execution
- * but the blob is not yet resolved (async dependency)
+ * Extract a readable name from a blob's Symbol ID
  */
-export class BlobNotReadyError extends Error {
-  constructor(public readonly promise: Promise<unknown>) {
-    super('Blob not yet resolved - async dependency detected');
-    Object.setPrototypeOf(this, BlobNotReadyError.prototype);
-  }
+function getBlobNameFromSymbol(id: symbol): string {
+	// Symbol.description contains the name passed to Symbol()
+	return id.description || 'anonymous';
 }
 
 /**
@@ -98,9 +104,7 @@ export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetad
       // Check if a handler is registered for this blob
       const handler = blobHandlers.get(blobId);
       if (!handler) {
-        throw new Error(
-          `Blob not yet resolved. Make sure to register this blob with a container before using it.`
-        );
+        throw new BlobNotResolvedError(getBlobNameFromSymbol(blobId), 'get');
       }
 
       // Delegate to the handler
@@ -119,9 +123,7 @@ export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetad
       // Check if an instance getter is registered for this blob
       const instanceGetter = blobInstanceGetters.get(blobId);
       if (!instanceGetter) {
-        throw new Error(
-          `Blob not yet resolved. Make sure to register this blob with a container before using it.`
-        );
+        throw new BlobNotResolvedError(getBlobNameFromSymbol(blobId), 'set');
       }
 
       // Get the resolved instance
@@ -129,7 +131,7 @@ export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetad
 
       // Handle async instance
       if (instance instanceof Promise) {
-        throw new Error('Cannot set property on async blob. Await the blob first.');
+        throw new BlobAsyncSetError(getBlobNameFromSymbol(blobId));
       }
 
       // Set the property on the actual instance
@@ -156,7 +158,8 @@ export function createBlob<T extends object>(name = 'blob', metadata?: BlobMetad
 export function getBlobId<T>(blob: Blob<T>): symbol {
   const id = blobIds.get(blob);
   if (!id) {
-    throw new Error('Invalid blob: not created with createBlob()');
+    const receivedType = blob === null ? 'null' : typeof blob;
+    throw new InvalidBlobError(receivedType);
   }
   return id;
 }

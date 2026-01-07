@@ -5,6 +5,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import { createBlob, getBlobId, isBlob } from '../src/blob';
+import { BlobNotResolvedError, InvalidBlobError } from '../src/errors';
 import { blobPropSymbol } from '../src/types';
 
 describe('Blob Creation', () => {
@@ -49,7 +50,7 @@ describe('Blob Creation', () => {
     const blob = createBlob<{ test: string }>();
     assert.throws(
       () => blob.test,
-      /Blob not yet resolved/
+      BlobNotResolvedError
     );
   });
 
@@ -64,7 +65,7 @@ describe('Blob Creation', () => {
     assert.throws(
       // biome-ignore lint/suspicious/noExplicitAny: it's a test
       () => getBlobId({} as any),
-      /Invalid blob/
+      InvalidBlobError
     );
   });
 });

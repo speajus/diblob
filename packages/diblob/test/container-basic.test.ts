@@ -4,7 +4,7 @@
 
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { createBlob, createContainer,  } from '../src';
+import { BlobNotRegisteredError, createBlob, createContainer } from '../src';
 
 describe('Container - Basic Registration', () => {
   it('should register and resolve a simple class', async () => {
@@ -62,10 +62,10 @@ describe('Container - Basic Registration', () => {
   it('should throw error for unregistered blob', () => {
     const service = createBlob<{ test: string }>();
     const container = createContainer();
-    
+
     assert.throws(
       () => container.resolve(service),
-      /Blob not registered/
+      BlobNotRegisteredError
     );
   });
 
