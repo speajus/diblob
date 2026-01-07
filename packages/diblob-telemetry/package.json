@@ -14,10 +14,10 @@
     }
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "lint": "biome check .",
-    "test": "tsx --test src/test/*.test.ts"
+    "test": "pnpm run build && tsx --test src/test/*.test.ts"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
