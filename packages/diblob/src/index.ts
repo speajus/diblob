@@ -22,6 +22,17 @@ import type { Container as _Container } from './types.js';
 
 export { createBlob, getBlobId, getBlobMetadata, isBlob } from './blob.js';
 export { createContainer, getContainerMetadata, introspectContainer } from './container.js';
+export {
+	BlobAsyncSetError,
+	BlobNotReadyError,
+	BlobNotRegisteredError,
+	BlobNotResolvedError,
+	ContainerNotSupportedError,
+	DiblobError,
+	InvalidBlobError,
+	InvalidFactoryError,
+	ListBlobNotRegisteredError,
+} from './errors.js';
 export { createListBlob } from './list-blob.js';
 export type {
 	Blob,

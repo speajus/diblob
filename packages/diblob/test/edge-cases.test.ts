@@ -9,10 +9,10 @@ import { createBlob, createContainer } from '../src';
 describe('Edge Cases - Error Handling', () => {
   it('should throw error when accessing unregistered blob', () => {
     const blob = createBlob<{ test: string }>();
-    
+
     assert.throws(
       () => blob.test,
-      /Blob not yet resolved/
+      /is not yet resolved/
     );
   });
 
