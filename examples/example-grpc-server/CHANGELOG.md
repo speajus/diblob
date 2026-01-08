@@ -1,5 +1,19 @@
 # example-grpc-server
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [994785f]
+- Updated dependencies [a2a4bd7]
+  - @speajus/diblob-visualizer@1.0.3
+  - @speajus/diblob@1.0.3
+  - @speajus/diblob-config@1.0.3
+  - @speajus/diblob-connect@1.0.3
+  - @speajus/diblob-diagnostics@1.0.3
+  - @speajus/diblob-logger@1.0.3
+  - @speajus/diblob-telemetry@1.0.3
+
 ## 0.1.2
 
 ### Patch Changes

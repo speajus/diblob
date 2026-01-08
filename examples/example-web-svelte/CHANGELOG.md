@@ -1,5 +1,16 @@
 # example-web-svelte
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [994785f]
+- Updated dependencies [a2a4bd7]
+  - @speajus/diblob-visualizer@1.0.3
+  - @speajus/diblob@1.0.3
+  - @speajus/diblob-config@1.0.3
+  - @speajus/diblob-svelte@1.0.3
+
 ## 0.0.4
 
 ### Patch Changes
